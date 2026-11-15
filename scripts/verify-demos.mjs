@@ -308,6 +308,22 @@ function extractConst(src, name, kind) {
   ok(Math.abs(priceMarkup - 7.69) < 0.01, `M06: impliziter Gaspreis-Aufschlag ${priceMarkup.toFixed(2)} %`);
 }
 
+// ---------------------------------------------------------------- M06: EntryPoint-Versionen & Topics (v0.6-v0.9)
+{
+  const src = readFileSync('src/components/tools/UseropAutopsy.tsx', 'utf8');
+  const eps = {
+    '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789': 'v0.6',
+    '0x0000000071727de22e5e9d8baf0edac6f37da032': 'v0.7',
+    '0x4337084d9e255ff0702461cf8895ce9e3b5ff108': 'v0.8',
+    '0x433709009b8330fda32311df1c2afa402ed8d009': 'v0.9',
+  };
+  for (const [addr, v] of Object.entries(eps)) {
+    ok(src.includes(addr), `M06: EntryPoint ${v} (${addr.slice(0, 12)}…) eingebettet`);
+  }
+  ok(src.includes('0x49628fd1471006c1482da88028e9ce4dbb080b815c9b0344d39e5a8e6ec1419f'), 'M06: UserOperationEvent-Topic (v0.6–v0.9 identisch)');
+  ok(src.includes('0xd80b2cbd5dc420e00122d9f598731e3834f5d98a280dd183b5a3801dc1f2e967'), 'M06: IgnoredInitCode-Topic (v0.9)');
+}
+
 // ---------------------------------------------------------------- contenthash IPNS
 {
   const { decodeContenthash } = await import('../src/lib/contenthash.ts');
