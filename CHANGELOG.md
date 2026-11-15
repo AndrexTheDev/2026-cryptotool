@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-15 — Wave 7: ERC-7730/8176/8213-Kontext + ENSv2-Dokumentation
+
+- **STVA**: Clear-Signing-Hinweise auf aktuellen Stand — ERC-7730-Deskriptoren seit 12.05.2026 aus dem EF-gehosteten, frei spiegelbaren Registry (clearsigning.org) nach Uebergabe von Ledger an die Trillion-Dollar-Security-Initiative; ERC-8176-Attestierungen fuer Deskriptor-Audits genannt. Der vom Tool berechnete Calldata-Fingerprint wird explizit als ERC-8213-Digest-Fallback eingeordnet.
+- **BundleWatch**: ENSv2-Migrationskontext dokumentiert (Universal-Resolver ist DAO-eigener Proxy unter 0xeEeEEEeE…E144EeEe; Sepolia laeuft seit 08/2026 auf v2, Mainnet bei Aktivierung — Abfrage bleibt kompatibel). Resolver-Adresse gegen ENS-Docs verifiziert (unveraendert).
+- Demo-Regression: 108 Checks (inkl. String-Lock-ins fuer ERC-8176/8213/ENSv2-Hinweise).
+
 ## 2026-11-15 — Wave 6: BIP-322 „Complete“ (v1.0.0/v2.0.0) in DAC8-SelfProof
 
 - **BIP-322 Finale beruecksichtigt**: Der BIP wurde am 15.04.2026 auf „Complete“ gehoben — mit Breaking Changes: menschenlesbare Praefixe `smp`/`ful`/`pof`, direkt dem Base64 vorangestellt (kein Trennzeichen), Backward-Compat-Klausel (ohne Praefix = simple). bip322-js 4.0.1 versteht die Praefixe nicht; Erkennung + Abstreifen jetzt in `lib/bip322.ts` (`classifyBip322Signature`).

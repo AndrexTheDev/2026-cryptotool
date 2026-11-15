@@ -387,6 +387,12 @@ function extractConst(src, name, kind) {
   ok(Object.keys(SAFE_SINGLETONS).length === 9, 'M11: Registry enthaelt exakt 9 kanonische Eintraege');
   const src = readFileSync('src/components/tools/StvaUpgradeDiff.tsx', 'utf8');
   ok(src.includes('lookupSafeSingleton'), 'M11: Registry-Abgleich im STVA-Report verdrahtet');
+  ok(src.includes('clearsigning.org') && src.includes('ERC-8176'), 'M11: EF-Registry + Attestierungs-Standard im Deskriptor-Hinweis');
+  ok(src.includes('ERC-8213-Calldata-Digest-Fallback'), 'M11: ERC-8213-Digest-Fallback beim Fingerprint benannt');
+  const bw = readFileSync('src/components/tools/BundleWatchEns.tsx', 'utf8');
+  ok(bw.includes('ENSv2'), 'M10: BundleWatch dokumentiert ENSv2-Migrationskontext');
+  const ensSrc = readFileSync('src/lib/ens.ts', 'utf8');
+  ok(ensSrc.includes('0xeeeeeeee14d718c2b47d9923deab1335e144eeee'), 'M10: Universal-Resolver-Adresse unveraendert kanonisch');
 }
 
 // ---------------------------------------------------------------- contenthash Vektoren vs. Referenz-Implementierungen

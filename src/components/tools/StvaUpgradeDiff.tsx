@@ -251,9 +251,13 @@ export default function StvaUpgradeDiff() {
         rep.signingTime.push(`Clear-Signing-Deskriptor: „${decoded.descriptor.label}".`);
         if (decoded.descriptor.riskNote) rep.signingTime.push(`Risiko-Hinweis: ${decoded.descriptor.riskNote}`);
       } else {
-        rep.signingTime.push('Kein ERC-7730-Deskriptor hinterlegt: Anzeige auf Signer-Wallets zeigt ggf. nur rohe Hex-Daten.');
+        rep.signingTime.push(
+          'Kein ERC-7730-Deskriptor hinterlegt: Anzeige auf Signer-Wallets zeigt ggf. nur rohe Hex-Daten. Deskriptoren kommen seit 05/2026 aus dem EF-gehosteten Registry (clearsigning.org); ERC-8176 definiert zugehoerige Audit-Attestierungen. Pruefen Sie dort, ob fuer Target+Selektor ein Deskriptor existiert.',
+        );
       }
-      rep.signingTime.push(`Calldata-Digest (kryptografischer Fingerprint): ${fingerprints.calldataDigest}`);
+      rep.signingTime.push(
+        `Calldata-Digest (kryptografischer Fingerprint): ${fingerprints.calldataDigest} — entspricht dem ERC-8213-Calldata-Digest-Fallback: auf dem Signer exakt diese Bytes gegenpruefbar.`,
+      );
       if (fingerprints.safeTxHash) rep.signingTime.push(`Safe Signing Hash (safeTxHash): ${fingerprints.safeTxHash}`);
       if (fingerprints.eip712)
         rep.signingTime.push(`EIP-712: Domain ${fingerprints.eip712.domainSeparator} · Message ${fingerprints.eip712.messageHash}`);
