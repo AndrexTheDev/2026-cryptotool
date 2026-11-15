@@ -198,17 +198,19 @@ export async function decodeUpgradeCalldata(calldata: string): Promise<DecodedCa
   const cd = calldata.trim();
   if (!/^0x([0-9a-fA-F]{2})+$/.test(cd) || cd.length < 10) return null;
   const selector = cd.slice(0, 10).toLowerCase();
-  // Nested-execTransaction entschachteln: wenn die Calldata selbst execTransaction
-  // aufruft und data ein Upgrade enthaelt, beides dekodieren.
   try {
     const v = await import('viem');
-    const decoded = v.decodeFunctionData({ abi: UPGRADE_ABIS as never, data: cd as `0x${string}` });
-    const args = Object.fromEntries(
-      Object.entries(decoded.args && typeof decoded.args === 'object' ? decoded.args : {}).map(([k, val]) => [
-        k,
-        typeof val === 'bigint' ? val.toString() : val,
-      ]),
+    const decoded = v.decodeFunctionData({ abi: UPGRADE_ABIS as unknown as never[], data: cd as `0x${string}` });
+    // args ist positionelles Array → auf Parameternamen der verwendeten ABI mappen
+    const abiEntry = (UPGRADE_ABIS as readonly { name: string; inputs: readonly { name: string }[] }[]).find(
+      (a) => a.name === decoded.functionName,
     );
+    const argsArr = Array.isArray(decoded.args) ? decoded.args : decoded.args != null ? [decoded.args] : [];
+    const args: Record<string, unknown> = {};
+    (abiEntry?.inputs ?? []).forEach((inp, i) => {
+      const val = argsArr[i];
+      args[inp.name] = typeof val === 'bigint' ? val.toString() : val;
+    });
     return { functionName: decoded.functionName, selector, args, descriptor: findDescriptor(selector) };
   } catch {
     return { selector, descriptor: findDescriptor(selector) };
@@ -236,14 +238,12 @@ export async function eip712HashJson(typedDataJson: string): Promise<{ domainSep
     if (typeof domain.chainId === 'number') domain.chainId = BigInt(domain.chainId);
     const types = { ...td.types };
     delete (types as Record<string, unknown>).EIP712Domain;
-    const domainSeparator = v.hashDomain({ domain: domain as never, types: types as never });
-    const messageHash = v.hashStruct({ data: td.message as never, primaryType: td.primaryType, types: types as never });
-    const digest = v.hashTypedData({
-      domain: domain as never,
-      types: types as never,
-      primaryType: td.primaryType,
-      message: td.message as never,
-    });
+    const hashDomainLoose = v.hashDomain as unknown as (x: unknown) => string;
+    const hashStructLoose = v.hashStruct as unknown as (x: unknown) => string;
+    const hashTypedDataLoose = v.hashTypedData as unknown as (x: unknown) => string;
+    const domainSeparator = hashDomainLoose({ domain, types });
+    const messageHash = hashStructLoose({ data: td.message, primaryType: td.primaryType, types });
+    const digest = hashTypedDataLoose({ domain, types, primaryType: td.primaryType, message: td.message });
     return { domainSeparator, messageHash, digest };
   } catch {
     return null;

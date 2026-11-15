@@ -238,7 +238,7 @@ export default function StvaUpgradeDiff() {
       } else if (decoded?.functionName === 'upgradeToAndCall' || decoded?.functionName === 'upgradeAndCall') {
         rep.executionTime.push('Garantiert: Ueberschreiben des Implementierungs-Slots UND sofortige Ausfuehrung der mitgegebenen Initialisierungs-Calldata im Proxy-Kontext.');
         if (nestedData && nestedData !== '0x') {
-          const nested = await decodeUpgradeCalldata(nested);
+          const nested = await decodeUpgradeCalldata(nestedData);
           rep.executionTime.push(
             nested?.functionName
               ? `Verschachtelter Aufruf dekodiert: ${nested.functionName}(${Object.keys((nested.args as object) ?? {}).join(', ')}).`

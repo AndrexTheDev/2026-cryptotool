@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ToolPageHeader from '../../components/ToolPageHeader.astro';
+import StealthAudit5564 from '../../components/tools/StealthAudit5564';
+import { SITE_URL, toolBySlug } from '../../config/site';
+
+const tool = toolBySlug('stealthaudit-5564')!;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: tool.name,
+  applicationCategory: 'SecurityApplication',
+  operatingSystem: 'Web Browser',
+  url: `${SITE_URL}/tools/${tool.slug}`,
+  description: tool.seoDesc,
+  author: { '@type': 'Person', name: 'AndrexTheDev', email: 'hippie.highho@gmail.com' },
+};
+---
+
+<BaseLayout title={tool.seoTitle} description={tool.seoDesc} path={`/tools/${tool.slug}`} jsonLd={jsonLd}>
+  <ToolPageHeader tool={tool} />
+  <div class="container-x py-8">
+    <StealthAudit5564 client:only="react" />
+  </div>
+</BaseLayout>

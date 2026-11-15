@@ -176,13 +176,11 @@ export async function rpcCall<T = unknown>(
     }
     const existing = inflight.get(key);
     if (existing) {
-      const v = (await existing) as T;
-      return { data: v, source: 'public' };
+      return (await existing) as { data: T; source: RpcSource };
     }
   }
 
-  const run = (async (): Promise<T> => {
-    const errors: string[] = [];
+  const run = (async (): Promise<{ data: T; source: RpcSource }> => {
     const chain = chainById(chainId);
     const candidates: { url: string; source: RpcSource }[] = [];
     const userUrl = getUserRpc(chainId);
@@ -197,9 +195,9 @@ export async function rpcCall<T = unknown>(
         if (cid === chainId) {
           try {
             const v = (await p.request({ method, params })) as T;
-            return v;
-          } catch (e) {
-            errors.push('wallet: ' + (e as Error).message);
+            return { data: v, source: 'wallet' };
+          } catch {
+            /* Wallet-Kanal nicht nutzbar — weiter mit HTTPS */
           }
         }
       }
@@ -213,9 +211,8 @@ export async function rpcCall<T = unknown>(
         if (!opts.noCache) {
           void idbSet('rpc-cache', key, { t: Date.now(), v });
         }
-        return v;
-      } catch (e) {
-        errors.push((e as Error).message);
+        return { data: v, source: c.source };
+      } catch {
         attempt += 1;
         await sleep(Math.min(400 * 2 ** attempt, 4000));
       }
@@ -227,10 +224,9 @@ export async function rpcCall<T = unknown>(
     );
   })();
 
-  if (!opts.noCache) inflight.set(key, run);
+  if (!opts.noCache) inflight.set(key, run as Promise<unknown>);
   try {
-    const data = await run;
-    return { data, source: userUrl ? 'user' : 'public' };
+    return await run;
   } finally {
     inflight.delete(key);
   }
