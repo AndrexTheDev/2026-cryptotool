@@ -69,7 +69,7 @@ const steps = [
 ];
 ---
 
-<BaseLayout
+<BaseLayout shell="static"
   title="Web3 Security Toolkit 2026 — 10 lokale Prüfwerkzeuge"
   description="10 lokale Web3-, Bitcoin- und Compliance-Werkzeuge: EIP-7702, Safe-Upgrades, DAC8, BIP-322, Passkeys, x402, ERC-7683, ERC-5564, ENS-Bundles — alles im Browser, ohne Signup."
   path="/"
@@ -132,7 +132,7 @@ const steps = [
         <h2 class="text-2xl sm:text-3xl font-bold">Zehn Werkzeuge, ein Klick entfernt</h2>
         <p class="text-dim text-sm mt-1">Filter: Kategorie wählen — Werkzeug-Code lädt erst nach dem Öffnen.</p>
       </div>
-      <a href={import.meta.env.BASE_URL + 'llms.txt'} class="hidden md:inline btn btn-ghost btn-sm mono text-xs">llms.txt</a>
+      <a href="/llms.txt" class="hidden md:inline btn btn-ghost btn-sm mono text-xs">llms.txt</a>
     </div>
     <ToolGrid />
   </section>
@@ -208,8 +208,8 @@ const steps = [
         Spenden sind <strong class="text-ink">freiwillig</strong> und jederzeit erkennbar: drei Adressen, QR-Codes lokal generiert, keine Gegenleistung.
       </p>
       <div class="flex flex-wrap justify-center gap-3 mt-7">
-        <a href={import.meta.env.BASE_URL + 'donate'} class="btn btn-primary px-6 py-3">Zu den Spenden-Adressen</a>
-        <a href={import.meta.env.BASE_URL + 'disclaimer'} class="btn btn-ghost px-6 py-3">Disclaimer lesen</a>
+        <a href="/donate" class="btn btn-primary px-6 py-3">Zu den Spenden-Adressen</a>
+        <a href="/disclaimer" class="btn btn-ghost px-6 py-3">Disclaimer lesen</a>
       </div>
     </div>
   </section>

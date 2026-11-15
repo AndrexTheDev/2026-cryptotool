@@ -11,9 +11,14 @@ interface Props {
   path?: string;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   robots?: string;
+  /**
+   * shell: 'interactive' (Standard, laedt GlobalApp-Client fuer Palette/RPC/Spenden)
+   *         'static'      (Landing + Recht: 0 KB JavaScript — harte Vorgabe)
+   */
+  shell?: 'interactive' | 'static';
 }
 
-const { title, description, path = Astro.url.pathname, jsonLd, robots = 'index, follow' } = Astro.props;
+const { title, description, path = Astro.url.pathname, jsonLd, robots = 'index, follow', shell = 'interactive' } = Astro.props;
 const canonical = SITE_URL + (path.endsWith('/') ? path : path + '/').replace(/\/\/$/, '/');
 const ogImage = SITE_URL + '/og-image.svg?v=1';
 ---
@@ -54,6 +59,17 @@ const ogImage = SITE_URL + '/og-image.svg?v=1';
       <slot />
     </main>
     <Footer />
-    <GlobalApp client:load />
+    {
+      shell === 'interactive' ? (
+        <GlobalApp client:load />
+      ) : (
+        <noscript>
+          <p class="container-x py-3 text-xs text-dim">
+            Diese Seite funktioniert vollständig ohne JavaScript. Interaktive Werkzeuge (Palette, RPC-Status,
+            Spenden-QR) stehen auf den Werkzeug-Seiten zur Verfuegung.
+          </p>
+        </noscript>
+      )
+    }
   </body>
 </html>

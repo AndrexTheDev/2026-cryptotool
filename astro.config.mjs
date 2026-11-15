@@ -19,8 +19,21 @@ export default defineConfig({
       lastmod: new Date('2026-11-15'),
     }),
   ],
+  server: {
+    // Sandbox-/Preview-Umgebungen: externe Subdomains (z. B. *.e2b.app) zulassen.
+    allowedHosts: ['.e2b.app'],
+  },
+  preview: {
+    allowedHosts: ['.e2b.app'],
+  },
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      allowedHosts: ['.e2b.app'],
+    },
+    preview: {
+      allowedHosts: ['.e2b.app'],
+    },
     build: {
       // Route-Level-Code-Splitting: schwere Krypto-Module werden ausschliesslich
       // ueber dynamische Imports der jeweiligen Tool-Island geladen.

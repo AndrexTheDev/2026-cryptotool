@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import DonationPage from '../components/react/DonationPage';
+import { SITE_URL } from '../config/site';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: 'AndrexTheDev unterstützen',
+  url: `${SITE_URL}/donate`,
+  description: 'Freiwillige On-Chain-Unterstützung der Suite: SOL, BTC oder EVM-Adresse. QR-Codes lokal generiert.',
+};
+---
+
+<BaseLayout
+  title="AndrexTheDev unterstützen — freiwillige On-Chain-Spenden"
+  description="Freiwillige On-Chain-Unterstützung: SOL-, BTC- und EVM-Adressen mit lokal generierten QR-Codes (BIP-21, Solana Pay, EIP-681). Ohne Gegenleistung."
+  path="/donate"
+  jsonLd={jsonLd}
+>
+  <div class="container-x py-12 max-w-3xl">
+    <h1 class="text-2xl sm:text-3xl font-bold">Support AndrexTheDev</h1>
+    <p class="text-dim mt-2 text-sm sm:text-base">
+      Die Suite wird durch freiwillige On-Chain-Unterstützung der Community getragen. Unabhängig, ohne Konto, ohne
+      Tracking. Kein Preis, keine Paywall — nur eine transparente Adressliste.
+    </p>
+    <div class="mt-6">
+      <DonationPage client:only="react" />
+    </div>
+    <p class="text-xs text-dim mt-6">
+      Alternativ als Modal in jeder Werkzeug-Ansicht: <em>Support / Spenden</em> in der Kopfzeile.
+    </p>
+  </div>
+</BaseLayout>

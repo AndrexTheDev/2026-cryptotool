@@ -17,6 +17,7 @@ const SUGGESTED: Record<DonationChain, string[]> = {
 };
 
 export default function DonationModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  // Auch als Standalone-Seite verwendbar: /donate (shell statisch ueber Wrapper)
   const [chain, setChain] = useState<DonationChain>('eth');
   const [amount, setAmount] = useState('');
   const [raw, setRaw] = useState(false);

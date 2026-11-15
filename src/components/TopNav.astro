@@ -94,15 +94,11 @@ const categories: Category[] = ['smart-account', 'bitcoin-compliance', 'agents-i
       DE|EN
     </button>
 
-    <button
-      type="button"
-      class="btn btn-outline-amber btn-sm"
-      onclick="window.dispatchEvent(new CustomEvent('atd:donate:open'))"
-    >
+    <a href="/donate" class="btn btn-outline-amber btn-sm" data-donate-link>
       <span aria-hidden="true">◆</span>
       <span class="hidden xs:inline sm:inline">Support / Spenden</span>
       <span class="xs:hidden sm:hidden">Spenden</span>
-    </button>
+    </a>
   </div>
 </header>
 

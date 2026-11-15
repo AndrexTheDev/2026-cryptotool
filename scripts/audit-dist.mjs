@@ -66,7 +66,15 @@ for (const v of ethVariants) if (v !== EXPECTED.eth && v !== ethLower) fail(`ETH
 
 // ---------------------------------------------------------------- 3) Homepage Bundle-Audit
 const home = readFileSync(join(DIST, 'index.html'), 'utf8');
-const referenced = [...home.matchAll(/(?:src|href)="([^"]+\.(?:js|wasm|css)[^"]*)"/g)].map((m) => m[1]);
+// Alle JS/WASM/CSS-Referenzen — auch verschachtelte (Astro-Island-Renderer referenziert Pfade im Skript-Inhalt)
+const referenced = [
+  ...new Set(
+    [
+      ...[...home.matchAll(/(?:src|href)="([^"]+\.(?:js|wasm|css)[^"]*)"/g)].map((m) => m[1]),
+      ...[...home.matchAll(/_astro\/[A-Za-z0-9._-]+\.(?:js|wasm|css)/g)].map((m) => '/' + m[0]),
+    ],
+  ),
+];
 const HEAVY = /(worker|noble|viem|bitcoinjs|bip322|secp|stealth|iron|groth|snark|wasm|lib-btc|lib-evm)/i;
 const heavyRef = referenced.filter((r) => HEAVY.test(r));
 if (heavyRef.length) fail(`index.html referenziert schwere Chunks: ${heavyRef.join(', ')}`);

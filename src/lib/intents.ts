@@ -147,15 +147,38 @@ export async function decodeOrderData(orderData: string): Promise<{ label: strin
         ],
       },
     ] as const;
+    const isPaddedAddr = (v0: string) => /^0x0{24}[0-9a-fA-F]{40}$/.test(v0);
     for (const c of candidates) {
       try {
         const dec = v.decodeAbiParameters(
-          c.schema.map((s) => ({ type: s.type, name: s.name })) as never,
+          c.schema.map((s0) => ({ type: s0.type, name: s0.name })) as never,
           orderData as `0x${string}`,
         ) as unknown[];
-        c.schema.forEach((s, i) => fields.push({ label: s.name, value: String(dec[i]) }));
+        fields.length = 0;
+        let plausible = true;
+        c.schema.forEach((s2, i) => {
+          let val = String(dec[i]);
+          if (s2.type === 'bytes32' && /token|relayer|recipient|depositor/i.test(s2.name)) {
+            if (isPaddedAddr(val)) val = '0x' + val.slice(26); // gepaddete Adresse auf 20 B zurueckschneiden
+            else plausible = false; // bytes32-Token, das keine Adresse ist -> anderes Schema wahrscheinlicher
+          }
+          if (s2.type === 'uint256' && /chainId/i.test(s2.name)) {
+            try {
+              const n = BigInt(val);
+              if (!(n > 0n && n < 2n ** 32n)) plausible = false;
+            } catch {
+              plausible = false;
+            }
+          }
+          fields.push({ label: s2.name, value: val });
+        });
+        if (!plausible) {
+          fields.length = 0;
+          continue;
+        }
         if (fields.length) return fields;
       } catch {
+        fields.length = 0;
         /* naechstes Schema probieren */
       }
     }
@@ -227,6 +250,17 @@ export function parseOrderJson(json: string): DecodedOrder | null {
   }
 }
 
+/** JSON-Pfad inkl. orderData-Tuple-Dekodierung (async Pendant zu parseOrderJson). */
+export async function parseOrderJsonFull(json: string): Promise<DecodedOrder | null> {
+  const o = parseOrderJson(json);
+  if (!o) return null;
+  if (o.orderData) {
+    o.orderDataFields = await decodeOrderData(o.orderData);
+    if (o.orderDataFields.length) o.decodeConfidence = 'vollstaendig';
+  }
+  return o;
+}
+
 export interface SpreadResult {
   inputAmount: bigint;
   minReceived: bigint;
@@ -289,13 +323,21 @@ export async function encodeResolveFor(order: {
   orderData: string;
 }): Promise<string> {
   const v = await import('viem');
+  const norm = (a: string) => {
+    try {
+      return v.getAddress(a);
+    } catch {
+      // Checksum-Toleranz: Kleinbuchstaben-Variante akzeptieren (analysieren, nicht signieren)
+      return v.getAddress(a.toLowerCase());
+    }
+  };
   return v.encodeFunctionData({
     abi: RESOLVE_ABI,
     functionName: 'resolveFor',
     args: [
       {
-        originSettler: order.originSettler as `0x${string}`,
-        user: order.user as `0x${string}`,
+        originSettler: norm(order.originSettler),
+        user: norm(order.user),
         nonce: BigInt(order.nonce),
         originChainId: BigInt(order.originChainId),
         openDeadline: order.openDeadline,
