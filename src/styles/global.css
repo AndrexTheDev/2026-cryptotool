@@ -237,3 +237,17 @@ details.acc .acc-body { padding: 0 1rem 1rem; color: var(--color-body); font-siz
 /* Statische Shells (Landing/Recht, 0 KB JS): interaktive Shell-Buttons ausblenden,
    damit keine funktionslosen Controls gerendert werden. */
 html:not(.js-shell) .js-only { display: none !important; }
+
+/* Barrierefreiheit: Skip-Link (nur bei Tastaturfokus sichtbar). */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0.5rem;
+  z-index: 100;
+  background: var(--color-prime);
+  color: #07090d;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+}
+.skip-link:focus-visible { left: 0.75rem; }

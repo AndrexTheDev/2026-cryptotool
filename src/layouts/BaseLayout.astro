@@ -54,8 +54,9 @@ const ogImage = SITE_URL + '/og-image.svg?v=1';
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
   <body class="min-h-screen flex flex-col">
+    <a href="#main" class="skip-link">Zum Inhalt springen</a>
     <TopNav currentPath={Astro.url.pathname} />
-    <main class="flex-1 w-full">
+    <main id="main" class="flex-1 w-full" tabindex="-1">
       <slot />
     </main>
     <Footer />

@@ -44,7 +44,8 @@ const categories: Category[] = ['smart-account', 'bitcoin-compliance', 'agents-i
                   <li>
                     <a
                       href={`/tools/${t.slug}`}
-                      class={`block rounded-md px-2 py-1.5 text-sm hover:bg-prime-soft ${currentPath.includes(t.slug) ? 'text-prime-hi' : 'text-ink'}`}
+                      class={`block rounded-md px-2 py-1.5 text-sm hover:bg-prime-soft ${currentPath.includes(t.slug) ? 'text-prime-hi font-semibold' : 'text-ink'}`}
+                      aria-current={currentPath.includes(t.slug) ? 'page' : undefined}
                     >
                       <span class="mono text-[10px] text-dim mr-1">{String(t.id).padStart(2, '0')}</span>
                       {t.name}
