@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-15 — Wave 6: BIP-322 „Complete“ (v1.0.0/v2.0.0) in DAC8-SelfProof
+
+- **BIP-322 Finale beruecksichtigt**: Der BIP wurde am 15.04.2026 auf „Complete“ gehoben — mit Breaking Changes: menschenlesbare Praefixe `smp`/`ful`/`pof`, direkt dem Base64 vorangestellt (kein Trennzeichen), Backward-Compat-Klausel (ohne Praefix = simple). bip322-js 4.0.1 versteht die Praefixe nicht; Erkennung + Abstreifen jetzt in `lib/bip322.ts` (`classifyBip322Signature`).
+- **Proof-of-Funds (pof)**: finalisiertes PSBT wird offline inspektiert (`inspectPofPsbt`): Eingabezahl, PSBT_GLOBAL_GENERIC_SIGNED_MESSAGE (0x09) und Challenge-Uebereinstimmung — mit explizitem Hinweis, dass der Unspent-Status onchain zu pruefen ist.
+- Demo-Signer erzeugt jetzt `smp`-praefigierte Signaturen (Spec-konform); Verifier akzeptiert weiterhin Legacy ohne Praefix (Regression abgesichert).
+- Negativ-Befund notiert: Bitcoin Core v30-Standardness-Aenderungen (datacarriersize 83 → 100.000, mehrere OP_RETURN-Ausgaben) betreffen nur Relais-Policy, keine Konsensregeln — BitVaultStress benoetigt keine Aenderung.
+- Demo-Regression: 104 Checks.
+
 ## 2026-11-15 — Wave 5: Safe v1.5.0-Registry + Contenthash-Referenzvektoren
 
 - **STVA (Safe Upgrade Diff)**: Kanonische Safe-Singleton-Registry aus `safe-global/safe-deployments` eingebettet — v1.3.0 (canonical/eip155), v1.4.1, v1.5.0 inkl. SafeL2- und SafeMigration-Varianten (9 Adressen, upstream verifiziert). Ziel-Implementierungen von Upgrade-Transaktionen werden gegen die Registry geprueft: Treffer mit Version-Badge, Nicht-Treffer mit Supply-Chain-Warnung in den Annahmen. Bei erkanntem Singleton < v1.5.0 Hinweis auf die offizielle Upgrade-Empfehlung (Safe-Blog 22.09.2026: Module-Guard-Pflicht, Fehler-Rueckgabe, ERC-1271).

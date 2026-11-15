@@ -294,8 +294,15 @@ export default function Dac8SelfProof() {
       let ok = false;
       let detail = '';
       if (asset === 'btc') {
-        scheme = 'BIP-322 (simple)';
         const r = await verifyBip322(target.trim(), challenge, sigInput.trim());
+        scheme =
+          r.variant === 'pof'
+            ? 'BIP-322 Proof-of-Funds (finalisiertes PSBT)'
+            : r.variant === 'full'
+              ? 'BIP-322 (full)'
+              : r.variant === 'simple-prefixed'
+                ? 'BIP-322 (simple, smp-Praefix)'
+                : 'BIP-322 (simple, Legacy)';
         ok = r.ok;
         detail = r.detail;
       } else if (target.trim().length === 42) {
@@ -446,7 +453,10 @@ export default function Dac8SelfProof() {
         <p className="text-sm">
           Die Challenge wird deterministisch aus TXID, Blockhash, Zeitstempel und Zweckstring gebaut. Signaturwege:
           EVM-Wallet (EIP-191) direkt hier, oder Signatur in Ihrer (Hardware-)Wallet erzeugen und unten einfuegen
-          (Bitcoin: BIP-322; EVM: EIP-191/EIP-712/ERC-1271).
+          (Bitcoin: BIP-322; EVM: EIP-191/EIP-712/ERC-1271). BIP-322 ist seit 04/2026 auf Status „Complete" (v1.0.0): moderne Signer
+          versehen Signaturen mit dem Praefix smp/ful/pof — alle Varianten werden erkannt; Proof-of-Funds (pof = finalisiertes PSBT mit
+          eingebetteter Challenge) wird format-geprueft, der UTXO-Ausgabestatus erfordert zusaetzlich Node/Explorer. Aeltere Signaturen ohne
+          Praefix gelten weiterhin als simple.
         </p>
         <button className="btn btn-primary w-full sm:w-auto" onClick={() => void prepare()} disabled={busy}>
           {busy ? 'Lade Daten…' : 'Challenge erzeugen'}

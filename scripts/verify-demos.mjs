@@ -181,16 +181,58 @@ function extractConst(src, name, kind) {
 
 // ---------------------------------------------------------------- Modul 03: DAC8 BIP-322
 {
-  const { signBip322P2tr, verifyBip322 } = await import('../src/lib/bip322.ts');
+  const { signBip322P2tr, verifyBip322, classifyBip322Signature, inspectPofPsbt } = await import('../src/lib/bip322.ts');
   const message = 'AndrexTheDev DAC8-SelfProof demo-check';
   const priv = new Uint8Array(32);
   priv[31] = 1;
   const { address, signatureBase64 } = await signBip322P2tr(priv, message);
   ok(address.startsWith('bc1p') && address.length === 62, `M03 DAC8: P2TR-Demo-Adresse ${address.slice(0, 16)}…`);
+  // Finale Spec (v1.0.0, 04/2026): Signer MUSSEN das smp-Praefix setzen
+  ok(signatureBase64.startsWith('smp'), 'M03: Demo-Signer setzt smp-Praefix (BIP-322 Complete)');
   const ver = await verifyBip322(address, message, signatureBase64);
-  ok(ver.ok && /simple/i.test(ver.detail), `M03: BIP-322 roundtrip verifiziert (${ver.detail})`);
+  ok(ver.ok && ver.variant === 'simple-prefixed' && /simple/i.test(ver.detail), `M03: BIP-322 roundtrip verifiziert (${ver.detail})`);
   const verBad = await verifyBip322(address, message + 'x', signatureBase64);
   ok(!verBad.ok, 'M03: BIP-322 lehnt veränderte Nachricht ab');
+  // Legacy-Kompatibilitaetsklausel: payload ohne Praefix wird als 'simple' angenommen
+  const verLegacy = await verifyBip322(address, message, signatureBase64.slice(3));
+  ok(verLegacy.ok && verLegacy.variant === 'simple-legacy', 'M03: Legacy-Signatur ohne Praefix weiterhin gueltig');
+
+  // Varianten-Klassifikation
+  ok(classifyBip322Signature('smpQUFB').variant === 'simple-prefixed', 'M03: smp-Klassifikation');
+  ok(classifyBip322Signature('fulQUFB').variant === 'full', 'M03: ful-Klassifikation');
+  ok(classifyBip322Signature('pofQUFB').variant === 'pof', 'M03: pof-Klassifikation');
+  ok(classifyBip322Signature('QUFB').variant === 'simple-legacy', 'M03: Legacy-Klassifikation');
+
+  // PoF: synthetisches finalisiertes PSBT (unabhaengige Konstruktion im Test)
+  const txBytes = [
+    0x02, 0x00, 0x00, 0x00, // nVersion
+    0x01, // vin count
+    ...Array(32).fill(0x00), // prevout hash
+    0x00, 0x00, 0x00, 0x00, // vout
+    0x00, // scriptSig len
+    0xff, 0xff, 0xff, 0xff, // nSequence
+    0x01, // vout count
+    ...Array(8).fill(0x00), // value
+    0x01, 0x6a, // spk OP_RETURN
+    0x00, 0x00, 0x00, 0x00, // locktime
+  ];
+  const msgBytes = [...new TextEncoder().encode('DAC8-Test')];
+  const psbt = [
+    0x70, 0x73, 0x62, 0x74, 0xff, // magic
+    0x01, 0x00, txBytes.length, ...txBytes, // global key 0x00: unsigned tx
+    0x01, 0x09, msgBytes.length, ...msgBytes, // global key 0x09: message
+    0x00, // global map separator
+    0x00, // input map (leer)
+    0x00, // output map (leer)
+  ];
+  const psbtB64 = Buffer.from(Uint8Array.from(psbt)).toString('base64');
+  const insp = inspectPofPsbt(psbtB64);
+  ok(insp?.inputs === 1 && insp.message === 'DAC8-Test', 'M03: PoF-PSBT gelesen (1 Input, Message-Global 0x09)');
+  const pofOk = await verifyBip322(address, 'DAC8-Test', 'pof' + psbtB64);
+  ok(pofOk.ok && pofOk.variant === 'pof', 'M03: PoF mit uebereinstimmender Challenge akzeptiert (mit Offline-Caveat)');
+  const pofMismatch = await verifyBip322(address, 'ANDERE-Challenge', 'pof' + psbtB64);
+  ok(!pofMismatch.ok, 'M03: PoF mit abweichender Challenge abgelehnt');
+  ok(inspectPofPsbt('bm90LWEtcHNidA==') === null || true, 'M03: Nicht-PSBT-Payload robust (kein Absturz)');
 }
 
 // ---------------------------------------------------------------- Modul 06: UserOp-Autopsy

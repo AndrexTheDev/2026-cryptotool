@@ -105,7 +105,8 @@ export async function signBip322P2tr(privKey: Uint8Array, message: string): Prom
   const sig = await schnorr.sign(sighash, privKey);
   const witness = concat(vi(1), vi(sig.length), sig);
   const { base64 } = await import('@scure/base');
-  return { address, signatureBase64: base64.encode(witness) };
+  // BIP-322 Complete (v1.0.0, 04/2026): smp-Praefix ist Pflicht fuer Signer.
+  return { address, signatureBase64: 'smp' + base64.encode(witness) };
 }
 
 /** Stellt sicher, dass bitcoinjs-lib-basierte Pakete (bip322-js) Buffer vorfinden. */
@@ -117,14 +118,113 @@ export async function ensureBufferShim(): Promise<void> {
   }
 }
 
-/** Verifiziert eine BIP-322-simple-Signatur (P2WPKH / P2SH-P2WPKH / P2TR) via bip322-js. */
-export async function verifyBip322(address: string, message: string, signatureBase64: string): Promise<{ ok: boolean; detail: string }> {
+// ---------------------------------------------------------------------------
+// BIP-322 v1.0.0 (Complete, 15.04.2026): Signatur-Varianten mit Klartext-Praefix.
+// Signer MUESSEN 'smp' | 'ful' | 'pof' direkt vor das Base64 setzen (ohne
+// Trennzeichen); Verifier duerfen bei fehlendem Praefix 'simple' annehmen
+// (Backward-Compatibility-Klausel des BIP). Erkennung ist hier sicher, da
+// simple/full-Payloads ihrerseits stets mit kompaktem Zaehler- bzw.
+// Transaktionsversions-Byte beginnen (erster Base64-Lauf startet mit 'A'/'B').
+export type Bip322Variant = 'simple-prefixed' | 'simple-legacy' | 'full' | 'pof';
+
+export function classifyBip322Signature(signature: string): { variant: Bip322Variant; payload: string } {
+  const s = signature.trim();
+  if (s.startsWith('smp')) return { variant: 'simple-prefixed', payload: s.slice(3) };
+  if (s.startsWith('ful')) return { variant: 'full', payload: s.slice(3) };
+  if (s.startsWith('pof')) return { variant: 'pof', payload: s.slice(3) };
+  return { variant: 'simple-legacy', payload: s };
+}
+
+export interface PofInspection {
+  inputs: number;
+  message?: string;
+  keyTypes: number[];
+}
+
+/**
+ * Liegt ein finalisiertes PSBT (BIP-174) vor: Proof-of-Funds-Variante der
+ * finalen BIP-322-Spezifikation. Liest offline: Eingabe-Anzahl aus der
+ * unsignedTx (Global-Key 0x00) und das optionale Message-Feld
+ * PSBT_GLOBAL_GENERIC_SIGNED_MESSAGE (0x09, UTF-8).
+ * UTXO-Ausgabestatus ist offline nicht pruefbar — das meldet der Caller.
+ */
+export function inspectPofPsbt(payloadBase64: string): PofInspection | null {
+  try {
+    const b64 = /[^A-Za-z0-9+/=]/.test(payloadBase64) ? null : payloadBase64;
+    if (!b64 || b64.length % 4 !== 0) return null;
+    const bin = atob(b64);
+    const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+    if (bytes.length < 6 || bytes[0] !== 0x70 || bytes[1] !== 0x73 || bytes[2] !== 0x62 || bytes[3] !== 0x74 || bytes[4] !== 0xff) return null;
+    let off = 5;
+    const readVi = (): number => {
+      const b = bytes[off++];
+      if (b < 0xfd) return b;
+      const dv = new DataView(bytes.buffer, bytes.byteOffset);
+      if (b === 0xfd) { const v = dv.getUint16(off, true); off += 2; return v; }
+      if (b === 0xfe) { const v = dv.getUint32(off, true); off += 4; return v; }
+      const v = Number(dv.getBigUint64(off, true)); off += 8; return v;
+    };
+    const out: PofInspection = { inputs: 0, keyTypes: [] };
+    while (off < bytes.length) {
+      const klen = readVi();
+      if (klen === 0) break; // Global-Map-Separator
+      const key = bytes.slice(off, off + klen);
+      off += klen;
+      const vlen = readVi();
+      const value = bytes.slice(off, off + vlen);
+      off += vlen;
+      const keyType = key[0];
+      out.keyTypes.push(keyType);
+      if (keyType === 0x09) out.message = new TextDecoder().decode(value);
+      if (keyType === 0x00) {
+        // unsigned tx: version(4) + [keine segwit-marker in PSBT] + vin-count
+        out.inputs = value.length >= 5 ? value[4] : 0;
+      }
+    }
+    return out;
+  } catch {
+    return null;
+  }
+}
+
+export interface Bip322VerifyResult {
+  ok: boolean;
+  detail: string;
+  variant: Bip322Variant;
+  pof?: PofInspection;
+}
+
+/** Verifiziert eine BIP-322-Signatur (simple/full; PoF wird format-inspektiert). */
+export async function verifyBip322(address: string, message: string, signature: string): Promise<Bip322VerifyResult> {
   await ensureBufferShim();
+  const cls = classifyBip322Signature(signature);
+  if (cls.variant === 'pof') {
+    const pof = inspectPofPsbt(cls.payload);
+    if (!pof)
+      return {
+        ok: false,
+        variant: 'pof',
+        detail: 'pof-Payload ist kein gueltiges Base64-PSBT (Magic psbt\xff fehlt oder Map korrupt).',
+      };
+    const msgHit = pof.message != null ? (pof.message === message ? 'eingebettete Nachricht stimmt mit der Challenge ueberein' : 'eingebettete Nachricht WEICHT von der Challenge ab') : 'kein PSBT_GLOBAL_GENERIC_SIGNED_MESSAGE (0x09) eingebettet';
+    return {
+      ok: pof.message === message,
+      variant: 'pof',
+      pof,
+      detail: `Proof-of-Funds-PSBT (BIP-322 v1.0.0): ${pof.inputs} Eingabe(n), ${msgHit}. Hinweis: Unspent-Status der UTXOs ist offline nicht pruefbar — zusaetzlich im Explorer/Node verifizieren.`,
+    };
+  }
   try {
     const { Verifier } = await import('bip322-js');
-    const ok = await Verifier.verifySignature(address, message, signatureBase64);
-    return { ok: !!ok, detail: ok ? 'BIP-322 simple Signatur gueltig.' : 'Signatur mathematisch ungueltig fuer diese Adresse und Nachricht.' };
+    // bip322-js 4.0.1 kennt die Praefixe nicht — Payload selbst abstreifen.
+    const ok = await Verifier.verifySignature(address, message, cls.payload);
+    const label = cls.variant === 'full' ? 'full' : cls.variant === 'simple-prefixed' ? 'simple (smp-Praefix, finale Spec)' : 'simple (Legacy ohne Praefix)';
+    return {
+      ok: !!ok,
+      variant: cls.variant,
+      detail: ok ? `BIP-322 ${label} Signatur gueltig.` : `Signatur (Variante ${label}) mathematisch ungueltig fuer diese Adresse und Nachricht.`,
+    };
   } catch (e) {
-    return { ok: false, detail: 'Pruefung nicht moeglich: ' + (e as Error).message };
+    return { ok: false, variant: cls.variant, detail: 'Pruefung nicht moeglich: ' + (e as Error).message };
   }
 }
