@@ -105,5 +105,38 @@ for (const f of htmlFiles) {
 }
 ok(`CSP in ${htmlFiles.length} HTML-Seiten geprueft`);
 
+// ---------------------------------------------------------------- 5) HTML-Struktur-Checks
+const titles = new Map();
+for (const f of htmlFiles) {
+  const h = readFileSync(f, 'utf8');
+  const rel = relative(DIST, f);
+  const h1s = [...h.matchAll(/<h1[\s>]/g)].length;
+  if (h1s !== 1) fail(`${rel}: ${h1s} <h1> (erwartet: genau 1)`);
+  const ids = [...h.matchAll(/ id="([^"]+)"/g)].map((m) => m[1]);
+  const dup = ids.filter((x, i) => ids.indexOf(x) !== i);
+  if (dup.length) fail(`${rel}: doppelte IDs: ${[...new Set(dup)].join(', ')}`);
+  for (const m of h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
+    try {
+      JSON.parse(m[1]);
+    } catch (e) {
+      fail(`${rel}: JSON-LD nicht parsebar: ${(e).message}`);
+    }
+  }
+  const t = h.match(/<title>([^<]*)<\/title>/)?.[1];
+  if (t) {
+    if (titles.has(t)) fail(`Titel-Duplikat: '${t}' in ${rel} und ${titles.get(t)}`);
+    titles.set(t, rel);
+  }
+}
+ok(`HTML-Struktur: ${htmlFiles.length} Seiten (h1/IDs/JSON-LD/Titel-Duplikate)`);
+
+// ---------------------------------------------------------------- 6) llms.txt-Inhalt
+const llms = readFileSync(join(DIST, 'llms.txt'), 'utf8');
+if (!llms.includes('hippie.highho@gmail.com')) fail('llms.txt ohne Kontakt-E-Mail');
+if (!llms.includes('AndrexTheDev')) fail('llms.txt ohne Brand');
+const TOOLSLUGS = ['7702-slotguard','stva-upgradediff','dac8-selfproof','bitvault-stress','passkey-continuity','userop-autopsy','x402-paywallguard','intentlens-7683','stealthaudit-5564','bundlewatch-ens'];
+for (const t of TOOLSLUGS) if (!llms.includes(t)) fail(`llms.txt nennt ${t} nicht`);
+ok('llms.txt: Brand, Kontakt, alle 10 Tools referenziert');
+
 console.log(failures ? `\n${failures} Befund(e) — Audit NICHT bestanden` : '\nAudit bestanden');
 process.exit(failures ? 1 : 0);
