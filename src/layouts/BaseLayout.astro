@@ -1,0 +1,59 @@
+---
+import '../styles/global.css';
+import { BRAND, SUITE_NAME, SITE_URL } from '../config/site';
+import TopNav from '../components/TopNav.astro';
+import Footer from '../components/Footer.astro';
+import GlobalApp from '../components/react/GlobalApp';
+
+interface Props {
+  title: string;
+  description: string;
+  path?: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  robots?: string;
+}
+
+const { title, description, path = Astro.url.pathname, jsonLd, robots = 'index, follow' } = Astro.props;
+const canonical = SITE_URL + (path.endsWith('/') ? path : path + '/').replace(/\/\/$/, '/');
+const ogImage = SITE_URL + '/og-image.svg?v=1';
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https: wss:; worker-src 'self' blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="robots" content={robots} />
+    <meta name="author" content={BRAND} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:site_name" content={`${BRAND} — ${SUITE_NAME}`} />
+    <meta property="og:locale" content="de_DE" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <TopNav currentPath={Astro.url.pathname} />
+    <main class="flex-1 w-full">
+      <slot />
+    </main>
+    <Footer />
+    <GlobalApp client:load />
+  </body>
+</html>

@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ToolPageHeader from '../../components/ToolPageHeader.astro';
+import SlotGuard7702 from '../../components/tools/SlotGuard7702';
+import { SITE_URL, toolBySlug } from '../../config/site';
+
+const tool = toolBySlug('7702-slotguard')!;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: tool.name,
+  applicationCategory: 'SecurityApplication',
+  operatingSystem: 'Web Browser',
+  url: `${SITE_URL}/tools/${tool.slug}`,
+  description: tool.seoDesc,
+  author: { '@type': 'Person', name: 'AndrexTheDev', email: 'hippie.highho@gmail.com' },
+  offers: { '@type': 'Offer', availability: 'https://schema.org/InStock' },
+};
+---
+
+<BaseLayout title={tool.seoTitle} description={tool.seoDesc} path={`/tools/${tool.slug}`} jsonLd={jsonLd}>
+  <ToolPageHeader tool={tool} />
+  <div class="container-x py-8">
+    <SlotGuard7702 client:only="react" />
+  </div>
+</BaseLayout>

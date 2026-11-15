@@ -1,0 +1,24 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { BRAND, CONTACT_EMAIL } from '../config/site';
+
+interface Props {
+  title: string;
+  description: string;
+  heading: string;
+  updated?: string;
+}
+const { title, description, heading, updated = '15. November 2026' } = Astro.props;
+---
+
+<BaseLayout title={title} description={description} path={Astro.url.pathname}>
+  <div class="container-x py-12 max-w-3xl">
+    <h1 class="text-2xl sm:text-3xl">{heading}</h1>
+    <p class="text-xs text-dim mt-2">
+      Stand: {updated} · Betreiber: {BRAND} · Kontakt: <a class="text-prime-hi" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+    </p>
+    <div class="prose-d mt-6 text-[0.95rem]">
+      <slot />
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,77 @@
+---
+import LegalLayout from '../layouts/LegalLayout.astro';
+---
+
+<LegalLayout
+  title="Disclaimer | AndrexTheDev Web3 Security Suite"
+  description="Haftungsausschluss der AndrexTheDev Web3 Security & Forensics Suite: As-Is-Bereitstellung, keine Beratung, Non-Custodial, spezifische technische Risiken."
+  heading="Disclaimer / Haftungsausschluss"
+>
+  <h2>1. Bereitstellung „wie besehen“ (As-Is)</h2>
+  <p>
+    Die Web3 Security &amp; Forensics Suite (nachfolgend „Suite“) von <strong>AndrexTheDev</strong> wird ohne Gewähr
+    bereitgestellt. Es wird keine Garantie für Vollständigkeit, Richtigkeit, Fehlerfreiheit, Aktualität oder
+    Verfügbarkeit übernommen — insbesondere nicht für Daten, die aus externen Blockchain-Netzwerken, öffentlichen
+    Endpunkten oder vom Nutzer eingefügten Rohdaten stammen. Alle Prüfergebnisse sind <strong>Diagnosehinweise</strong>,
+    die stets einer eigenständigen fachlichen Nachprüfung bedürfen.
+  </p>
+
+  <h2>2. Keine Anlage-, Finanz-, Rechts- oder Steuerberatung</h2>
+  <p>
+    Keine Ausgabe der Suite — auch nicht die der Module DAC8-SelfProof, STVA-UpgradeDiff oder BitVault-Stress — stellt
+    eine Anlage-, Finanz-, Rechts- oder Steuerberatung dar. Für steuerliche Einordnungen (z.&nbsp;B. Nachweise im
+    Kontext von EU-DAC8, Travel Rule oder nationaler Steuerdokumentation) wenden Sie sich an eine zur Beratung
+    befugte Person Ihres Vertrauens. Ein kryptografischer Verfügungsmacht-Nachweis ersetzt keine steuerrechtliche
+    Einzelfallprüfung.
+  </p>
+
+  <h2>3. Non-Custodial-Hinweis</h2>
+  <p>
+    Die Suite <strong>speichert oder überträgt zu keinem Zeitpunkt private Schlüssel oder Seed-Phrasen</strong>. Es
+    existiert kein betriebener Server, der Nutzereingaben entgegennimmt; Verarbeitungen finden lokal im Browser statt.
+    Jede On-Chain-Transaktion (z.&nbsp;B. das Absenden einer vorbereiteten Refund- oder Revoke-Calldata) erfolgt
+    ausschließlich in der alleinigen Verantwortung des Nutzers und über vom Nutzer selbst gewählte Wallets und
+    Netzwerk-Endpunkte.
+  </p>
+
+  <h2>4. Spezifische technische Risiken</h2>
+  <ul>
+    <li>
+      <strong>Block-Snapshot-Abhängigkeit (STVA-UpgradeDiff):</strong> Simulations- und Vergleichsergebnisse beziehen
+      sich auf die konkret ausgewiesene Blocknummer und den Blockhash. Spätere Zustandsänderungen (neue Implementierung,
+      geänderter Storage) werden dadurch nicht erfasst.
+    </li>
+    <li>
+      <strong>Nonce-Verfall (7702-SlotGuard):</strong> Jede reguläre Transaktion Ihres Kontos erhöht die Nonce. Ein
+      vorab signiertes Notfallpaket (Panic-Revoke-Autorisierung) verliert danach seine Einloesbarkeit und muss
+      <strong>neu generiert</strong> werden. Ein verschluesseltes Notfallpaket ist kein Backup-Ersatz, sondern ein
+      Reaktionswerkzeug.
+    </li>
+    <li>
+      <strong>Rechtliche Einzelfallprüfung (DAC8-SelfProof):</strong> Ein signiertes Prüfdossier dokumentiert
+      kryptografische Verfügungsmacht zu einem Zeitpunkt. Steuerliche Anerkennung (Eigenübertrag, Einstandspreise,
+      Spekulationsfristen) ist eine eigenständige rechtliche Frage.
+    </li>
+    <li>
+      <strong>Endpunkt-Verfügbarkeit:</strong> Öffentliche Lese-Endpunkte können gedrosselt oder offline sein. Die
+      Module bieten deshalb durchgehend Offline-Modi mit manueller Eingabe; Ergebnisqualität hängt dann von der
+      Korrektheit der eingefügten Rohdaten ab.
+    </li>
+    <li>
+      <strong>Gebühren- und Marktdaten:</strong> Referenzkurse oder Gebührenannahmen (z.&nbsp;B. Paymaster-Spreads,
+      Dust-Klippen) sind Modellrechnungen und kein Handelsangebot.
+    </li>
+  </ul>
+
+  <h2>5. Externe Inhalte und Netzwerke</h2>
+  <p>
+    Für Inhalte und Verfügbarkeit externer Netzwerke, Block-Explorer, IPFS-Gateways oder Wallet-Software wird keine
+    Haftung übernommen. Verlinkungen dienen der Information und begründen keine Haftung für fremde Inhalte.
+  </p>
+
+  <h2>6. Anwendbares Recht</h2>
+  <p>
+    Es gilt das Recht des Betreiberstandorts unter Ausschluss kollisionsrechtlicher Verweisungsnormen, soweit gesetzlich
+    zulässig. Zwingende Verbraucherschutzrechte bleiben unberührt.
+  </p>
+</LegalLayout>

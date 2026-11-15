@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#07090d"/>
+  <rect x="40" y="40" width="1120" height="550" rx="28" fill="#0f141b" stroke="#1e293b" stroke-width="2"/>
+  <rect x="40" y="40" width="1120" height="6" rx="3" fill="#10b981"/>
+  <g font-family="ui-sans-serif, system-ui, sans-serif">
+    <text x="90" y="180" font-size="34" fill="#10b981" font-weight="700" letter-spacing="6">ANDREXTHEDEV</text>
+    <text x="88" y="270" font-size="56" fill="#f8fafc" font-weight="800">Web3 Security &amp;</text>
+    <text x="88" y="345" font-size="56" fill="#f8fafc" font-weight="800">Forensics Suite</text>
+    <text x="90" y="420" font-size="26" fill="#94a3b8">Forensische Web3-Sicherheit, Smart-Account-Audits &amp;</text>
+    <text x="90" y="458" font-size="26" fill="#94a3b8">kryptografische Nachweise — direkt in Ihrem Browser</text>
+    <g font-size="20" fill="#facc15" font-weight="700">
+      <text x="90" y="540">10 Module</text>
+      <text x="250" y="540" fill="#34d399">Nur Client. Keine Keys.</text>
+      <text x="560" y="540" fill="#34d399">Deterministische Prüflogik</text>
+    </g>
+  </g>
+</svg>

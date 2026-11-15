@@ -1,0 +1,74 @@
+---
+import LegalLayout from '../layouts/LegalLayout.astro';
+---
+
+<LegalLayout
+  title="Datenschutz-Transparenz | AndrexTheDev"
+  description="Zero-Data-Architektur der AndrexTheDev Suite: keine Konten, keine Tracking-Cookies, keine Analytics-Skripte, lokale Browser-Speicherung mit Ein-Klick-Löschung."
+  heading="Datenschutz-Transparenz"
+>
+  <h2>1. Zero-Data-Architektur</h2>
+  <p>
+    Die Suite ist konsequent so gebaut, dass personenbezogene Daten gar nicht erst beim Betreiber anfallen:
+  </p>
+  <ul>
+    <li><strong>Keine Nutzerkonten:</strong> Es gibt keine Registrierung, kein Login und keine Sitzungsverwaltung durch den Betreiber.</li>
+    <li><strong>Keine Tracking-Cookies:</strong> Es werden keine Cookies gesetzt.</li>
+    <li><strong>Keine Analytics-Skripte:</strong> Es existieren keine externen Analyse-, Zählpixel- oder Fingerprinting-Dienste.</li>
+    <li><strong>Keine Server-Logs von Wallet-Eingaben:</strong> Adressen, Transaktionsdaten und Prüfeingaben werden lokal im Browser verarbeitet und nicht an eine Infrastruktur des Betreibers übertragen.</li>
+  </ul>
+
+  <h2>2. Lokale Speicherung im Browser</h2>
+  <p>
+    Funktionsbedingt nutzt die Suite ausschließlich browserseitige Speicherorte:
+  </p>
+  <ul>
+    <li><strong>localStorage:</strong> Sprachpräferenz und optional selbst hinterlegte Netzwerk-Endpunkte (Schlüssel-Präfixe <code>atd-</code> und <code>ds-rpc-</code>).</li>
+    <li><strong>IndexedDB:</strong> kurzlebiger Lese-Cache für Blockchain-Antworten sowie pausierbare Scan-Fortschritte (z.&nbsp;B. zeitlich eingegrenzte Stealth-Scans).</li>
+  </ul>
+  <p id="lokal">
+    Diese Daten verlassen Ihr Gerät nicht durch die Suite und lassen sich jederzeit mit einem Klick löschen:
+    über <strong>Netzwerk &amp; Datenquellen → „Alle lokalen Suite-Daten löschen“</strong> in der Navigationsleiste.
+    Alternativ können Sie die Website-Daten in Ihren Browser-Einstellungen entfernen.
+  </p>
+
+  <h2>3. Direkte Browser-Verbindungen zu Blockchain-Endpunkten</h2>
+  <p>
+    Wenn Sie ein Werkzeug im Online-Modus nutzen, sendet <strong>Ihr Browser direkt</strong> Leseanfragen (JSON-RPC) an
+    Netzwerk-Endpunkte — vorzugsweise an von Ihnen hinterlegte Endpunkte, alternativ rotierend an öffentlich erreichbare
+    Lese-Endpunkte. Dabei gilt:
+  </p>
+  <ul>
+    <li>Der Endpunkt-Betreiber sieht Ihre IP-Adresse und die abgefragten öffentlichen Daten (z.&nbsp;B. eine Adresse oder einen Transaktionshash).</li>
+    <li>Es findet <strong>keine</strong> Übertragung privater Schlüssel oder Seed-Phrasen statt — die Suite nimmt solche Eingaben nicht entgegen und blockiert erkannte Muster aktiv.</li>
+    <li>Sie können die Netz-Qualität einschränken, indem Sie eigene Endpunkte hinterlegen oder die Offline-Modi der Werkzeuge (manuelle Eingabe von Rohdaten, Datei-Upload) verwenden.</li>
+  </ul>
+
+  <h2>4. Wallet-Verbindungen</h2>
+  <p>
+    Optionale Wallet-Verbindungen (EIP-1193/EIP-6963) erfolgen ausschließlich auf Ihre ausdrückliche Aktion hin und
+    ausschließlich zwischen Ihrem Browser und Ihrer Wallet-Software. Die Suite erhält nur die Daten, die Sie in der
+    Wallet freigeben (z.&nbsp;B. öffentliche Adresse, Signatur einer Challenge).
+  </p>
+
+  <h2>5. E-Mail-Kontakt</h2>
+  <p>
+    Bei Kontaktaufnahme per E-Mail an <strong>hippie.highho@gmail.com</strong> verarbeitet der Betreiber die mit der
+    E-Mail übermittelten Daten (Absender, Inhalt, Metadaten) zur Bearbeitung der Anfrage. Rechtsgrundlage ist
+    Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;b bzw. lit.&nbsp;f DSGVO. Anfragen werden gelöscht, sobald sie erledigt sind,
+    sofern keine gesetzlichen Aufbewahrungspflichten bestehen.
+  </p>
+
+  <h2>6. Ihre Rechte</h2>
+  <p>
+    Soweit personenbezogene Daten beim Betreiber verarbeitet werden (im Wesentlichen E-Mail-Kommunikation), stehen
+    Ihnen die Rechte auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und
+    Widerspruch zu. Zudem besteht ein Beschwerderecht bei der zuständigen Datenschutz-Aufsichtsbehörde.
+  </p>
+
+  <h2>7. Verantwortlicher</h2>
+  <p>
+    Verantwortlich im Sinne der DSGVO: <strong>AndrexTheDev</strong>, Erreichbarkeit per E-Mail:
+    <strong>hippie.highho@gmail.com</strong>.
+  </p>
+</LegalLayout>

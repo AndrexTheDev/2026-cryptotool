@@ -1,0 +1,70 @@
+---
+import { BRAND, CONTACT_EMAIL, DONATION, TOOLS } from '../config/site';
+const year = 2026;
+---
+
+<footer class="border-t border-line mt-16 no-print">
+  <div class="container-x py-10 grid gap-8 md:grid-cols-4">
+    <div>
+      <p class="font-extrabold text-ink">{BRAND}</p>
+      <p class="text-sm mt-2 leading-relaxed">
+        Web3 Security &amp; Forensics Suite — zehn spezialisierte Werkzeuge, vollständig lokal im Browser ausgeführt.
+        Keine Konten, keine zentrale Datenspeicherung, keine Weitergabe privater Schlüssel.
+      </p>
+      <p class="text-sm mt-3">
+        Kontakt: <a class="text-prime-hi underline underline-offset-4" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+      </p>
+    </div>
+    <div>
+      <p class="text-xs uppercase tracking-wider text-dim font-semibold mb-2">Werkzeuge 01–05</p>
+      <ul class="space-y-1 text-sm">
+        {
+          TOOLS.slice(0, 5).map((t) => (
+            <li>
+              <a class="hover:text-prime-hi" href={`/tools/${t.slug}`}>
+                {t.name}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <div>
+      <p class="text-xs uppercase tracking-wider text-dim font-semibold mb-2">Werkzeuge 06–10</p>
+      <ul class="space-y-1 text-sm">
+        {
+          TOOLS.slice(5).map((t) => (
+            <li>
+              <a class="hover:text-prime-hi" href={`/tools/${t.slug}`}>
+                {t.name}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <div>
+      <p class="text-xs uppercase tracking-wider text-dim font-semibold mb-2">Recht &amp; Transparenz</p>
+      <ul class="space-y-1 text-sm">
+        <li><a class="hover:text-prime-hi" href="/agb">AGB / Nutzungsbedingungen</a></li>
+        <li><a class="hover:text-prime-hi" href="/disclaimer">Disclaimer / Haftungsausschluss</a></li>
+        <li><a class="hover:text-prime-hi" href="/datenschutz">Datenschutz-Transparenz</a></li>
+        <li><a class="hover:text-prime-hi" href="/llms.txt">llms.txt (KI-Sichtbarkeit)</a></li>
+      </ul>
+      <p class="text-xs text-dim mt-4 leading-relaxed">
+        On-Chain-Support (freiwillig):<br />
+        <span class="mono">SOL {DONATION.sol.slice(0, 10)}…</span><br />
+        <span class="mono">BTC {DONATION.btc.slice(0, 14)}…</span><br />
+        <span class="mono">ETH {DONATION.eth.slice(0, 10)}…</span>
+      </p>
+    </div>
+  </div>
+  <div class="border-t border-line">
+    <div class="container-x py-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-dim">
+      <span>© {year} {BRAND}. Alle Werkzeuge sind Diagnose-, Formatierungs- und Analyse-Software.</span>
+      <span class="ml-auto">
+        <a href="/datenschutz#lokal" class="underline underline-offset-2 hover:text-prime-hi">Lokale Daten verwalten</a>
+      </span>
+    </div>
+  </div>
+</footer>
