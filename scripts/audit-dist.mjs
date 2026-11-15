@@ -138,5 +138,26 @@ const TOOLSLUGS = ['7702-slotguard','stva-upgradediff','dac8-selfproof','bitvaul
 for (const t of TOOLSLUGS) if (!llms.includes(t)) fail(`llms.txt nennt ${t} nicht`);
 ok('llms.txt: Brand, Kontakt, alle 10 Tools referenziert');
 
+// ---------------------------------------------------------------- 7) Tool-Seiten-Budgets & noscript
+for (const slug of TOOLSLUGS) {
+  const f = join(DIST, 'tools', slug, 'index.html');
+  if (!existsSync(f)) continue;
+  const h = readFileSync(f, 'utf8');
+  if (!h.includes('<noscript')) fail(`tools/${slug}: kein noscript-Fallback`);
+  const refs = [
+    ...new Set([
+      ...[...h.matchAll(/(?:src|href)="([^"]+\.(?:js|wasm)[^"]*)"/g)].map((m) => m[1]),
+      ...[...h.matchAll(/_astro\/[A-Za-z0-9._-]+\.(?:js)/g)].map((m) => '/' + m[0]),
+    ]),
+  ];
+  let bytes = 0;
+  for (const r of refs) {
+    const pth = join(DIST, r.split('?')[0].replace(/^\//, ''));
+    if (existsSync(pth)) bytes += statSync(pth).size;
+  }
+  if (bytes > 400 * KB) fail(`tools/${slug}: ${(bytes / KB).toFixed(0)} KB initiales JS (Limit 400 KB)`);
+}
+ok('Tool-Seiten: noscript vorhanden, initiales JS <= 400 KB');
+
 console.log(failures ? `\n${failures} Befund(e) — Audit NICHT bestanden` : '\nAudit bestanden');
 process.exit(failures ? 1 : 0);
