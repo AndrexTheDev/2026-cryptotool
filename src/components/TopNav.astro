@@ -1,0 +1,138 @@
+---
+import { BRAND, CATEGORY_LABEL, TOOLS, type Category } from '../config/site';
+
+interface Props {
+  currentPath: string;
+}
+const { currentPath } = Astro.props;
+const categories: Category[] = ['smart-account', 'bitcoin-compliance', 'agents-intents-privacy'];
+---
+
+<header class="sticky top-0 z-40 border-b border-line bg-obsidian/90 backdrop-blur-md no-print">
+  <div class="container-x flex items-center gap-2 sm:gap-3 h-14">
+    <a href="/" class="flex items-center gap-2 shrink-0 group" aria-label="Startseite AndrexTheDev">
+      <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true" class="text-prime">
+        <rect x="1.5" y="1.5" width="29" height="29" rx="7" fill="none" stroke="currentColor" stroke-width="2"></rect>
+        <path
+          d="M10 21 16 8l6 13M12.6 17h6.8"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"></path>
+        <circle cx="24.5" cy="22.5" r="2.4" fill="#eab308"></circle>
+      </svg>
+      <span class="font-extrabold text-ink tracking-tight hidden xs:inline sm:inline">{BRAND}</span>
+    </a>
+
+    <details class="relative group">
+      <summary
+        class="btn btn-ghost btn-sm cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden"
+        aria-label="Werkzeuge anzeigen"
+      >
+        Werkzeuge ▾
+      </summary>
+      <div
+        class="absolute left-0 mt-2 w-[min(34rem,92vw)] card p-3 grid gap-3 sm:grid-cols-3 shadow-2xl shadow-black/60 z-50"
+      >
+        {
+          categories.map((cat) => (
+            <div>
+              <p class="px-2 pb-1 text-[10px] uppercase tracking-wider text-dim font-semibold">{CATEGORY_LABEL[cat]}</p>
+              <ul class="space-y-0.5">
+                {TOOLS.filter((t) => t.category === cat).map((t) => (
+                  <li>
+                    <a
+                      href={`/tools/${t.slug}`}
+                      class={`block rounded-md px-2 py-1.5 text-sm hover:bg-prime-soft ${currentPath.includes(t.slug) ? 'text-prime-hi font-semibold' : 'text-ink'}`}
+                      aria-current={currentPath.includes(t.slug) ? 'page' : undefined}
+                    >
+                      <span class="mono text-[10px] text-dim mr-1">{String(t.id).padStart(2, '0')}</span>
+                      {t.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </details>
+
+    <button
+      type="button"
+      class="btn btn-ghost btn-sm js-only"
+      onclick="window.dispatchEvent(new CustomEvent('atd:palette:open'))"
+      aria-label="Schnell-Tool-Wechsler oeffnen (Strg+K)"
+    >
+      <span class="hidden sm:inline">Suchen</span>
+      <kbd class="text-[10px] text-dim border border-line rounded px-1.5 py-0.5 mono">⌘K</kbd>
+    </button>
+
+    <div class="flex-1"></div>
+
+    <button
+      type="button"
+      class="btn btn-ghost btn-sm js-only"
+      onclick="window.dispatchEvent(new CustomEvent('atd:rpc:open'))"
+      aria-label="Netzwerk- und Datenquellen-Einstellungen"
+      title="Netzwerk & Datenquellen (eigene Endpunkte, lokale Daten)"
+    >
+      <span class="relative flex h-2.5 w-2.5">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-prime opacity-60"></span>
+        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-prime"></span>
+      </span>
+      <span class="hidden md:inline">Netzwerk</span>
+    </button>
+
+    <button
+      type="button"
+      id="lang-toggle"
+      class="btn btn-ghost btn-sm mono"
+      aria-label="Sprache umschalten / Switch language"
+      title="Deutsch | English"
+    >
+      DE|EN
+    </button>
+
+    <a href="/donate" class="btn btn-outline-amber btn-sm" data-donate-link>
+      <span aria-hidden="true">◆</span>
+      <span class="hidden xs:inline sm:inline">Support / Spenden</span>
+      <span class="xs:hidden sm:hidden">Spenden</span>
+    </a>
+  </div>
+</header>
+
+<script is:inline>
+  // Sprachumschalter DE|EN: deutsche und englische Texte werden serverseitig
+  // gerendert (data-i18n-Attributen), der Schalter blendet clientseitig um.
+  // Kein externes i18n-Framework, kein Tracking.
+  (function () {
+    var KEY = 'atd-lang';
+    function apply(lang) {
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-i18n-de]').forEach(function (el) {
+        var v = el.getAttribute(lang === 'en' ? 'data-i18n-en' : 'data-i18n-de');
+        if (v != null) el.textContent = v;
+      });
+      var t = document.getElementById('lang-toggle');
+      if (t) t.classList.toggle('text-prime-hi', lang === 'en');
+    }
+    var lang = 'de';
+    try {
+      lang = localStorage.getItem(KEY) || 'de';
+    } catch (e) {}
+    document.addEventListener('DOMContentLoaded', function () {
+      apply(lang);
+      var btn = document.getElementById('lang-toggle');
+      if (btn)
+        btn.addEventListener('click', function () {
+          lang = lang === 'de' ? 'en' : 'de';
+          try {
+            localStorage.setItem(KEY, lang);
+          } catch (e) {}
+          apply(lang);
+        });
+    });
+  })();
+</script>
