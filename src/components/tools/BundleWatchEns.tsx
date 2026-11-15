@@ -37,7 +37,8 @@ interface Compare {
   newAddresses: string[];
 }
 
-const BOOKMARKLET = `javascript:(async()=>{const u=[];const h=async(t)=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};for(const s of document.querySelectorAll('script[src]')){try{const r=await fetch(s.src,{cache:'no-store'});const t=await r.text();u.push({url:s.src,hash:await h(t),kind:'script'})}catch(e){u.push({url:s.src,kind:'script',error:'fetch-failed'})}}for(const l of document.querySelectorAll('link[rel=stylesheet]')){try{const r=await fetch(l.href,{cache:'no-store'});const t=await r.text();u.push({url:l.href,hash:await h(t),kind:'css'})}catch(e){u.push({url:l.href,kind:'css',error:'fetch-failed'})}}const blob=new Blob([JSON.stringify({origin:location.origin,ts:new Date().toISOString(),assets:u},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='live-bundle-'+location.hostname+'.json';a.click()})()`;
+// Konsolen-Snippet (im Live-Tab der dApp ausfuehren). Nutzt crypto.subtle im Seitenkontext — HTTPS erforderlich.
+const BOOKMARKLET = `(async()=>{const u=[];const h=async t=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};for(const s of document.querySelectorAll('script[src]')){try{const r=await fetch(s.src,{cache:'no-store'});const t=await r.text();u.push({url:s.src,hash:await h(t),kind:'script'})}catch(e){u.push({url:s.src,kind:'script',error:'fetch-failed'})}}for(const l of document.querySelectorAll('link[rel=stylesheet]')){try{const r=await fetch(l.href,{cache:'no-store'});const t=await r.text();u.push({url:l.href,hash:await h(t),kind:'css'})}catch(e){u.push({url:l.href,kind:'css',error:'fetch-failed'})}}const blob=new Blob([JSON.stringify({origin:location.origin,ts:new Date().toISOString(),assets:u},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='live-bundle-'+location.hostname+'.json';a.click()})()`;
 
 const DEMO_LIVE = JSON.stringify(
   {
@@ -411,11 +412,11 @@ export default function BundleWatchEns() {
       )}
 
       <details className="acc">
-        <summary>Bookmarklet (im Ziel-Tab ausführen, sammelt Skript-Hashes)</summary>
+        <summary>Konsolen-Snippet (im Ziel-Tab ausführen, sammelt Skript-Hashes)</summary>
         <div className="acc-body">
           <p className="text-sm text-dim">Diese Zeile in die Konsole des Live-Tabs der dApp kopieren — sie hasht alle geladenen Skripte lokal und laedt ein JSON herunter:</p>
           <pre className="mono text-xs bg-obsidian border border-line rounded-lg p-3 overflow-x-auto whitespace-pre-wrap break-all">{BOOKMARKLET}</pre>
-          <CopyButton text={BOOKMARKLET} label="Bookmarklet kopieren" compact />
+          <CopyButton text={BOOKMARKLET} label="Snippet kopieren" compact />
         </div>
       </details>
     </div>

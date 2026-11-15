@@ -1,59 +1,216 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { BRAND, SITE_URL, CONTACT_EMAIL, TOOLS } from '../config/site';
+import ToolGrid from '../components/ToolGrid.astro';
 
-const jsonLd = [
+const faq = [
   {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: `${BRAND} — Web3 Security & Forensics Suite`,
-    url: SITE_URL,
+    q: 'Was kostet die Nutzung der Suite?',
+    a: 'Die Suite verzichtet auf Preise, Abos und Accounts. Jede Analyse läuft lokal in deinem Browser. Wer die Arbeit unterstützen möchte, kann freiwillig per SOL, BTC oder EVM-Adresse spenden — ohne Einfluss auf Funktionen.',
   },
   {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: 'Web3 Security & Forensics Suite',
-    applicationCategory: 'SecurityApplication',
-    operatingSystem: 'Web Browser',
-    url: SITE_URL,
-    author: { '@type': 'Person', name: 'AndrexTheDev', email: CONTACT_EMAIL },
+    q: 'Wo werden meine Daten verarbeitet?',
+    a: 'Ausschließlich in deinem Browser: WebCrypto, Worker und IndexedDB. Es gibt keinen Server der Suite, der Daten empfängt. Optional kannst du öffentliche RPC-Endpunkte deiner Wahl für Chain-Daten nutzen — auch das machst du selbst konfigurierbar.',
   },
   {
-    '@context': 'https://schema.org',
-    '@type': 'Person',
-    name: 'AndrexTheDev',
-    email: CONTACT_EMAIL,
+    q: 'Sind die Ergebnisse rechtsverbindlich?',
+    a: 'Nein. Die Suite liefert technische Vorab-Indikatoren und Befund-Artefakte. Sie ersetzt keine Rechts-, Steuer- oder Compliance-Beratung. Der DAC8-SelfProof ist ausdrücklich ein vorbereitendes Merkblatt, keine Meldung.',
   },
+  {
+    q: 'Kann ich die Werkzeuge offline nutzen?',
+    a: 'Ja. Jedes Werkzeug hat Offline-Pfade: manuelle Eingaben, Dumps, Dateien oder signierte Artefakte. Einmal geladen, benötigt die Seite für Kernfunktionen kein Server-Roundtrip.',
+  },
+  {
+    q: 'Warum spenden statt Abo?',
+    a: 'Weil Sicherheits-Werkzeuge am besten funktionieren, wenn sie ohne Zwang zugänglich sind. Spenden sind freiwillig, nicht rückerstattbar und schaffen keine Gegenleistung.',
+  },
+];
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+
+const comparisons = [
+  { davor: 'Delegations kontrollieren unbekannte, unbegrenzte Ziele', danach: '7702-SlotGuard listet Delegate, Scope und Risiko in Minuten' },
+  { davor: 'Proxy-Upgrades werden blind signiert', danach: 'STVA-UpgradeDiff zeigt Storage-Kollisionen und Initializer-Fallen vorher' },
+  { davor: 'x402-Middleware veraltet, Replay-Gate unbemerkt', danach: 'x402-PaywallGuard mahnt betroffene Versionen und SIWx-Fehlkonfiguration' },
+  { davor: 'Intent-Spreads unklar, Fristen übersehen', danach: 'IntentLens-7683 berechnet Fill-Fenster und Spread deterministisch' },
+  { davor: 'Live-dApp unterscheidet sich heimlich vom Release', danach: 'BundleWatch-ENS gleicht Skript-Hashes mit dem ENS-Release ab' },
+];
+
+const pillars = [
+  {
+    title: '100 % lokal & clientseitig',
+    text: 'Berechnungen mit WebCrypto und Workern im Browser. Es gibt keinen Daten-Upload an einen Betreiber-Server — dein Browser ist die Laufzeit.',
+    icon: 'M12 3l8 4v5c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7l8-4z',
+  },
+  {
+    title: 'Kein Signup, kein Tracking',
+    text: 'Keine Konten, keine Analytics, keine Cookies. Die Seite lädt Werkzeug-Code nur bei Bedarf nach — die Startseite enthält keinen einzigen Krypto-Import.',
+    icon: 'M9 12l2 2 4-5M12 3a9 9 0 100 18 9 9 0 000-18z',
+  },
+  {
+    title: 'Deterministische Mathematik',
+    text: 'Alle Risiko-Scores und Schwellenwerte sind fix im Code dokumentiert, reproduzierbar und exportierbar. Keine black-box Scoring-Dienste.',
+    icon: 'M4 4h16v4H4zM4 10h10v4H4zM4 16h16v4H4z',
+  },
+  {
+    title: 'Open Source & prüfbar',
+    text: 'Jede Seite linkt auf den Quelltext des Moduls. Rizinfrische Builds sind reproduzierbar, die Hash-Standards (EIP-191, BIP-322, EIP-1577) öffentlich.',
+    icon: 'M8 7l-5 5 5 5M16 7l5 5-5 5M13 4l-3 16',
+  },
+];
+
+const steps = [
+  { n: '01', title: 'Modul öffnen', text: 'Eine Kachel wählen — Werkzeug-JavaScript lädt erst jetzt, isoliert vom Rest der Seite.' },
+  { n: '02', title: 'Eingabe wählen', text: 'Adresse, JSON, calldata, Log-Datei oder Demo-Szenario. Offline-Modus überall verfügbar.' },
+  { n: '03', title: 'Prüfung starten', text: 'Ein Klick startet die Analyse; Ergebnis erscheint als Ampel, KPIs, Details und Export.' },
 ];
 ---
 
 <BaseLayout
-  title="Forensische Web3-Sicherheit direkt im Browser | AndrexTheDev"
-  description="Zehn forensische Web3-, Bitcoin- und Compliance-Werkzeuge — lokal im Browser, ohne Konto, ohne Weitergabe privater Schlüssel. Smart-Account-Audits, DAC8-Nachweise, Intent-Dekodierung."
+  title="Web3 Security Toolkit 2026 — 10 lokale Prüfwerkzeuge"
+  description="10 lokale Web3-, Bitcoin- und Compliance-Werkzeuge: EIP-7702, Safe-Upgrades, DAC8, BIP-322, Passkeys, x402, ERC-7683, ERC-5564, ENS-Bundles — alles im Browser, ohne Signup."
   path="/"
-  jsonLd={jsonLd}
+  jsonLd={faqLd}
 >
-  <section class="container-x py-10">
-    <h1 class="text-3xl sm:text-4xl font-extrabold text-ink max-w-3xl">
-      Forensische Web3-Sicherheit, Smart-Account-Audits &amp; kryptografische Nachweise — direkt in Ihrem Browser
-    </h1>
-    <p class="mt-4 text-lg max-w-2xl">
-      Verifizierte Diagnose vor der Signatur, lückenlose Steuer- und Erbfall-Prüfung, Schutz vor Account-Abstraction-
-      und KI-Agenten-Risiken — sofort einsatzbereit, ohne Kontoeröffnung und ohne Weitergabe privater Schlüssel.
-    </p>
-    <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {
-        TOOLS.map((t) => (
-          <a href={`/tools/${t.slug}`} class="card card-hover p-5 block">
-            <div class="flex items-center gap-2">
-              <span class="mono text-xs text-dim">{String(t.id).padStart(2, '0')}</span>
-              <h2 class="text-base font-bold text-ink">{t.name}</h2>
-            </div>
-            <p class="text-sm mt-2">{t.tagline}</p>
-            <p class="text-xs text-prime-hi mt-3">Modul öffnen →</p>
-          </a>
-        ))
-      }
+  <!-- Hero -->
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(16,185,129,0.14),transparent)] pointer-events-none" />
+    <div class="container-x relative py-16 sm:py-24 text-center">
+      <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-prime-hi bg-prime-dim border border-mint/30 rounded-full px-4 py-1.5">
+        10 Module · 100 % lokal · ohne Signup
+      </span>
+      <h1 class="mt-6 text-4xl sm:text-6xl font-extrabold leading-[1.05] tracking-tight max-w-4xl mx-auto">
+        Web3-Sicherheit prüfen, <span class="text-transparent bg-clip-text bg-gradient-to-r from-prime to-prime-hi">bevor du signierst</span>.
+      </h1>
+      <p class="mt-5 text-base sm:text-lg text-dim max-w-2xl mx-auto">
+        EIP-7702-Delegations, Proxy-Upgrades, DAC8-Befunde, BIP-322-Nachweise, x402-Middleware, Intents, Privacy und mehr — als lokal laufende Werkzeuge, die keine Daten an Server senden.
+      </p>
+      <div class="mt-8 flex flex-wrap justify-center gap-3">
+        <a href="#tools" class="btn btn-primary px-6 py-3 text-base">Werkzeuge entdecken</a>
+        <a href="#support" class="btn btn-ghost px-6 py-3 text-base">♥ Projekt unterstützen</a>
+      </div>
+      <div class="mt-10 inline-flex items-center gap-3 text-sm text-dim bg-surface border border-line rounded-full px-5 py-2.5">
+        <span class="w-2 h-2 rounded-full bg-prime animate-pulse" />
+        Letztes Modul-Update: <time datetime="2026-11-15" class="text-ink font-medium">15. November 2026</time>
+        <span class="hidden sm:inline">· deutsch & englisch</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bedrohungslage -->
+  <section class="border-y border-line bg-surface/50">
+    <div class="container-x py-14">
+      <div class="max-w-2xl">
+        <h2 class="text-2xl sm:text-3xl font-bold">Die Bedrohungslage 2026</h2>
+        <p class="text-dim mt-3 text-sm sm:text-base">
+          Drei Entwicklungen machen Ad-hoc-Checks untauglich: <strong class="text-ink">EIP-7702-Delegations</strong> geben Smart Contracts Schlüsselgewalt über EOAs, <strong class="text-ink">x402-Zahlungs-Middleware</strong> verbreitet sich schneller als Audits, und <strong class="text-ink">DAC8/CARF-Meldepflichten</strong> verlangen dokumentierte Selbst-Auskünfte. Diese Suite prüft technisch, deterministisch und lokal — ohne dass irgendwo ein Account entsteht.
+        </p>
+      </div>
+      <div class="grid sm:grid-cols-3 gap-4 mt-8">
+        {[
+          { k: '7702', t: 'Delegation-Hijacks', d: 'Ungeprüfte Delegate-Adressen können komplette Wallets übernehmen. SlotGuard zeigt jedes Delegee und seinen Scope.' },
+          { k: 'x402', t: 'Paywall-Middleware-Fallen', d: 'Veraltete x402-Versionen ohne Replay-Schutz oder Signatur-Bindung sind ein Einfallstor. PaywallGuard erkennt sie.' },
+          { k: 'ENS', t: 'Bundle-Substitution', d: 'Kommt es zum ENS-Umschwenk, lädt die dApp plötzlich fremde Skripte. BundleWatch vergleicht Hashes mit dem Referenz-Release.' },
+        ].map((c) => (
+          <div class="card p-5">
+            <span class="mono text-xs text-prime-hi font-bold">{c.k}</span>
+            <h3 class="font-semibold mt-1.5">{c.t}</h3>
+            <p class="text-sm text-dim mt-1.5">{c.d}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Tool-Bento -->
+  <section id="tools" class="container-x py-16">
+    <div class="flex items-end justify-between mb-2">
+      <div>
+        <h2 class="text-2xl sm:text-3xl font-bold">Zehn Werkzeuge, ein Klick entfernt</h2>
+        <p class="text-dim text-sm mt-1">Filter: Kategorie wählen — Werkzeug-Code lädt erst nach dem Öffnen.</p>
+      </div>
+      <a href={import.meta.env.BASE_URL + 'llms.txt'} class="hidden md:inline btn btn-ghost btn-sm mono text-xs">llms.txt</a>
+    </div>
+    <ToolGrid />
+  </section>
+
+  <!-- Vorher/Nachher -->
+  <section class="border-y border-line bg-surface/50">
+    <div class="container-x py-14">
+      <h2 class="text-2xl sm:text-3xl font-bold">Vorher / Nachher</h2>
+      <div class="mt-6 overflow-x-auto">
+        <table class="table-x">
+          <thead><tr><th class="w-1/2">Ohne Prüfung</th><th>Mit Web3 Security Toolkit</th></tr></thead>
+          <tbody>
+            {comparisons.map((c) => (
+              <tr>
+                <td class="text-sm text-dim">{c.davor}</td>
+                <td class="text-sm"><span class="badge badge-green mr-2">nachher</span>{c.danach}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ablauf -->
+  <section class="container-x py-14">
+    <h2 class="text-2xl sm:text-3xl font-bold">In drei Schritten zum Befund</h2>
+    <div class="grid sm:grid-cols-3 gap-4 mt-6">
+      {steps.map((s) => (
+        <div class="card p-5">
+          <span class="mono text-2xl font-extrabold text-prime-hi">{s.n}</span>
+          <h3 class="font-semibold mt-2">{s.title}</h3>
+          <p class="text-sm text-dim mt-1">{s.text}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Vertrauenssäulen -->
+  <section class="border-y border-line bg-surface/50">
+    <div class="container-x py-14">
+      <h2 class="text-2xl sm:text-3xl font-bold">Vertrauen durch Architektur</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        {pillars.map((p) => (
+          <div class="card p-5">
+            <svg class="w-7 h-7 text-prime-hi" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d={p.icon} /></svg>
+            <h3 class="font-semibold mt-3">{p.title}</h3>
+            <p class="text-sm text-dim mt-1.5">{p.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="container-x py-14 max-w-3xl">
+    <h2 class="text-2xl sm:text-3xl font-bold">Häufige Fragen</h2>
+    <div class="mt-6 space-y-3">
+      {faq.map((f) => (
+        <details class="acc">
+          <summary class="font-medium">{f.q}</summary>
+          <div class="acc-body text-sm text-dim">{f.a}</div>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  <!-- Support / Spenden -->
+  <section id="support" class="border-t border-line bg-surface/50">
+    <div class="container-x py-16 text-center">
+      <h2 class="text-2xl sm:text-3xl font-bold">Unterstütze unabhängige Web3-Sicherheit</h2>
+      <p class="text-dim max-w-xl mx-auto mt-3 text-sm sm:text-base">
+        Spenden sind <strong class="text-ink">freiwillig</strong> und jederzeit erkennbar: drei Adressen, QR-Codes lokal generiert, keine Gegenleistung.
+      </p>
+      <div class="flex flex-wrap justify-center gap-3 mt-7">
+        <a href={import.meta.env.BASE_URL + 'donate'} class="btn btn-primary px-6 py-3">Zu den Spenden-Adressen</a>
+        <a href={import.meta.env.BASE_URL + 'disclaimer'} class="btn btn-ghost px-6 py-3">Disclaimer lesen</a>
+      </div>
     </div>
   </section>
 </BaseLayout>

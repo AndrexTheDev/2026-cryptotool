@@ -1,0 +1,55 @@
+---
+import { TOOLS, type ToolCategory } from '../config/site';
+
+const filters: { id: ToolCategory | 'all'; labelKey: string; label: string }[] = [
+  { id: 'all', labelKey: 'filter.all', label: 'Alle 10 Werkzeuge' },
+  { id: 'smart-account', labelKey: 'filter.smartAccount', label: 'Smart-Account-Sicherheit' },
+  { id: 'bitcoin-compliance', labelKey: 'filter.bitcoinCompliance', label: 'Bitcoin & Compliance' },
+  { id: 'agents-privacy', labelKey: 'filter.agentsPrivacy', label: 'Agenten, Intents & Privacy' },
+];
+---
+
+<div class="flex flex-wrap gap-2 mb-8 mt-4" role="tablist" aria-label="Kategorien">
+  {filters.map((f, i) => (
+    <button
+      class={`filter-btn btn btn-sm ${i === 0 ? 'btn-primary' : 'btn-ghost'}`}
+      data-filter={f.id}
+      data-i18n={f.labelKey}
+      role="tab"
+    >
+      {f.label}
+    </button>
+  ))}
+</div>
+<div id="tool-grid" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
+  {TOOLS.map((t) => (
+    <a
+      href={import.meta.env.BASE_URL + `tools/${t.slug}`}
+      class="tool-card card p-5 hover:border-prime/50 transition-colors group block"
+      data-cat={t.category}
+    >
+      <div class="flex items-start justify-between gap-3">
+        <h3 class="font-bold text-lg group-hover:text-prime-hi transition-colors" data-i18n={t.nameKey}>{t.name}</h3>
+        <span class={`badge ${t.status === 'beta' ? 'badge-amber' : 'badge-green'} shrink-0`}>
+          {t.status === 'beta' ? 'Beta' : 'Live'}
+        </span>
+      </div>
+      <p class="text-sm text-dim mt-2 leading-relaxed" data-i18n={t.teaserKey}>{t.teaser}</p>
+      <span class="inline-flex items-center gap-1 text-prime-hi text-sm mt-4 font-medium">
+        Öffnen <span aria-hidden="true">→</span>
+      </span>
+    </a>
+  ))}
+</div>
+<script>
+  const btns = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
+  const cards = document.querySelectorAll<HTMLElement>('.tool-card');
+  btns.forEach((b) =>
+    b.addEventListener('click', () => {
+      btns.forEach((x) => { x.classList.remove('btn-primary'); x.classList.add('btn-ghost'); });
+      b.classList.add('btn-primary'); b.classList.remove('btn-ghost');
+      const f = b.dataset.filter;
+      cards.forEach((c) => { c.style.display = f === 'all' || c.dataset.cat === f ? '' : 'none'; });
+    }),
+  );
+</script>
