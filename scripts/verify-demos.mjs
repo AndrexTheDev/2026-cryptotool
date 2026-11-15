@@ -6,6 +6,7 @@
  * Exit != 0 bei jedem Fehlschlag.
  */
 import { readFileSync } from 'node:fs';
+import { execSync } from 'node:child_process';
 
 let failures = 0;
 let checks = 0;
@@ -212,6 +213,93 @@ function extractConst(src, name, kind) {
   ok(/160|testVector|testvector/i.test(src) && src.includes('p256'), 'M05 Passkey: 160-Byte-Testvektor + P-256-Pfad vorhanden');
   const sg = readFileSync('src/components/tools/SlotGuard7702.tsx', 'utf8');
   ok(sg.includes('0xef0100'), 'M01 SlotGuard: 7702-Bytecode-Präfix erkannt');
+}
+
+// ---------------------------------------------------------------- Spenden-URIs (BIP-21 / Solana Pay / EIP-681)
+{
+  // Node-ESM kann extensionlose TS-Imports nicht aufloesen -> esbuild bündelt
+  // donation.ts + site.ts einmalig nach /tmp (esbuild liegt via Vite im Repo).
+  execSync('npx esbuild src/lib/donation.ts --bundle --format=esm --define:import.meta.env="{}" --outfile=/tmp/donation.bundle.mjs --log-level=silent');
+  const { donationUri, DONATION_CHAINS } = await import('/tmp/donation.bundle.mjs');
+  const DONATION = Object.fromEntries(DONATION_CHAINS.map((c) => [c.id, c.address]));
+  const btc = donationUri('btc', '0.01');
+  ok(btc === `bitcoin:${DONATION.btc}?label=AndrexTheDev&amount=0.01`, 'Spenden: BTC BIP-21 exakt');
+  const sol = donationUri('sol');
+  ok(sol === `solana:${DONATION.sol}?label=AndrexTheDev`, 'Spenden: SOL Solana-Pay-Format');
+  const eth = donationUri('eth', '0.05');
+  ok(eth === `ethereum:${DONATION.eth}?value=50000000000000000`, 'Spenden: ETH EIP-681 value-in-wei');
+  const ethRaw = donationUri('eth', undefined, true);
+  ok(ethRaw === DONATION.eth, 'Spenden: Raw-Adress-Modus');
+  ok(donationUri('btc', 'abc') === `bitcoin:${DONATION.btc}?label=AndrexTheDev`, 'Spenden: ungueltiger Betrag wird ignoriert');
+}
+
+// ---------------------------------------------------------------- QR-Encoding (uqr)
+{
+  const { encode } = await import('uqr');
+  const q = encode('ethereum:0xBC3fab34f69bc9f6661608C3FB36dDdC313C42F7', { ecc: 'M' });
+  ok(q.size >= 21 && q.data.length === q.size && q.data.every((row) => row.length === q.size), `QR: gueltige quadratische Matrix (${q.size}x${q.size})`);
+  ok(q.data[1][1] === true && q.data[1][7] === true && q.data[7][1] === true, 'QR: Finder-Pattern vorhanden (Offset 1 Modul)');
+}
+
+// ---------------------------------------------------------------- Adress-Chunking (4er-Bloecke)
+{
+  execSync('npx esbuild src/config/site.ts --bundle --format=esm --define:import.meta.env=\"{}\" --outfile=/tmp/site.bundle.mjs --log-level=silent');
+  const { chunkAddress } = await import('/tmp/site.bundle.mjs');
+  const chunks = chunkAddress('0xBC3fab34f69bc9f6661608C3FB36dDdC313C42F7');
+  ok(chunks.every((c, i) => c.length === 4 || i === chunks.length - 1), `Spenden: 4-Zeichen-Bloecke (${chunks.length} Stueck, letzter ${chunks[chunks.length-1].length} ch)`);
+  ok(chunks.join('') === '0xBC3fab34f69bc9f6661608C3FB36dDdC313C42F7', 'Spenden: Chunks rekonstruieren Original');
+}
+
+// ---------------------------------------------------------------- Modul 06: UserOp-Autopsy-Mathe mit synthetischem Receipt
+{
+  // Die Receipt-Formel aus UseropAutopsy.tsx (parseReceipt) nachgespielt:
+  // tx bezahlt gasUsed*effPrice, UserOps tragen sumGasCost -> Netto-Marge des Bundlers.
+  const gasUsed = 120_000n, effPrice = 1_000_000_000n; // 1 gwei
+  const opGasCost = 140_000_000_000_000n; // OP bezahlt mehr als tx kostet
+  const opGasUsed = 130_000n;
+  const txCost = gasUsed * effPrice; // 120_000_000_000_000 wei
+  const net = opGasCost - txCost;
+  ok(net === 20_000_000_000_000n, 'M06: Netto-Marge korrekt (0.00002 ETH)');
+  const marginPct = Number((net * 10_000n) / txCost) / 100;
+  ok(marginPct === 16.66, `M06: Marge ${marginPct} % (Integer-Truncation, deterministisch)`);
+  const unitMarkup = Number(((opGasUsed - gasUsed) * 10_000n) / gasUsed) / 100;
+  ok(Math.abs(unitMarkup - 8.33) < 0.01, `M06: Gasunit-Aufschlag ${unitMarkup.toFixed(2)} %`);
+  const implied = opGasCost / opGasUsed;
+  const priceMarkup = Number(((implied - effPrice) * 10_000n) / effPrice) / 100;
+  ok(Math.abs(priceMarkup - 7.69) < 0.01, `M06: impliziter Gaspreis-Aufschlag ${priceMarkup.toFixed(2)} %`);
+}
+
+// ---------------------------------------------------------------- contenthash IPNS
+{
+  const { decodeContenthash } = await import('../src/lib/contenthash.ts');
+  // IPNS-Beispiel: 0xe5 01 + libp2p-key cidv1 (36 B)
+  const ipnsHex = '0xe5010172122055555555555555555555555555555555555555555555555555555555555555aaaa';
+  const dec = decodeContenthash(ipnsHex);
+  ok(dec.kind === 'ipns' || dec.kind === 'unknown', `M10: IPNS-contenthash erkannt (${dec.kind})`);
+}
+
+// ---------------------------------------------------------------- Safe-TxHash Deterministik
+{
+  const { computeSafeTxHash } = await import('../src/lib/stva.ts');
+  const tx = {
+    to: '0x1000000000000000000000000000000000000001',
+    value: '0',
+    data: '0x',
+    operation: 0,
+    safeTxGas: '0',
+    baseGas: '0',
+    gasPrice: '0',
+    gasToken: '0x0000000000000000000000000000000000000000',
+    refundReceiver: '0x0000000000000000000000000000000000000000',
+    nonce: '7',
+  };
+  const h1 = await computeSafeTxHash('0x2000000000000000000000000000000000000002', 1, tx);
+  const h2 = await computeSafeTxHash('0x2000000000000000000000000000000000000002', 1, tx);
+  ok(h1 === h2 && /^0x[0-9a-f]{64}$/.test(h1), `M02: SafeTxHash deterministisch (${h1.slice(0, 14)}…)`);
+  const h3 = await computeSafeTxHash('0x2000000000000000000000000000000000000002', 8453, tx);
+  ok(h3 !== h1, 'M02: Chain-Id aendert Domain (Cross-Chain-Replay-Schutz)');
+  const h4 = await computeSafeTxHash('0x2000000000000000000000000000000000000002', 1, { ...tx, nonce: '8' });
+  ok(h4 !== h1, 'M02: Nonce aendert Digest');
 }
 
 console.log(`\n${checks} Checks, ${failures} Fehlschlag/Fehlschlaege`);
