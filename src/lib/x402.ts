@@ -19,22 +19,71 @@ export interface Advisory {
   summary: string;
 }
 
+// Stand der Matrix: Oktober/November 2026. Quellenlage: Oeffentliche Advisory-Meldungen
+// (V12-Disclosure mit 25 Findings vom 22.10.2026, darunter 3 kritische ohne Advisory-Eintrag in
+// npm audit/PyPI; Payment-Bypass-Fix in @x402/core 2.27.0 vom 22.09.2026; PT-2026-118463,
+// CVSS 6.5 (3.1) / 6.9 (4.0), SIWX-Server-Auth-Bypass). Versions-Schwellen sind konservativ
+// auf die jeweils erste gefixte Linie gesetzt.
 export const X402_ADVISORIES: Advisory[] = [
   {
-    id: 'X402-NPM-2026-01',
+    id: 'V12-2026-CRIT-1',
     ecosystem: 'npm',
-    match: (n) => /^@x402\/core$/.test(n),
-    belowVersion: '2.28.0',
+    match: (n) => /^@x402\/(core|fetch|axios|extensions)$/.test(n) || n === 'x402',
+    belowVersion: '2.23.0',
     severity: 'critical',
-    summary: 'Signatur-Verifikations-Luecke in @x402/core erlaubt Replay bezahlter Anfragen (fehlt in vielen npm-audit-Quellen).',
+    summary:
+      'Kein Default-Spend-Limit im Standard-Client: boesartige API kann das gesamte Agent-Token-Guthaben anfordern. Fix in @x402/core, @x402/fetch, @x402/axios 2.23.0 (18.08.2026).',
   },
   {
-    id: 'X402-NPM-2026-02',
+    id: 'V12-2026-CRIT-2',
     ecosystem: 'npm',
-    match: (n) => n === 'x402' || /^x402-(?!legacy)/.test(n) || /^@x402\//.test(n),
+    match: (n) => /^@x402\/svm$/.test(n),
     belowVersion: '2.23.0',
+    severity: 'critical',
+    summary:
+      'Solana-Facilitator akzeptierte ApproveChecked als Zahlung (kompletter Payment-Bypass, betroffen 2.0.0–2.22.0). Fix: @x402/svm 2.23.0.',
+  },
+  {
+    id: 'V12-2026-CRIT-3',
+    ecosystem: 'npm',
+    match: (n) => /^@x402\/(extensions|core)$/.test(n),
+    belowVersion: '2.23.0',
+    severity: 'critical',
+    summary:
+      'SIWx-Sign-In signierte Logins fuer Fremd-Domains (Session-Uebernahme via relayed Login). Fix: createSIWxPayload mit Pflicht-Finale-URL in @x402/extensions/core 2.23.0.',
+  },
+  {
+    id: 'X402-CORE-2026-09',
+    ecosystem: 'npm',
+    match: (n) => /^@x402\/core$/.test(n),
+    belowVersion: '2.27.0',
     severity: 'high',
-    summary: 'Ungepatchte x402-TypeScript-Linie: Payment-Header ohne Domain-Bindung (Cross-Site-Zahlungs-Phishing).',
+    summary: 'Separater Payment-Bypass im HTTP-Resource-Server von @x402/core. Fix: 2.27.0 (22.09.2026).',
+  },
+  {
+    id: 'PT-2026-118463',
+    ecosystem: 'npm',
+    match: (n) => /^@x402\/extensions$/.test(n),
+    belowVersion: '2.28.1',
+    severity: 'medium',
+    summary:
+      'SIWX-Server-Extension Auth-Bypass: bezahlende Clients koennen unbezahlte Routen entsperren (PaymentPayload.resource URL). Betroffen 2.3.1–2.28.0; CVSS 6.5/6.9.',
+  },
+  {
+    id: 'PT-2026-118463-PY',
+    ecosystem: 'pip',
+    match: (n) => /^x402/.test(n),
+    belowVersion: '2.25.1',
+    severity: 'medium',
+    summary: 'Python-x402-SIWX-Server: gleicher Auth-Bypass (PT-2026-118463), betroffen 2.11.0–2.25.0.',
+  },
+  {
+    id: 'PT-2026-118463-GO',
+    ecosystem: 'go',
+    match: (n) => /x402/i.test(n),
+    belowVersion: '2.28.1',
+    severity: 'medium',
+    summary: 'Go-Modul: SIWX-Server-Auth-Bypass (PT-2026-118463), betroffen 2.16.0–2.28.0.',
   },
   {
     id: 'X402-NPM-LEGACY',
@@ -42,7 +91,7 @@ export const X402_ADVISORIES: Advisory[] = [
     match: (n) => /^x402-(express|fetch|axios|legacy)/.test(n),
     belowVersion: '0.5.2',
     severity: 'high',
-    summary: 'Alt-Pakete der 0.x-Linie: verify-Flow ohne Retry-/Nonce-Schutz.',
+    summary: 'Alt-Pakete der 0.x-Linie: verify-Flow ohne Retry-/Nonce-Schutz; migrieren auf >= 2.x-Linie.',
   },
   {
     id: 'X402-PY-2026',
@@ -50,7 +99,7 @@ export const X402_ADVISORIES: Advisory[] = [
     match: (n) => /^x402/.test(n),
     belowVersion: '2.20.0',
     severity: 'high',
-    summary: 'Python-x402 < 2.20.0: fehlende Betrags-Validierung am Middleware-Rand.',
+    summary: 'Python-x402 < 2.20.0: fehlende Betrags-Validierung am Middleware-Rand (zusaetzlich PT-2026-118463 bis 2.25.0).',
   },
   {
     id: 'X402-GO-2026',
@@ -58,7 +107,7 @@ export const X402_ADVISORIES: Advisory[] = [
     match: (n) => /x402/i.test(n),
     belowVersion: '2.23.0',
     severity: 'high',
-    summary: 'Go-x402 < v2.23.0: Settlement-Timing-Race bei parallelen Agenten-Requests.',
+    summary: 'Go-x402 < v2.23.0: Settlement-Timing-Race bei parallelen Agenten-Requests (zusaetzlich PT-2026-118463 bis 2.28.0).',
   },
 ];
 

@@ -10,6 +10,11 @@ const site = process.env.PUBLIC_SITE_URL ?? 'https://suite.andrexthe.dev';
 export default defineConfig({
   site,
   output: 'static',
+  // Nur HTML-Dokumente prefetchen (keine JS-Islands) — Landing-Bento wird fluessig.
+  prefetch: {
+    prefetchAll: false,
+    defaultStrategy: 'hover',
+  },
   trailingSlash: 'ignore',
   integrations: [
     react(),

@@ -357,6 +357,13 @@ y:               ${P256_VECTOR.y}
 RIP-7212-Semantik: erfolgreiche Verifikation liefert 32-Byte 1; Fehler liefern je nach Chain LEER (0x) oder 0.
 Die "leere" Variante ist die still-fehlerquelle: Signaturen schlagen fehl, ohne dass ein Ablehnungsgrund
 sichtbar wird — Deshalb ist der positive Nachweis (32B=1) mit echtem Vektor entscheidend.`}</pre>
+              <p className="text-sm text-dim">
+                <strong className="text-ink">Adoptions-Referenz (Stand 2026):</strong> RIP-7212 ist finalisiert und auf
+                Optimism, Base, zkSync Era, Polygon zkEVM, Linea und Scroll produktiv — die Precompile-Verifikation
+                zieht die Kosten von ~200.000–300.000 Gas auf ~3.450 Gas (~98 % Reduktion). Der Live-Test oben
+                verifiziert jede ausgewaehlte Chain dennoch individuell — Chain-Listen alterieren schneller als
+                statische Dokumentation.
+              </p>
             </div>
           </details>
 

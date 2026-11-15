@@ -22,6 +22,21 @@ const ok = (cond, name) => {
 // Polyfill: Worker-Module referenzieren self — im Node-Kontext neutralisieren
 if (typeof globalThis.self === 'undefined') globalThis.self = undefined;
 
+// ---------------------------------------------------------------- M01 SlotGuard: Offline-Storage-Dump
+{
+  const { parseStorageDump } = await import('../src/lib/evm-utils.ts');
+  const src = readFileSync('src/components/tools/SlotGuard7702.tsx', 'utf8');
+  const dump = src.match(/const DEMO_DUMP = `([\s\S]*?)`;/)[1];
+  const entries = parseStorageDump(dump);
+  ok(entries.length === 3, `M01: Demo-Dump -> ${entries.length} Slots`);
+  ok(entries[0].slot === '0x' + '0'.repeat(64), 'M01: Slot 0 gepaddet auf 64 Hex');
+  ok(entries.every((e) => /^0x[0-9a-fA-F]+$/.test(e.value)), 'M01: Werte hex');
+  // JSON-Varianten
+  ok(parseStorageDump('{"0x1": "0x2"}').length === 1, 'M01: JSON-Objekt-Dump');
+  ok(parseStorageDump('[{"slot":"0x0","value":"0x1"}]').length === 1, 'M01: JSON-Array-Dump');
+  ok(parseStorageDump('').length === 0, 'M01: leerer Dump -> 0 Eintraege');
+}
+
 // ---------------------------------------------------------------- Modul 09: StealthAudit
 {
   const { genDemo, scanAnnouncements } = await import('../src/workers/stealth.worker.ts');
@@ -116,6 +131,30 @@ function extractConst(src, name, kind) {
   ok(har[0].hadPaymentHeader === true && har[1].hadPaymentHeader === false, 'M07: Payment-Header-Erkennung');
   const rec = reconcileDeliveries(har);
   ok(rec.length === 1 && /502/.test(rec[0].issue), `M07: Reconcile findet bezahlt-aber-${rec.length === 1 ? 'fehlgeschlagen' : '?'} (${rec.length} Befund)`);
+}
+
+// ---------------------------------------------------------------- x402-Schwellen-Lock-in (2026er Advisory-Stand)
+{
+  const { scanDependencies } = await import('../src/lib/x402.ts');
+  // @x402/core 2.22.x muss 3 Befunde triggern (CRIT-1, CRIT-3, CORE-2026-09)
+  const findings = scanDependencies([{ name: '@x402/core', version: '2.22.5', ecosystem: 'npm' }]);
+  const ids = findings.map((f) => f.advisory.id).sort();
+  ok(ids.join(',') === 'V12-2026-CRIT-1,V12-2026-CRIT-3,X402-CORE-2026-09', `x402: core 2.22.5 -> ${ids.length} Advisories (${ids.join('|')})`);
+  // @x402/extensions 2.28.0: PT-2026-118463 (below 2.28.1) aber nicht CRIT-3
+  const ext = scanDependencies([{ name: '@x402/extensions', version: '2.28.0', ecosystem: 'npm' }]);
+  ok(ext.length === 1 && ext[0].advisory.id === 'PT-2026-118463', 'x402: extensions 2.28.0 -> nur PT-2026-118463');
+  // svm 2.22.0 -> CRIT-2 ; py 2.25.0 -> PT-2026-118463-PY ; go 2.27.0 -> PT-2026-118463-GO
+  ok(scanDependencies([{ name: '@x402/svm', version: '2.22.0', ecosystem: 'npm' }])[0]?.advisory.id === 'V12-2026-CRIT-2', 'x402: svm 2.22.0 -> CRIT-2');
+  ok(scanDependencies([{ name: 'x402', version: '2.25.0', ecosystem: 'pip' }])[0]?.advisory.id === 'PT-2026-118463-PY', 'x402: py 2.25.0 -> PT-PY');
+  ok(scanDependencies([{ name: 'github.com/x402/go', version: '2.27.0', ecosystem: 'go' }])[0]?.advisory.id === 'PT-2026-118463-GO', 'x402: go 2.27.0 -> PT-GO');
+}
+{
+  // parseDependencies: py- und go-Pfade
+  const { parseDependencies } = await import('../src/lib/x402.ts');
+  const py = parseDependencies('x402==2.20.1\nfastapi==0.119.0', 'requirements.txt');
+  ok(py.some((d) => d.name === 'x402' && d.version === '2.20.1' && d.ecosystem === 'pip'), 'x402: requirements.txt-Parser');
+  const go = parseDependencies('module example.com/app\n\nrequire (\n\tgithub.com/x402/go v2.20.0\n)', 'go.mod');
+  ok(go.some((d) => d.name === 'github.com/x402/go' && d.version === '2.20.0' && d.ecosystem === 'go'), 'x402: go.mod-Parser');
 }
 
 // ---------------------------------------------------------------- Modul 04: BitVault

@@ -512,7 +512,10 @@ export default function Dac8SelfProof() {
                 <p className="text-sm">
                   <strong>Rechtlicher Hinweis:</strong> Die Signatur dokumentiert kryptografische Verfuegungsmacht ueber
                   die Zieladresse zum Blockzeitpunkt. Sie ersetzt keine nationale Steuerberatung und keine behoerdliche
-                  Einzelfallpruefung (z. B. DAC8-/TFR-Zuordnung, Einstandspreiswertermittlung).
+                  Einzelfallpruefung (z. B. DAC8-/TFR-Zuordnung, Einstandspreiswertermittlung). Zeitkontext: DAC8 gilt
+                  seit 01.01.2026 (erster Meldezeitraum = Kalenderjahr 2026); die Einreichung der RCASP-Daten beim
+                  nationalen Fiskus erfolgt je Mitgliedstaat im Fenster 01.01.–30.09.2027 — bewahren Sie Befunde
+                  vollstaendig auf.
                 </p>
               </div>
               <ExportBar

@@ -103,7 +103,7 @@ andernfalls erzeugen Sie das Paket im 7702-SlotGuard neu.</p>
 <h2>Konto &amp; Autorisierung (Klartext-Metadaten)</h2>
 <pre>Konto (EOA):        ${esc(pack.eoa)}
 Ziel-Delegation:     ${esc(ZERO_ADDR)} (vollstaendiger Widerruf)
-Chain-Gueltigkeit:   ${pack.chainId === 0 ? 'alle Chains (chainId 0)' : 'chainId ' + pack.chainId}
+${pack.chainId === 0 ? 'Chain-Gueltigkeit:    alle Chains (chainId 0) — ACHTUNG: chainId-0-Autorisierungen lassen sich cross-chain replayen; nur bei bewusstem Multi-Chain-Widerruf verwenden, sonst Paket mit fester chainId neu erzeugen.' : 'Chain-Gueltigkeit:    chainId ' + pack.chainId}
 Autorisierungs-Nonce: ${pack.nonce}
 Autorisierungs-Digest: ${esc(pack.digest)}
 Erzeugt:             ${new Date().toISOString()}
@@ -295,7 +295,7 @@ export default function SlotGuard7702() {
           level = 'amber';
           headline = 'Delegation auf unbekannten Delegate';
           detail =
-            'Der Delegate verweist auf eine Adresse ohne ausgerollten Code oder ohne verifizierbare Antwort. Vor jeder weiteren Signatur pruefen.';
+            'Der Delegate verweist auf eine Adresse ohne ausgerollten Code oder ohne verifizierbare Antwort. Vor jeder weiteren Signatur pruefen. Kontext (2026): Die Mehrheit boesartiger 7702-Delegationen entfiel forensischen Auswertungen zufolge auf eine einzige wiederkehrende Sweeper-Vertragsfamilie — ein unbekannter Delegate ist daher ein kritischer Kandidat fuer einen Dormant-Sweeper (kann Wochen inaktiv bleiben und bei Geldeingang zugreifen).';
         } else if (col.length > 0) {
           level = 'red';
           headline = 'Kollidierende Storage-Slots / verwaiste Werte';

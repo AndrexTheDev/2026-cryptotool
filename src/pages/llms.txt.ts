@@ -33,6 +33,16 @@ export const GET: APIRoute = () => {
   lines.push('- Freiwillige On-Chain-Unterstuetzung moeglich; kein Funktionsunterschied ohne Unterstuetzung.');
   lines.push('- Keine Anlage-, Finanz-, Rechts- oder Steuerberatung — alle Ergebnisse sind Diagnosehinweise.');
   lines.push('');
+  lines.push('## Eingebettete Aktualisierungen (Stand dieser Suite)');
+  lines.push('');
+  lines.push(
+    '- x402-PaywallGuard fuehrt eine eingebettete Advisory-Matrix auf dem Stand Oktober/November 2026 (V12-Disclosure: 25 Findings, 3 kritische — Spend-Limit-Fix, Solana-ApproveChecked-Bypass, SIWx-Login-Replay ab Linie 2.23.0; zusaetzlich Payment-Bypass-Fix 2.27.0 und PT-2026-118463 SIWX-Server-Auth-Bypass bis 2.28.0). Da diese Findings nicht in npm audit/PyPI-Warnungen auftauchen, prueft das Modul explizit gegen diese Matrix.',
+  );
+  lines.push(
+    '- StealthAudit-5564 scannt den kanonischen ERC-5564 Announcer 0x55649E01B5Df198D18D95b5cc5051630cfD45564 und kennt die ERC-6538 Registry 0x6538E6bf4B0eBd30A8Ea093027Ac2422ce5d6538.',
+  );
+  lines.push('- DAC8-SelfProof referenziert den Meldezeitraum 2026 mit Filing-Fenster 01.01.–30.09.2027.');
+  lines.push('');
 
   return new Response(lines.join('\n'), {
     headers: { 'content-type': 'text/plain; charset=utf-8' },
