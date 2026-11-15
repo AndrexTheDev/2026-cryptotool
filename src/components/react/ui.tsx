@@ -36,7 +36,7 @@ export type StatusLevel = 'green' | 'amber' | 'red' | 'neutral';
 export function StatusTile({ level, headline, detail }: { level: StatusLevel; headline: string; detail?: string }) {
   const icon = { green: '✓', amber: '⚠', red: '✕', neutral: 'ℹ' }[level];
   return (
-    <div className={`status-tile status-${level}`} role="status">
+    <div className={`status-tile status-${level}`} role="status" aria-live="polite">
       <span aria-hidden="true" className="text-xl leading-none mt-0.5">
         {icon}
       </span>

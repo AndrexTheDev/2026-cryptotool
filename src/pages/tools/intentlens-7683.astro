@@ -15,11 +15,27 @@ const jsonLd = {
   description: tool.seoDesc,
   author: { '@type': 'Person', name: 'AndrexTheDev', email: 'hippie.highho@gmail.com' },
 };
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Suite', item: `${SITE_URL}/` },
+    { '@type': 'ListItem', position: 2, name: tool.name, item: `${SITE_URL}/tools/${tool.slug}` },
+  ],
+};
+
 ---
 
-<BaseLayout title={tool.seoTitle} description={tool.seoDesc} path={`/tools/${tool.slug}`} jsonLd={jsonLd}>
+<BaseLayout title={tool.seoTitle} description={tool.seoDesc} path={`/tools/${tool.slug}`} jsonLd={[jsonLd, breadcrumbLd]}>
   <ToolPageHeader tool={tool} />
   <div class="container-x py-8">
     <IntentLens7683 client:only="react" />
+    <noscript>
+      <div class="card p-5 mt-4">
+        Dieses Werkzeug benoetigt JavaScript — saemtliche Logik laeuft ausschliesslich lokal in Ihrem
+        Browser (kein Server-Roundtrip). Aktivieren Sie JavaScript oder nutzen Sie die beschriebenen
+        Offline-Pfade (manuelle Eingabe nach lokaler Ausfuehrung) auf einem Geraet mit JavaScript.
+      </div>
+    </noscript>
   </div>
 </BaseLayout>

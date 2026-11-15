@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useFocusTrap } from './useFocusTrap';
 import QrCode from './QrCode';
 import { DONATION_CHAINS, donationUri, type DonationChain } from '../../lib/donation';
 import { chunkAddress } from '../../config/site';
@@ -17,6 +18,7 @@ const SUGGESTED: Record<DonationChain, string[]> = {
 };
 
 export default function DonationModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const trapRef = useFocusTrap<HTMLDivElement>(open);
   // Auch als Standalone-Seite verwendbar: /donate (shell statisch ueber Wrapper)
   const [chain, setChain] = useState<DonationChain>('eth');
   const [amount, setAmount] = useState('');
@@ -100,6 +102,7 @@ export default function DonationModal({ open, onClose }: { open: boolean; onClos
 
   return (
     <div
+      ref={trapRef}
       className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-6"
       role="dialog"
       aria-modal="true"

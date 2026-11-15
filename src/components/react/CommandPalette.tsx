@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useFocusTrap } from './useFocusTrap';
 import { CATEGORY_LABEL, TOOLS } from '../../config/site';
 
 export const PALETTE_EVENT = 'atd:palette:open';
@@ -8,6 +9,7 @@ export function openPalette() {
 }
 
 export default function CommandPalette({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const trapRef = useFocusTrap<HTMLDivElement>(open);
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -57,6 +59,7 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
   let lastCat = '';
   return (
     <div
+      ref={trapRef}
       className="fixed inset-0 z-[80] bg-black/70 backdrop-blur-sm flex items-start justify-center pt-[12vh] px-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
       role="dialog"

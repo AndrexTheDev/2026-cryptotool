@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useFocusTrap } from './useFocusTrap';
 import { CHAINS } from '../../config/chains';
 import { getUserRpc, setUserRpc, rpcCall } from '../../lib/rpc';
 import { wipeLocalData } from '../../lib/idb';
@@ -14,6 +15,7 @@ export function openRpcPanel() {
  * Anbieter werden niemals namentlich angezeigt (Pflichtvorgabe).
  */
 export default function RpcPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const trapRef = useFocusTrap<HTMLDivElement>(open);
   const [chainId, setChainId] = useState(1);
   const [value, setValue] = useState('');
   const [status, setStatus] = useState<string>('');
@@ -49,6 +51,7 @@ export default function RpcPanel({ open, onClose }: { open: boolean; onClose: ()
 
   return (
     <div
+      ref={trapRef}
       className="fixed inset-0 z-[85] bg-black/70 backdrop-blur-sm flex items-start justify-center pt-[10vh] px-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
       role="dialog"
