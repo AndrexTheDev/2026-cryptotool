@@ -120,8 +120,8 @@ const steps = [
         EIP-7702-Delegations, Proxy-Upgrades, DAC8-Befunde, BIP-322-Nachweise, x402-Middleware, Intents, Privacy und mehr — als lokal laufende Werkzeuge, die keine Daten an Server senden.
       </p>
       <div class="mt-8 flex flex-wrap justify-center gap-3">
-        <a href="#tools" class="btn btn-primary px-6 py-3 text-base">Werkzeuge entdecken</a>
-        <a href="#support" class="btn btn-ghost px-6 py-3 text-base">♥ Projekt unterstützen</a>
+        <a href="#tools" class="btn btn-primary px-6 py-3 text-base" data-i18n-de="Werkzeuge entdecken" data-i18n-en="Explore tools">Werkzeuge entdecken</a>
+        <a href="#support" class="btn btn-ghost px-6 py-3 text-base" data-i18n-de="♥ Projekt unterstützen" data-i18n-en="♥ Support the project">♥ Projekt unterstützen</a>
       </div>
       <div class="mt-10 inline-flex items-center gap-3 text-sm text-dim bg-surface border border-line rounded-full px-5 py-2.5">
         <span class="w-2 h-2 rounded-full bg-prime animate-pulse" />
@@ -135,7 +135,7 @@ const steps = [
   <section class="border-y border-line bg-surface/50">
     <div class="container-x py-14">
       <div class="max-w-2xl">
-        <h2 class="text-2xl sm:text-3xl font-bold">Die Bedrohungslage 2026</h2>
+        <h2 class="text-2xl sm:text-3xl font-bold" data-i18n-de="Die Bedrohungslage 2026" data-i18n-en="The 2026 threat landscape">Die Bedrohungslage 2026</h2>
         <p class="text-dim mt-3 text-sm sm:text-base">
           Drei Entwicklungen machen Ad-hoc-Checks untauglich: <strong class="text-ink">EIP-7702-Delegations</strong> geben Smart Contracts Schlüsselgewalt über EOAs, <strong class="text-ink">x402-Zahlungs-Middleware</strong> verbreitet sich schneller als Audits, und <strong class="text-ink">DAC8/CARF-Meldepflichten</strong> verlangen dokumentierte Selbst-Auskünfte. Diese Suite prüft technisch, deterministisch und lokal — ohne dass irgendwo ein Account entsteht.
         </p>
@@ -160,7 +160,7 @@ const steps = [
   <section id="tools" class="container-x py-16">
     <div class="flex items-end justify-between mb-2">
       <div>
-        <h2 class="text-2xl sm:text-3xl font-bold">Zehn Werkzeuge, ein Klick entfernt</h2>
+        <h2 class="text-2xl sm:text-3xl font-bold" data-i18n-de="Zehn Werkzeuge, ein Klick entfernt" data-i18n-en="Ten tools, one click away">Zehn Werkzeuge, ein Klick entfernt</h2>
         <p class="text-dim text-sm mt-1">Filter: Kategorie wählen — Werkzeug-Code lädt erst nach dem Öffnen.</p>
       </div>
       <a href="/llms.txt" class="hidden md:inline btn btn-ghost btn-sm mono text-xs">llms.txt</a>
@@ -171,7 +171,7 @@ const steps = [
   <!-- Vorher/Nachher -->
   <section class="border-y border-line bg-surface/50">
     <div class="container-x py-14">
-      <h2 class="text-2xl sm:text-3xl font-bold">Vorher / Nachher</h2>
+      <h2 class="text-2xl sm:text-3xl font-bold" data-i18n-de="Vorher / Nachher" data-i18n-en="Before / After">Vorher / Nachher</h2>
       <div class="mt-6 overflow-x-auto">
         <table class="table-x">
           <thead><tr><th class="w-1/2">Ohne Prüfung</th><th>Mit Web3 Security Toolkit</th></tr></thead>
@@ -190,7 +190,7 @@ const steps = [
 
   <!-- Ablauf -->
   <section class="container-x py-14">
-    <h2 class="text-2xl sm:text-3xl font-bold">In drei Schritten zum Befund</h2>
+    <h2 class="text-2xl sm:text-3xl font-bold" data-i18n-de="In drei Schritten zum Befund" data-i18n-en="Three steps to a finding">In drei Schritten zum Befund</h2>
     <div class="grid sm:grid-cols-3 gap-4 mt-6">
       {steps.map((s) => (
         <div class="card p-5">
@@ -205,7 +205,7 @@ const steps = [
   <!-- Vertrauenssäulen -->
   <section class="border-y border-line bg-surface/50">
     <div class="container-x py-14">
-      <h2 class="text-2xl sm:text-3xl font-bold">Vertrauen durch Architektur</h2>
+      <h2 class="text-2xl sm:text-3xl font-bold" data-i18n-de="Vertrauen durch Architektur" data-i18n-en="Trust through architecture">Vertrauen durch Architektur</h2>
       <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
         {pillars.map((p) => (
           <div class="card p-5">
@@ -220,7 +220,7 @@ const steps = [
 
   <!-- FAQ -->
   <section class="container-x py-14 max-w-3xl">
-    <h2 class="text-2xl sm:text-3xl font-bold">Häufige Fragen</h2>
+    <h2 class="text-2xl sm:text-3xl font-bold" data-i18n-de="Häufige Fragen" data-i18n-en="Frequently asked questions">Häufige Fragen</h2>
     <div class="mt-6 space-y-3">
       {faq.map((f) => (
         <details class="acc">
@@ -234,13 +234,13 @@ const steps = [
   <!-- Support / Spenden -->
   <section id="support" class="border-t border-line bg-surface/50">
     <div class="container-x py-16 text-center">
-      <h2 class="text-2xl sm:text-3xl font-bold">Unterstütze unabhängige Web3-Sicherheit</h2>
+      <h2 class="text-2xl sm:text-3xl font-bold" data-i18n-de="Unterstütze unabhängige Web3-Sicherheit" data-i18n-en="Support independent Web3 security">Unterstütze unabhängige Web3-Sicherheit</h2>
       <p class="text-dim max-w-xl mx-auto mt-3 text-sm sm:text-base">
         Spenden sind <strong class="text-ink">freiwillig</strong> und jederzeit erkennbar: drei Adressen, QR-Codes lokal generiert, keine Gegenleistung.
       </p>
       <div class="flex flex-wrap justify-center gap-3 mt-7">
-        <a href="/donate" class="btn btn-primary px-6 py-3">Zu den Spenden-Adressen</a>
-        <a href="/disclaimer" class="btn btn-ghost px-6 py-3">Disclaimer lesen</a>
+        <a href="/donate" class="btn btn-primary px-6 py-3" data-i18n-de="Zu den Spenden-Adressen" data-i18n-en="View donation addresses">Zu den Spenden-Adressen</a>
+        <a href="/disclaimer" class="btn btn-ghost px-6 py-3" data-i18n-de="Disclaimer lesen" data-i18n-en="Read the disclaimer">Disclaimer lesen</a>
       </div>
     </div>
   </section>

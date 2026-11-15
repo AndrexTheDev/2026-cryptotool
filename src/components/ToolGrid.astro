@@ -23,7 +23,7 @@ function href(slug: string) {
       role="tab"
       aria-selected={i === 0 ? 'true' : 'false'}
     >
-      {f.label}
+      <span data-i18n-de={f.label} data-i18n-en={f.labelEn}>{f.label}</span>
     </button>
   ))}
 </div>

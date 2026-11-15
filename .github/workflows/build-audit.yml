@@ -1,0 +1,38 @@
+name: Build & Audit
+
+on:
+  push:
+    branches: [main, 'arena/**']
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npx astro build
+        env:
+          PUBLIC_SITE_URL: https://suite.andrexthe.dev
+
+      - name: Policy-Audit (dist)
+        run: node scripts/audit-dist.mjs
+
+      - name: Demo-Regression (65 Checks)
+        run: node --experimental-strip-types scripts/verify-demos.mjs
