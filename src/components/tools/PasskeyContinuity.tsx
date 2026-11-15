@@ -71,6 +71,11 @@ const CHECKLIST = [
     q: 'Sind alle vom Konto genutzten Chains getestet (Precompile oder Fallback-Contract vorhanden)?',
     hint: 'Wird automatisch aus der Matrix uebernommen, sobald die Pruefung gelaufen ist.',
   },
+  {
+    id: 'portability',
+    q: 'Unterstuetzt der Passkey-Manager einen Export (FIDO CXF oder herstellereigenen Weg) — d. h. ueberlebt der Passkey einen Anbieterwechsel?',
+    hint: 'CXF 1.0 (Credential Exchange Format) ist seit 08/2025 FIDO Proposed Standard (Errata 03/2026); das Transport-Protokoll CXP ist weiter nur Working Draft (10/2024) — ohne Manager-Export droht bei Anbieterwechsel Zwangs-Neuregistrierung über den Recovery-Pfad.',
+  },
 ];
 
 export default function PasskeyContinuity() {

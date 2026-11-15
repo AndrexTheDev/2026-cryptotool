@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-15 — Wave 8: Passkey-Portabilität (FIDO CXF) + ERC-7715-Umbenennung
+
+- **PasskeyContinuity**: Fuenfter Checklisten-Punkt `portability` — unterstuetzt der Credential-Manager einen Export? Kontext: FIDO CXF 1.0 (Credential Exchange Format) ist seit 14.08.2025 Proposed Standard (Errata 09.03.2026), das Transport-Protokoll CXP jedoch weiter Working Draft vom 03.10.2024 — halbe Portabilitaet: Export-Format genormt, Transport nicht. Beide Quellenlagen (FIDO-Spec-Directory, unabhaengige Analyse 07/2026) dokumentiert.
+- **X402PaywallGuard**: ERC-7715-Methodenumbenennung im Draft beruecksichtigt — `wallet_requestExecutionPermissions` (Draft-Stand 09/2026) neben historischem `wallet_grantPermissions` (MetaMask-Referenzimlementierung Delegation Toolkit) im UI benannt. Hinweis: die zurueckgegebene Permission ist massgeblich, nicht die Anfrage (Draft-Regel).
+- Demo-Regression: 113 Checks.
+
 ## 2026-11-15 — Wave 7: ERC-7730/8176/8213-Kontext + ENSv2-Dokumentation
 
 - **STVA**: Clear-Signing-Hinweise auf aktuellen Stand — ERC-7730-Deskriptoren seit 12.05.2026 aus dem EF-gehosteten, frei spiegelbaren Registry (clearsigning.org) nach Uebergabe von Ledger an die Trillion-Dollar-Security-Initiative; ERC-8176-Attestierungen fuer Deskriptor-Audits genannt. Der vom Tool berechnete Calldata-Fingerprint wird explizit als ERC-8213-Digest-Fallback eingeordnet.

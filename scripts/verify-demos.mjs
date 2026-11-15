@@ -402,10 +402,20 @@ function extractConst(src, name, kind) {
   ok(src.includes('lookupSafeSingleton'), 'M11: Registry-Abgleich im STVA-Report verdrahtet');
   ok(src.includes('clearsigning.org') && src.includes('ERC-8176'), 'M11: EF-Registry + Attestierungs-Standard im Deskriptor-Hinweis');
   ok(src.includes('ERC-8213-Calldata-Digest-Fallback'), 'M11: ERC-8213-Digest-Fallback beim Fingerprint benannt');
+  const x4 = readFileSync('src/components/tools/X402PaywallGuard.tsx', 'utf8');
+  ok(x4.includes('wallet_requestExecutionPermissions'), 'M01: ERC-7715 Methoden-Umbenennung (Draft 09/2026) dokumentiert');
   const bw = readFileSync('src/components/tools/BundleWatchEns.tsx', 'utf8');
   ok(bw.includes('ENSv2'), 'M10: BundleWatch dokumentiert ENSv2-Migrationskontext');
   const ensSrc = readFileSync('src/lib/ens.ts', 'utf8');
   ok(ensSrc.includes('0xeeeeeeee14d718c2b47d9923deab1335e144eeee'), 'M10: Universal-Resolver-Adresse unveraendert kanonisch');
+}
+
+// ---------------------------------------------------------------- M04: Passkey-Continuity-Checkliste (CXF/CXP Laufzeitstand)
+{
+  const src = readFileSync('src/components/tools/PasskeyContinuity.tsx', 'utf8');
+  ok(src.includes("id: 'portability'") && src.includes('CXF 1.0'), 'M04: Portabilitaets-Check (FIDO CXF) in Checkliste');
+  const cl = src.match(/const CHECKLIST = \[([\s\S]*?)\];/)?.[1] ?? '';
+  ok((cl.match(/id: '/g) ?? []).length === 5, `M04: exakt 5 Checklisten-Items im CHECKLIST-Array (${(cl.match(/id: '/g) ?? []).length})`);
 }
 
 // ---------------------------------------------------------------- contenthash Vektoren vs. Referenz-Implementierungen
