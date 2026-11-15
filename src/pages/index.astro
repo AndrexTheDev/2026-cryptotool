@@ -25,11 +25,42 @@ const faq = [
   },
 ];
 
+const SITE_URL = import.meta.env.SITE ?? 'https://suite.andrexthe.dev';
 const faqLd = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
   mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
 };
+const siteLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'AndrexTheDev — Web3 Security & Forensics Suite',
+    url: SITE_URL,
+    inLanguage: ['de', 'en'],
+    author: { '@type': 'Person', name: 'AndrexTheDev', email: 'hippie.highho@gmail.com' },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'AndrexTheDev',
+    email: 'hippie.highho@gmail.com',
+    url: SITE_URL,
+    jobTitle: 'Independent Web3 Security Tooling',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Web3 Security & Forensics Suite',
+    applicationCategory: 'SecurityApplication',
+    operatingSystem: 'Web Browser',
+    url: SITE_URL,
+    description: 'Zehn lokale Web3-, Bitcoin- und Compliance-Werkzeuge — vollstaendig clientseitig, ohne Signup.',
+    author: { '@type': 'Person', name: 'AndrexTheDev', email: 'hippie.highho@gmail.com' },
+    isAccessibleForFree: true,
+    usageInfo: 'Keine Konten, keine Preise; freiwillige On-Chain-Unterstuetzung.',
+  },
+];
 
 const comparisons = [
   { davor: 'Delegations kontrollieren unbekannte, unbegrenzte Ziele', danach: '7702-SlotGuard listet Delegate, Scope und Risiko in Minuten' },
@@ -73,7 +104,7 @@ const steps = [
   title="Web3 Security Toolkit 2026 — 10 lokale Prüfwerkzeuge"
   description="Zehn lokale Web3-, Bitcoin- und Compliance-Werkzeuge: EIP-7702, DAC8, BIP-322, Passkeys, x402, Intents, Privacy — im Browser, ohne Signup."
   path="/"
-  jsonLd={faqLd}
+  jsonLd={[faqLd, ...siteLd]}
 >
   <!-- Hero -->
   <section class="relative overflow-hidden">
