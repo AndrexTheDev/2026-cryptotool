@@ -412,6 +412,15 @@ function extractConst(src, name, kind) {
 
 // ---------------------------------------------------------------- M04: Passkey-Continuity-Checkliste (CXF/CXP Laufzeitstand)
 {
+  // Hygiene: content-hash/multiformats sind Referenz-Pakete fuer Vektorverifikation,
+  // duerfen aber NICHT in den Projekt-Dependencies landen (Wave-5-Vorfall 641b898).
+  const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+  const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
+  ok(!('content-hash' in allDeps) && !('multiformats' in allDeps), 'HYGIENE: Referenz-Pakete (content-hash/multiformats) nicht als Projekt-Dep');
+  ok(Object.keys(allDeps).length <= 26, `HYGIENE: Dep-Anzahl gedeckelt (${Object.keys(allDeps).length} <= 26)`);
+}
+
+{
   const src = readFileSync('src/components/tools/PasskeyContinuity.tsx', 'utf8');
   ok(src.includes("id: 'portability'") && src.includes('CXF 1.0'), 'M04: Portabilitaets-Check (FIDO CXF) in Checkliste');
   const cl = src.match(/const CHECKLIST = \[([\s\S]*?)\];/)?.[1] ?? '';

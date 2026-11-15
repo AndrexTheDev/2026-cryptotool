@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-15 — Wave 9: Dependency-Hygiene & Currency-Audit
+
+- **Fix (Session-Eigenbefund):** Wave-5-Commit 641b898 hatte die Referenz-Pakete `content-hash`/`multiformats` versehentlich als Produktions-Dependencies eingetragen (Scratch-Install-Seiteneffekt). Nichts importierte sie; beide entfernt, Lockfile neu. Hygiene-Lock-in in verify-demos: eben diese Pakete duerfen nie Projekt-Deps werden + Obergrenze 26 Deps.
+- **Currency-Audit (npm, 15.11.2026):** 17/19 Deps aktuell (darunter viem 2.57.20, age-encryption 0.3.1, @noble/@scure 2.4.x, bip322-js 4.0.1). Bewusst NICHT geschwenkte Majors, je mit Begruendung:
+  - `astro` 6.4.8 (7.4.12 draussen): Major-Sprung erfordert Migrationsreview (Integration-Vertraege React/Sitemap, Vite-8-Paarung) — kein Blindbump in einer Audit-Toolchain.
+  - `@astrojs/react` 6.0.6 und `vite` 7.3.8: folgen der Astro-6/7-Paarung.
+  - `typescript` 5.9.3 (7.0.2 draussen): TS7 ist der native Port (Go) mit geaendertem Build/Tooling-Verhalten — erst nach Astro-7-Aufzug bewerten.
+  - `@astrojs/sitemap` ^3.6.0 resolved bereits auf 3.7.5 (Caret-Range nutzt Patch/Minor automatisch).
+
 ## 2026-11-15 — Wave 8: Passkey-Portabilität (FIDO CXF) + ERC-7715-Umbenennung
 
 - **PasskeyContinuity**: Fuenfter Checklisten-Punkt `portability` — unterstuetzt der Credential-Manager einen Export? Kontext: FIDO CXF 1.0 (Credential Exchange Format) ist seit 14.08.2025 Proposed Standard (Errata 09.03.2026), das Transport-Protokoll CXP jedoch weiter Working Draft vom 03.10.2024 — halbe Portabilitaet: Export-Format genormt, Transport nicht. Beide Quellenlagen (FIDO-Spec-Directory, unabhaengige Analyse 07/2026) dokumentiert.
