@@ -212,6 +212,12 @@ function extractConst(src, name, kind) {
     const dec = await decodeUpgradeCalldata(demoCall);
     ok(dec && dec.functionName, `M02 STVA: Decodiert als ${dec?.functionName ?? 'null'}`);
     ok(dec?.args && Object.keys(dec.args).length >= 1, 'M02: Argumente benannt dekodiert');
+    const { lookupSafeSingleton } = await import('../src/lib/stva.ts');
+    const implInDemo = String(dec?.args?.newImplementation ?? dec?.args?.implementation ?? '');
+    ok(
+      !!lookupSafeSingleton(implInDemo),
+      'M02: Demo zielt auf kanonisches Safe-Singleton (Registry-Pfad im Demo-Flow abgedeckt)'
+    );
   }
 }
 
@@ -324,13 +330,44 @@ function extractConst(src, name, kind) {
   ok(src.includes('0xd80b2cbd5dc420e00122d9f598731e3834f5d98a280dd183b5a3801dc1f2e967'), 'M06: IgnoredInitCode-Topic (v0.9)');
 }
 
-// ---------------------------------------------------------------- contenthash IPNS
+// ---------------------------------------------------------------- M11: Safe-Singleton-Registry (safe-deployments, kanonisch)
+{
+  const { lookupSafeSingleton, SAFE_SINGLETONS } = await import('../src/lib/stva.ts');
+  const v150 = lookupSafeSingleton('0xFf51A5898e281Db6DfC7855790607438dF2ca44b');
+  ok(v150?.version === '1.5.0' && v150.variant === 'Safe', 'M11: Safe v1.5.0 canonical erkannt');
+  const l2_150 = lookupSafeSingleton('0xEdd160fEBBD92E350D4D398fb636302fccd67C7e');
+  ok(l2_150?.version === '1.5.0' && l2_150.variant === 'SafeL2', 'M11: SafeL2 v1.5.0 canonical erkannt');
+  const l2_141 = lookupSafeSingleton('0x29fcB43b46531BcA003ddC8FCB67FFE91900C762'); // Grossschreibung → Normalisierung testen
+  ok(l2_141?.version === '1.4.1' && l2_141.variant === 'SafeL2', 'M11: SafeL2 v1.4.1 case-insensitiv erkannt');
+  const mig = lookupSafeSingleton('0x6439e7ABD8Bb915A5263094784C5CF561c4172AC');
+  ok(mig?.variant === 'SafeMigration' && mig.version === '1.5.0', 'M11: SafeMigration v1.5.0 erkannt');
+  ok(lookupSafeSingleton('0x000000000000000000000000000000000000dead') === undefined, 'M11: unbekannte Adresse → undefined');
+  ok(Object.keys(SAFE_SINGLETONS).length === 9, 'M11: Registry enthaelt exakt 9 kanonische Eintraege');
+  const src = readFileSync('src/components/tools/StvaUpgradeDiff.tsx', 'utf8');
+  ok(src.includes('lookupSafeSingleton'), 'M11: Registry-Abgleich im STVA-Report verdrahtet');
+}
+
+// ---------------------------------------------------------------- contenthash Vektoren vs. Referenz-Implementierungen
+// Referenzen: multiformats CID.decode().toV1().toString(base32) bzw. content-hash.decode()
+// (Beide offiziell gegen den EIP-Vektor verifiziert — Regression gegen Varint-Bug-klasse
+// walletbeat#1330: Proto-Codec 0xe3 ist ein uvarint ('e3 01'), kein Einzelbyte.)
 {
   const { decodeContenthash } = await import('../src/lib/contenthash.ts');
-  // IPNS-Beispiel: 0xe5 01 + libp2p-key cidv1 (36 B)
-  const ipnsHex = '0xe5010172122055555555555555555555555555555555555555555555555555555555555555aaaa';
-  const dec = decodeContenthash(ipnsHex);
-  ok(dec.kind === 'ipns' || dec.kind === 'unknown', `M10: IPNS-contenthash erkannt (${dec.kind})`);
+  // 1) EIP-1577-Spezifikationsvektor (CIDv1, dag-pb, sha2-256)
+  const eip = decodeContenthash('e3010170122029f2d17be6139079dc48696d1f582a8530eb9805b561eda517e22a892c7e3f1f');
+  ok(
+    eip.kind === 'ipfs' && eip.cid === 'bafybeibj6lixxzqtsb45ysdjnupvqkufgdvzqbnvmhw2kf7cfkesy7r7d4',
+    'M10: EIP-1577-Spezifikationsvektor → exakter CIDv1-base32 (multiformats-Referenz)'
+  );
+  // 2) CIDv0-Multihash direkt hinter dem Codec: content-hash-Paket dekodiert auf QmbFMk…
+  const v0 = decodeContenthash('e301' + '1220' + 'bfccda787baba32b59c78450ac3d20b633360b25192c73e135fd8d4dcc864d05');
+  ok(
+    v0.kind === 'ipfs' && v0.cid === 'QmbFMke1KXqnYyBBWxB74N4c5SBnFp9EZAvPw6CNv8xQDi',
+    'M10: CIDv0-contenthash → exakter Qm…-String (content-hash-Referenz)'
+  );
+  // 3) IPNS-namespace (libp2p-key)
+  const ipns = decodeContenthash('0xe501017212205555555555555555555555555555555555555555555555555555555555555555');
+  ok(ipns.kind === 'ipns' && ipns.cid.length > 10, `M10: IPNS-contenthash erkannt (${ipns.kind})`);
 }
 
 // ---------------------------------------------------------------- Safe-TxHash Deterministik

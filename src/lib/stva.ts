@@ -249,3 +249,31 @@ export async function eip712HashJson(typedDataJson: string): Promise<{ domainSep
     return null;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Kanonische Safe-Singleton-Registry (Quelle: safe-global/safe-deployments,
+// Stand 2026-11; v1.5.0 seit 03.07.2025 onchain, seit 09/2026 offiziell als
+// Upgrade-Empfehlung in Safe{Wallet}).
+// Adressen sind lowercase-normalisiert abzulegen (Summenpruefung via Pruefsumme
+// im Upstream-Repo).
+export interface SafeSingleton {
+  version: string;
+  variant: 'Safe' | 'SafeL2' | 'SafeMigration';
+  deployment: 'canonical' | 'eip155' | 'zksync';
+}
+
+export const SAFE_SINGLETONS: Record<string, SafeSingleton> = {
+  '0xd9db270c1b5e3bd161e8c8503c55ceabee709552': { version: '1.3.0', variant: 'Safe', deployment: 'canonical' },
+  '0x69f4d1788e39c87893c980c06edf4b7f686e2938': { version: '1.3.0', variant: 'Safe', deployment: 'eip155' },
+  '0x3e5c63644e683549055b9be8653de26e0b4cd36e': { version: '1.3.0', variant: 'SafeL2', deployment: 'canonical' },
+  '0xfb1bffc9d739b8d520daf37df666da4c687191ea': { version: '1.3.0', variant: 'SafeL2', deployment: 'eip155' },
+  '0x41675c099f32341bf84bfc5382af534df5c7461a': { version: '1.4.1', variant: 'Safe', deployment: 'canonical' },
+  '0x29fcb43b46531bca003ddc8fcb67ffe91900c762': { version: '1.4.1', variant: 'SafeL2', deployment: 'canonical' },
+  '0xff51a5898e281db6dfc7855790607438df2ca44b': { version: '1.5.0', variant: 'Safe', deployment: 'canonical' },
+  '0xedd160febbd92e350d4d398fb636302fccd67c7e': { version: '1.5.0', variant: 'SafeL2', deployment: 'canonical' },
+  '0x6439e7abd8bb915a5263094784c5cf561c4172ac': { version: '1.5.0', variant: 'SafeMigration', deployment: 'canonical' },
+};
+
+export function lookupSafeSingleton(address: string): SafeSingleton | undefined {
+  return SAFE_SINGLETONS[address.toLowerCase()];
+}

@@ -21,8 +21,10 @@ import {
   computeSafeTxHash,
   decodeUpgradeCalldata,
   eip712HashJson,
+  lookupSafeSingleton,
   parseSafeExport,
   type DecodedCall,
+  type SafeSingleton,
 } from '../../lib/stva';
 
 interface ImplInfo {
@@ -40,6 +42,7 @@ interface StvaReport {
   fingerprints: { calldataDigest?: string; eip712?: { domainSeparator: string; messageHash: string; digest: string }; safeTxHash?: string };
   oldImpl?: ImplInfo;
   newImpl?: ImplInfo;
+  singletonCheck?: SafeSingleton | null;
   snapshot?: { blockNumber: number; blockHash: string };
   diffNotes: string[];
   signingTime: string[];
@@ -50,7 +53,7 @@ interface StvaReport {
 }
 
 const DEMO_CALLDATA =
-  '0x4f1ef2860000000000000000000000008ba1f109551bd432803012645ac136ddd64dba7200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000';
+  '0x4f1ef286000000000000000000000000edd160febbd92e350d4d398fb636302fccd67c7e00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000';
 const DEMO_SAFE = JSON.stringify(
   {
     safe: '0x8Ba1f109551bD432803012645Ac136ddd64DBA72',
@@ -118,7 +121,7 @@ export default function StvaUpgradeDiff() {
   const demo = () => {
     setChainId(1);
     setProxy('0xD2046C5451980C011A2278DB7cD2A4763d0E4C8d');
-    setNewImpl('0x8ba1f109551bD432803012645Ac136ddd64DBA72');
+    setNewImpl('0xEdd160fEBBD92E350D4D398fb636302fccd67C7e');
     setCalldata(DEMO_CALLDATA);
     setSafeJson(DEMO_SAFE);
     setTypedJson('');
@@ -166,7 +169,12 @@ export default function StvaUpgradeDiff() {
 
       // Ziel-Implementierung aus Calldata ableiten, wenn moeglich
       const decArgs = decoded?.args as Record<string, unknown> | undefined;
-      const implArg = (decArgs?.newImplementation as string) || newImpl.trim();
+      const implArg =
+        (decArgs?.newImplementation as string) ||
+        (decArgs?.implementation as string) ||
+        (decArgs?.masterCopy as string) ||
+        (decArgs?.singleton as string) ||
+        newImpl.trim();
       const nestedData = (decArgs?.data as string) || '';
 
       const fetchImpl = async (addr: string): Promise<ImplInfo> => {
@@ -212,6 +220,23 @@ export default function StvaUpgradeDiff() {
 
       if (isHexAddress(implArg)) rep.newImpl = await fetchImpl(implArg);
       rep.diffNotes = diffImpls(rep.oldImpl, rep.newImpl);
+
+      // Registry-Abgleich: ist das Ziel ein kanonisches Safe-Singleton?
+      rep.singletonCheck = isHexAddress(implArg) ? lookupSafeSingleton(implArg) ?? null : null;
+      if (rep.singletonCheck) {
+        const sc = rep.singletonCheck;
+        rep.diffNotes.push(
+          `Registry-Treffer: Ziel ist Safe ${sc.variant} v${sc.version} (${sc.deployment}) — kanonische Adresse aus safe-global/safe-deployments.`,
+        );
+        if (sc.version !== '1.5.0')
+          rep.assumptions.push(
+            `Ziel-Singleton v${sc.version}: Safe empfiehlt seit 09/2026 den Umstieg auf v1.5.0 (Module-Guard-Pflicht, Fehler-Rueckgabe bei fehlgeschlagenen Transaktionen, ERC-1271-Aktualisierung).`,
+          );
+      } else if (isHexAddress(implArg)) {
+        rep.assumptions.push(
+          'Ziel-Implementierung ist KEINE kanonische safe-deployments-Adresse — Supply-Chain-Risiko: Bytecode und Quellcode unabhaengig verifizieren (Explorer-Verifizierung, Deterministic-Deployment-Nachweis).',
+        );
+      }
 
       // ------ Normative STVA-Dreiteilung ------
       const target = rep.proxy || implArg;
@@ -473,6 +498,21 @@ export default function StvaUpgradeDiff() {
                   </thead>
                   <tbody>
                     <tr><td>Adresse</td><td className="mono text-xs break-all">{shortHex(report.oldImpl?.address ?? '—', 12, 8)}</td><td className="mono text-xs break-all">{shortHex(report.newImpl?.address ?? '—', 12, 8)}</td></tr>
+                    {report.singletonCheck !== undefined && (
+                      <tr>
+                        <td>Registry</td>
+                        <td>—</td>
+                        <td>
+                          {report.singletonCheck ? (
+                            <span className="badge badge-green">
+                              Safe {report.singletonCheck.variant} v{report.singletonCheck.version} · {report.singletonCheck.deployment}
+                            </span>
+                          ) : (
+                            <span className="badge badge-amber">kein kanonisches Singleton</span>
+                          )}
+                        </td>
+                      </tr>
+                    )}
                     <tr><td>Code-Hash</td><td className="mono text-xs break-all">{shortHex(report.oldImpl?.codeHash ?? '—', 12, 8)}</td><td className="mono text-xs break-all">{shortHex(report.newImpl?.codeHash ?? '—', 12, 8)}</td></tr>
                     <tr><td>Groesse</td><td>{report.oldImpl?.sizeBytes ?? '—'} B</td><td>{report.newImpl?.sizeBytes ?? '—'} B</td></tr>
                     <tr>

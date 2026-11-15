@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-15 — Wave 5: Safe v1.5.0-Registry + Contenthash-Referenzvektoren
+
+- **STVA (Safe Upgrade Diff)**: Kanonische Safe-Singleton-Registry aus `safe-global/safe-deployments` eingebettet — v1.3.0 (canonical/eip155), v1.4.1, v1.5.0 inkl. SafeL2- und SafeMigration-Varianten (9 Adressen, upstream verifiziert). Ziel-Implementierungen von Upgrade-Transaktionen werden gegen die Registry geprueft: Treffer mit Version-Badge, Nicht-Treffer mit Supply-Chain-Warnung in den Annahmen. Bei erkanntem Singleton < v1.5.0 Hinweis auf die offizielle Upgrade-Empfehlung (Safe-Blog 22.09.2026: Module-Guard-Pflicht, Fehler-Rueckgabe, ERC-1271).
+- Demo-Flow zielt jetzt realistisch auf SafeL2 v1.5.0; Argument-Namen `implementation`/`masterCopy`/`singleton` werden neben `newImplementation` aufgeloest.
+- **Contenthash-Regression auf Spezifikationsvektoren gehärtet**: EIP-1577-Beispielvektor und CIDv0-Pfad werden exakt gegen multiformats- bzw. content-hash-Referenzausgaben geprueft (`bafybeibj6…r7d4`, `QmbFMke1…xQDi`). Deckt die Varint-Verwechslung der Bug-Klasse walletbeat#1330 ab.
+- age-encryption 0.3.1 gegen npm bestaetigt (aktuell, kein Handlungsbedarf).
+- Demo-Regression: 94 Checks.
+
 ## 2026-11-15 — Wave 4: ERC-4337 v0.8/v0.9 (UserOp-Autopsy)
 
 - EntryPoint-Erkennung fuer alle vier kanonischen Singletons (v0.6 `0x5FF13…d2789`, v0.7 `0x0000…da032`, v0.8 `0x4337084D…Ff108`, v0.9 `0x43370900…D8d009`); Version-Badge pro Transaktion.
