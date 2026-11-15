@@ -139,10 +139,23 @@ function extractConst(src, name, kind) {
   // @x402/core 2.22.x muss 3 Befunde triggern (CRIT-1, CRIT-3, CORE-2026-09)
   const findings = scanDependencies([{ name: '@x402/core', version: '2.22.5', ecosystem: 'npm' }]);
   const ids = findings.map((f) => f.advisory.id).sort();
-  ok(ids.join(',') === 'V12-2026-CRIT-1,V12-2026-CRIT-3,X402-CORE-2026-09', `x402: core 2.22.5 -> ${ids.length} Advisories (${ids.join('|')})`);
-  // @x402/extensions 2.28.0: PT-2026-118463 (below 2.28.1) aber nicht CRIT-3
+  ok(
+    ids.join(',') === 'V12-2026-CRIT-1,V12-2026-CRIT-3,X402-CORE-2026-09,X402-CORE-2026-10,X402-CORE-2026-11',
+    `x402: core 2.22.5 -> ${ids.length} Advisories (${ids.join('|')})`
+  );
+  // @x402/extensions 2.28.0: PT-2026-118463 (below 2.28.1) + zod/DoS-Caps 2026-10 (below 2.29.0)
   const ext = scanDependencies([{ name: '@x402/extensions', version: '2.28.0', ecosystem: 'npm' }]);
-  ok(ext.length === 1 && ext[0].advisory.id === 'PT-2026-118463', 'x402: extensions 2.28.0 -> nur PT-2026-118463');
+  ok(
+    ext.map((f) => f.advisory.id).join(',') === 'X402-CORE-2026-10,PT-2026-118463',
+    'x402: extensions 2.28.0 -> CORE-2026-10 + PT-2026-118463 (Reihenfolge = Matrix-Order)'
+  );
+  // Schwellen-Nachweis der 2026-10/11-Wellen: 2.29.0 heilt nur 2026-10, 2.30.0 heilt beide
+  const c229 = scanDependencies([{ name: '@x402/core', version: '2.29.0', ecosystem: 'npm' }]).map((f) => f.advisory.id);
+  ok(c229.join(',') === 'X402-CORE-2026-11', `x402: core 2.29.0 -> nur AfterSettle-Isolation (${c229.join('|') || 'leer'})`);
+  ok(
+    scanDependencies([{ name: '@x402/core', version: '2.31.0', ecosystem: 'npm' }]).length === 0,
+    'x402: core 2.31.0 (aktueller Stand 11/2026) -> keine npm-Advisories'
+  );
   // svm 2.22.0 -> CRIT-2 ; py 2.25.0 -> PT-2026-118463-PY ; go 2.27.0 -> PT-2026-118463-GO
   ok(scanDependencies([{ name: '@x402/svm', version: '2.22.0', ecosystem: 'npm' }])[0]?.advisory.id === 'V12-2026-CRIT-2', 'x402: svm 2.22.0 -> CRIT-2');
   ok(scanDependencies([{ name: 'x402', version: '2.25.0', ecosystem: 'pip' }])[0]?.advisory.id === 'PT-2026-118463-PY', 'x402: py 2.25.0 -> PT-PY');

@@ -61,6 +61,24 @@ export const X402_ADVISORIES: Advisory[] = [
     summary: 'Separater Payment-Bypass im HTTP-Resource-Server von @x402/core. Fix: 2.27.0 (22.09.2026).',
   },
   {
+    id: 'X402-CORE-2026-10',
+    ecosystem: 'npm',
+    match: (n) => /^@x402\/(core|fetch|axios|extensions)$/.test(n),
+    belowVersion: '2.29.0',
+    severity: 'high',
+    summary:
+      'Transitivabhaengigkeit zod 3.x mit GHSA-mrhx-c7xc-m3w5 (CVE-2023-54404); erst 2.29.0 nutzt zod >= 4.6.6 und deckelt accepts/discovery/SIWX-Listen auf 1024 Eintraege sowie Facilitator-Antworten auf 1 MiB (Speicher-DoS). Fix: 2.29.0 (10/2026).',
+  },
+  {
+    id: 'X402-CORE-2026-11',
+    ecosystem: 'npm',
+    match: (n) => /^@x402\/core$/.test(n),
+    belowVersion: '2.30.0',
+    severity: 'high',
+    summary:
+      'Advisory-Hook-Isolation: ein werfender afterSettle-Hook liess settle() ablehnen, obwohl die onchain-Settlement bereits final ausgefuehrt war (Zahlung vollzogen, Server meldet Fehler). Fix: 2.30.0 (Fehler werden geloggt/uebersprungen; Gate-Hooks bleiben fail-closed).',
+  },
+  {
     id: 'PT-2026-118463',
     ecosystem: 'npm',
     match: (n) => /^@x402\/extensions$/.test(n),

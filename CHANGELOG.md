@@ -6,6 +6,12 @@
 - **BundleWatch**: ENSv2-Migrationskontext dokumentiert (Universal-Resolver ist DAO-eigener Proxy unter 0xeEeEEEeE…E144EeEe; Sepolia laeuft seit 08/2026 auf v2, Mainnet bei Aktivierung — Abfrage bleibt kompatibel). Resolver-Adresse gegen ENS-Docs verifiziert (unveraendert).
 - Demo-Regression: 108 Checks (inkl. String-Lock-ins fuer ERC-8176/8213/ENSv2-Hinweise).
 
+### Nachtrag: x402-Advisory-Matrix auf Stand 11/2026 (2.31.0)
+
+- **X402-CORE-2026-10** (high, < 2.29.0): zod-3.x-Transitivabhaengigkeit enthaelt GHSA-mrhx-c7xc-m3w5 (CVE-2023-54404) — es gibt kein gepatchtes zod 3.x; 2.29.0 geht auf zod >= 4.6.6 und deckelt zugleich accepts/discovery/SIWX-Listen auf 1024 Eintraege sowie Facilitator-Antworten auf 1 MiB (Speicher-DoS). Match auf core/fetch/axios/extensions.
+- **X402-CORE-2026-11** (high, < 2.30.0): AfterSettle-Hook-Isolation — ein werfender afterSettle-Hook liess settle() ablehnen, obwohl das Settlement onchain bereits final war (Zahlung vollzogen, Server meldet Fehler). Gate-Hooks bleiben fail-closed.
+- Lock-ins aktualisiert: core 2.22.5 -> 5 Advisories; extensions 2.28.0 -> CORE-2026-10 + PT-2026-118463; core 2.29.0 -> nur CORE-2026-11; core 2.31.0 (Aktuellstand) -> keine npm-Advisories. 110 Checks insgesamt.
+
 ## 2026-11-15 — Wave 6: BIP-322 „Complete“ (v1.0.0/v2.0.0) in DAC8-SelfProof
 
 - **BIP-322 Finale beruecksichtigt**: Der BIP wurde am 15.04.2026 auf „Complete“ gehoben — mit Breaking Changes: menschenlesbare Praefixe `smp`/`ful`/`pof`, direkt dem Base64 vorangestellt (kein Trennzeichen), Backward-Compat-Klausel (ohne Praefix = simple). bip322-js 4.0.1 versteht die Praefixe nicht; Erkennung + Abstreifen jetzt in `lib/bip322.ts` (`classifyBip322Signature`).
