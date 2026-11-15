@@ -56,7 +56,7 @@ export const TOOLS: ToolDef[] = [
     category: 'smart-account',
     audiences: ['multisig', 'coldwallet'],
     seoTitle: 'EIP-7702 Delegation pruefen: 7702-SlotGuard',
-    seoDesc: 'EIP-7702-Delegationen erkennen, Storage-Kollisionen beim Delegate-Wechsel pruefen und ein verschluesseltes Panic-Revoke-Notfallpaket erzeugen. Lokal im Browser.',
+    seoDesc: 'EIP-7702-Delegationen erkennen, Storage-Kollisionen pruefen und ein verschluesseltes Panic-Revoke-Notfallpaket erzeugen — lokal im Browser.',
   },
   {
     id: 2,
@@ -69,7 +69,7 @@ export const TOOLS: ToolDef[] = [
     category: 'smart-account',
     audiences: ['multisig', 'builder'],
     seoTitle: 'Proxy-Upgrade pruefen vor der Signatur: STVA-UpgradeDiff',
-    seoDesc: 'STVA-konforme Drei-Ebenen-Verifizierung fuer Multisig- und Proxy-Upgrades: Signatur-Absicht, Ausfuehrungs-Effekt und Annahmen mit Block-Snapshot. Clientseitig.',
+    seoDesc: 'Drei-Ebenen-Verifizierung fuer Multisig- und Proxy-Upgrades: Signatur-Absicht, Ausfuehrungs-Effekt und Annahmen mit Block-Snapshot — clientseitig.',
   },
   {
     id: 3,
@@ -82,7 +82,7 @@ export const TOOLS: ToolDef[] = [
     category: 'bitcoin-compliance',
     audiences: ['coldwallet', 'multisig'],
     seoTitle: 'DAC8 Eigenübertrag nachweisen: DAC8-SelfProof',
-    seoDesc: 'Datensparsamer Eigentums- und Eigenübertragsnachweis fuer DAC8 und Travel Rule: BIP-322, EIP-191/712 und ERC-1271 lokal pruefen, druckfertiges Dossier exportieren.',
+    seoDesc: 'Eigentums- und Eigenuebertragsnachweis fuer DAC8: BIP-322, EIP-191/712 und ERC-1271 lokal pruefen, druckfertiges Dossier exportieren.',
   },
   {
     id: 4,
@@ -95,7 +95,7 @@ export const TOOLS: ToolDef[] = [
     category: 'bitcoin-compliance',
     audiences: ['coldwallet'],
     seoTitle: 'Miniscript Tresor Stress-Test: BitVault-Stress',
-    seoDesc: 'Bitcoin-Miniscript-Tresore und Erbschaftskonzepte pruefen: vByte-Gewichte, Dust-Klippe (Bitcoin-Core), Gebuehren-Heatmap, Konsolidierungsrechner und Erben-Uebungsdatei.',
+    seoDesc: 'Bitcoin-Miniscript-Tresore und Erbschaftskonzepte pruefen: vByte-Gewichte, Dust-Klippe, Gebuehren-Heatmap und Erben-Uebungsdatei — lokal.',
   },
   {
     id: 5,
@@ -108,7 +108,7 @@ export const TOOLS: ToolDef[] = [
     category: 'smart-account',
     audiences: ['multisig', 'builder'],
     seoTitle: 'Passkey Smart Account Multi-Chain pruefen',
-    seoDesc: 'WebAuthn-/P-256-Smart-Accounts multi-chain testen: RIP-7212-Precompile-Erkennung mit echtem 160-Byte-Testvektor, Malleability-Check und Recovery-Scorecard.',
+    seoDesc: 'WebAuthn-/P-256-Smart-Accounts multi-chain testen: RIP-7212-Erkennung mit 160-Byte-Testvektor, Malleability-Check und Recovery-Scorecard.',
   },
   {
     id: 6,
@@ -121,7 +121,7 @@ export const TOOLS: ToolDef[] = [
     category: 'agents-intents-privacy',
     audiences: ['builder', 'multisig'],
     seoTitle: 'ERC-4337 Gebuehren analysieren: UserOp-Autopsy',
-    seoDesc: 'Forensische Gebuehrenanalyse fuer Account Abstraction: Bundler-Marge, Gaspreis-Aufschlag und Paymaster-Token-Spread aus Receipts und EntryPoint-Logs berechnen.',
+    seoDesc: 'Gebuehren-Forensik fuer Account Abstraction: Bundler-Marge, Gaspreis-Aufschlag und Paymaster-Token-Spread aus Receipts und EntryPoint-Logs.',
   },
   {
     id: 7,
@@ -134,7 +134,7 @@ export const TOOLS: ToolDef[] = [
     category: 'agents-intents-privacy',
     audiences: ['builder'],
     seoTitle: 'x402 Agentenzahlungen auditieren: x402-PaywallGuard',
-    seoDesc: 'Sicherheits-Auditor fuer HTTP-402-Agentenzahlungen: Schwachstellen-Check, SIWX-Pattern-Scanner, ERC-7715-Policy-Radar und Delivery-Abgleich. Lokal im Browser.',
+    seoDesc: 'Auditor fuer HTTP-402-Agentenzahlungen: Schwachstellen-Check, SIWX-Pattern-Scanner, ERC-7715-Policy-Radar, Delivery-Abgleich — lokal.',
   },
   {
     id: 8,
@@ -147,7 +147,7 @@ export const TOOLS: ToolDef[] = [
     category: 'agents-intents-privacy',
     audiences: ['builder'],
     seoTitle: 'ERC-7683 Intents dekodieren: IntentLens-7683',
-    seoDesc: 'Cross-Chain-Intents (ERC-7683) herstellerunabhaengig dekodieren: Solver-Spread berechnen, Deadline-Status pruefen und Refund-Calldata zum Selbstabsenden erzeugen.',
+    seoDesc: 'Cross-Chain-Intents (ERC-7683) dekodieren: Solver-Spread berechnen, Deadline-Status pruefen und Refund-Calldata erzeugen — lokal.',
   },
   {
     id: 9,
@@ -160,7 +160,7 @@ export const TOOLS: ToolDef[] = [
     category: 'agents-intents-privacy',
     audiences: ['coldwallet'],
     seoTitle: 'EIP-5564 Stealth-Adressen pruefen: StealthAudit',
-    seoDesc: 'Lokaler Viewing-Key-Scanner fuer Stealth-Adressen (EIP-5564/ERC-6538): zeitlich eingegrenzter Scan im WebWorker, Zuordnungsnachweise, CSV-/JSON-Export ohne Schluessel.',
+    seoDesc: 'Viewing-Key-Scanner fuer Stealth-Adressen (EIP-5564): zeitlich eingegrenzter Scan im Worker, Zuordnungsnachweise, Export ohne Schluessel.',
   },
   {
     id: 10,
@@ -173,7 +173,7 @@ export const TOOLS: ToolDef[] = [
     category: 'agents-intents-privacy',
     audiences: ['multisig', 'builder'],
     seoTitle: 'dApp Frontend Integritaet pruefen: BundleWatch-ENS',
-    seoDesc: 'Externe Integritaetspruefung von dApp-Frontends: Skript-Hashes gegen ENS-contenthash (EIP-1577) und Release-Archive vergleichen, Governance-Ampel und Domain-Diffs.',
+    seoDesc: 'dApp-Frontend-Integritaet: Skript-Hashes gegen ENS-contenthash und Releases vergleichen — Governance-Ampel und Domain-Diffs.',
   },
 ];
 

@@ -233,3 +233,7 @@ details.acc .acc-body { padding: 0 1rem 1rem; color: var(--color-body); font-siz
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* Statische Shells (Landing/Recht, 0 KB JS): interaktive Shell-Buttons ausblenden,
+   damit keine funktionslosen Controls gerendert werden. */
+html:not(.js-shell) .js-only { display: none !important; }
