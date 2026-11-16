@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-15 — Wave 15: Konsolidierung auf dem neuen Stack
+
+- Preview-Umgebung auf Astro 7.4.1 neu gestartet (alter Prozess lief noch auf 6.4.8-node_modules): **17/17 Routen 200**, Sitemap-Index korrekt, Title/Noscript unveraendert.
+- vite-Direkt-DevDep 7.3.8 → ^8.3.8 angeglichen (Astro 7 bringt ohnehin vite 8.3.8 — jetzt ein einziger Baum, keine dedup-Parallelkopie mehr).
+- `npm outdated` Final: nur typescript 5.9.3 (< 7.0.2, Wave-9/14-Entscheidung steht) — alle bewusst.
+- Kein Funktionsdelta, daher Demo-Regression unveraendert.
+
 ## 2026-11-15 — Wave 14: npm-Audit-Sweep, Astro-Major 6 → 7, Security-Gate in verify
 
 - **Ausloeser:** `npm audit` zeigte 3 Findings — darunter **GHSA-26w7-cxv4-gfx2 (RCE über AVIF-Bildoptimierung, CVSS 9.8, range < 7.2.8)**, womit der bewusste Astro-6-Pin (Wave 9) nicht mehr tragfaehig war.
