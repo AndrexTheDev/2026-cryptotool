@@ -295,6 +295,7 @@ function extractConst(src, name, kind) {
   ok(bc.startsWith('0xef0100'), 'M01: 0xef0100-Praefix');
   const d = extract7702Delegate(bc);
   ok(d === '0x' + bc.slice(8), `M01: Delegate extrahiert (${d})`);
+  ok(d === '0x63c0c19a282a1b52b07dd5a65b58948a07dae32b', 'M01: Demo-Delegate = MetaMask-Delegator (Known-Delegates-Badge-Pfad geuebt)');
 }
 
 // ---------------------------------------------------------------- Slot-Mathe gegen bekannte Konstanten
@@ -442,6 +443,18 @@ function extractConst(src, name, kind) {
   ok(src.includes('EIP-7951') && src.includes('Fusaka') && src.includes('03.12.2025'), 'M04: EIP-7951/Fusaka-Mainnet-Kontext benannt');
   const cl = src.match(/const CHECKLIST = \[([\s\S]*?)\];/)?.[1] ?? '';
   ok((cl.match(/id: '/g) ?? []).length === 5, `M04: exakt 5 Checklisten-Items im CHECKLIST-Array (${(cl.match(/id: '/g) ?? []).length})`);
+}
+
+// ---------------------------------------------------------------- Feature↔Demo-Paritaet (alle 10 Tools)
+{
+  const { readdirSync } = await import('node:fs');
+  const files = readdirSync('src/components/tools').filter((f) => f.endsWith('.tsx'));
+  let okCount = 0;
+  for (const f of files) {
+    const t = readFileSync('src/components/tools/' + f, 'utf8');
+    if (t.includes('DemoButton') && /demo\s*=|function demo|const demo/.test(t)) okCount++;
+  }
+  ok(files.length === 10 && okCount === 10, `PARITAET: alle ${files.length} Tools haben Demo-Handler (${okCount}/${files.length})`);
 }
 
 // ---------------------------------------------------------------- HYGIENE: CI-Versionen + bekannte Delegates

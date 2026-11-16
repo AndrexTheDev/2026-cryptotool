@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-15 — Wave 17: Feature↔Demo-Paritaet
+
+- **SlotGuard-Demo** zeigt jetzt auf den MetaMask-Delegator (0x63c0c19a…E32B) → uebt den Known-Delegates-Badge-Pfad aus Wave 12 (Delegation mit Code, Label, Reset-Hinweis greifbar).
+- **Paritaets-Lock-in:** alle 10 Tools muessen DemoButton + Demo-Handler besitzen (Struktur-Assertion) — Feature-ohne-Demo-Regel verankert.
+- Demo-Regression: 126 Checks.
+
 ## 2026-11-15 — Wave 16: UserOp-Demo uebt v0.9-Pfad
 
 - Offline-Demo der UserOp-Autopsy ist jetzt ein **zwei-Receipt-Array**: v0.6-Bundle (bisher) + v0.9-Bundle auf dem v0.9-EntryPoint-Singleton inklusive `IgnoredInitCode`-Ereignis — die Wave-4-Erkennung (Versions-Badge, IgnoredInitCode-Zeile) wird im Demo-Klick direkt sichtbar statt nur latent.
