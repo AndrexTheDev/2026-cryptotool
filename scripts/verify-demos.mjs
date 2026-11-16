@@ -423,6 +423,7 @@ function extractConst(src, name, kind) {
 {
   const src = readFileSync('src/components/tools/PasskeyContinuity.tsx', 'utf8');
   ok(src.includes("id: 'portability'") && src.includes('CXF 1.0'), 'M04: Portabilitaets-Check (FIDO CXF) in Checkliste');
+  ok(src.includes('EIP-7951') && src.includes('Fusaka') && src.includes('03.12.2025'), 'M04: EIP-7951/Fusaka-Mainnet-Kontext benannt');
   const cl = src.match(/const CHECKLIST = \[([\s\S]*?)\];/)?.[1] ?? '';
   ok((cl.match(/id: '/g) ?? []).length === 5, `M04: exakt 5 Checklisten-Items im CHECKLIST-Array (${(cl.match(/id: '/g) ?? []).length})`);
 }

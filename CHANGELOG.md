@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-15 — Wave 11: EIP-7951/Fusaka-Mainnet-Kontext (PasskeyContinuity)
+
+- P256VERIFY (Precompile 0x0100) ist seit dem **Fusaka-Hardfork (03.12.2025)** konsensfähig auf dem Ethereum-Mainnet aktiv — selbe Adresse wie RIP-7212 auf Rollups. Adoptions-Referenz im Tool entsprechend zweigeteilt (Mainnet EIP-7951 vs. Rollup-RIP-7212).
+- Fachlich wichtiger Unterschied dokumentiert: EIP-7951 macht die high-S-Ablehnung (Malleability-Schutz) verbindlich; RIP-7212 ueberliess sie den Chains. Malleability-Interpretation im Kommentar entsprechend praezisiert.
+- Der Doku-Drift-Lock-in hat direkt bewiesen, dass er greift: neuer Check erhoehte die Summe auf 117 → README-Zahl wurde vom Lock-in als veraltet gemeldet und aktualisiert.
+- Demo-Regression: 117 Checks.
+
 ## 2026-11-15 — Wave 10: Doku-Drift-Eliminierung
 
 - **Drift-Lock-in (neu, selbstreferenziell):** der letzte Demo-Check prueft, dass die README exakt die aktuelle Check-Zahl nennt (inkl. seiner selbst) — Doku kann kuenftig nicht mehr hinter der Regression herhinken.
