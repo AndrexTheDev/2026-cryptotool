@@ -474,5 +474,13 @@ function extractConst(src, name, kind) {
   ok(h4 !== h1, 'M02: Nonce aendert Digest');
 }
 
+// ---------------------------------------------------------------- HYGIENE: Doku-Drift-Lock-in (letzter Check)
+{
+  // README nennt die exakte aktuelle Check-Zahl; dieser Check selbst ist inklusive.
+  const expectedTotal = checks + 1;
+  const readme = readFileSync('README.md', 'utf8');
+  ok(readme.includes(`${expectedTotal}-Check`), `HYGIENE: README nennt aktuelle Check-Zahl (${expectedTotal}-Check)`);
+}
+
 console.log(`\n${checks} Checks, ${failures} Fehlschlag/Fehlschlaege`);
 process.exit(failures ? 1 : 0);

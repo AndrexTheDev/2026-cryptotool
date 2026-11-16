@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-15 — Wave 10: Doku-Drift-Eliminierung
+
+- **Drift-Lock-in (neu, selbstreferenziell):** der letzte Demo-Check prueft, dass die README exakt die aktuelle Check-Zahl nennt (inkl. seiner selbst) — Doku kann kuenftig nicht mehr hinter der Regression herhinken.
+- README: 78-Check → 116-Check korrigiert.
+- llms.txt auf Wellen 4–9 Synchronisationsstand gebracht: x402-Matrix jetzt mit 12 Eintraegen/2.31.0-Stand (inkl. 2026-10 zod/DoS und 2026-11 afterSettle), EntryPoint v0.6–v0.9-Erkennung samt IgnoredInitCode, Safe-Singleton-Registry ab v1.5.0, BIP-322-Complete-Praefixe PoF, FIDO CXF/CXP-Reifestufen, EF-Clear-Signing-Registry (ERC-7730/8176/8213).
+
 ## 2026-11-15 — Wave 9: Dependency-Hygiene & Currency-Audit
 
 - **Fix (Session-Eigenbefund):** Wave-5-Commit 641b898 hatte die Referenz-Pakete `content-hash`/`multiformats` versehentlich als Produktions-Dependencies eingetragen (Scratch-Install-Seiteneffekt). Nichts importierte sie; beide entfernt, Lockfile neu. Hygiene-Lock-in in verify-demos: eben diese Pakete duerfen nie Projekt-Deps werden + Obergrenze 26 Deps.
