@@ -89,20 +89,25 @@ function parseReceipt(hash: string, r: Record<string, unknown>): TxAutopsy {
     if (epLabel && t0 === IGNORED_INITCODE_TOPIC) ignoredInitCode++;
     if (t0 === USEROP_EVENT_TOPIC) {
       const data = log.data.slice(2);
-      const w = [0, 1, 2, 3].map((i) => '0x' + data.slice(i * 64, (i + 1) * 64));
-      const pm = hexAddr(log.topics[3]).toLowerCase();
-      if (BigInt('0x' + log.topics[3].slice(26)) !== 0n) paymasters.add(pm);
+      const w0 = '0x' + data.slice(0, 64);
+      const w1 = '0x' + data.slice(64, 128);
+      const w2 = '0x' + data.slice(128, 192);
+      const w3 = '0x' + data.slice(192, 256);
+      const topic3 = log.topics[3] ?? '0x0';
+      const topic2 = log.topics[2] ?? '0x0';
+      const pm = hexAddr(topic3).toLowerCase();
+      if (BigInt('0x' + topic3.slice(26)) !== 0n) paymasters.add(pm);
       userOps.push({
-        sender: hexAddr(log.topics[2]),
+        sender: hexAddr(topic2),
         paymaster: pm,
-        nonce: decBig(w[0]),
-        success: BigInt(w[1]) === 1n,
-        actualGasCost: decBig(w[2]),
-        actualGasUsed: decBig(w[3]),
+        nonce: decBig(w0),
+        success: BigInt(w1) === 1n,
+        actualGasCost: decBig(w2),
+        actualGasUsed: decBig(w3),
       });
     } else if (t0 === TRANSFER_TOPIC && log.topics.length === 3 && (log.data === '0x' || log.data.length === 66)) {
-      const from = hexAddr(log.topics[1]).toLowerCase();
-      const to = hexAddr(log.topics[2]).toLowerCase();
+      const from = hexAddr(log.topics[1] ?? '0x0').toLowerCase();
+      const to = hexAddr(log.topics[2] ?? '0x0').toLowerCase();
       tokenCharges.push({ token: log.address.toLowerCase(), from, to, amount: log.data === '0x' ? 0n : BigInt(log.data) });
     }
   }

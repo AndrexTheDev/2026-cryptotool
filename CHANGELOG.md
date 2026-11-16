@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-16 — Wave 21: TypeScript-Stärke-Verdichtung umgesetzt
+
+- **`noUncheckedIndexedAccess` permanent aktiviert** (tsconfig). Alle gemessenen 68 Stellen (18 Dateien, Wellen 19b-Probe) behoben: Array-/Map-Indizes und Regex-Gruppen-Extraktionen in evm-utils, x402-Lockfile-Parsen (npm/go/pip), BIP-322-PoF-PSBT-Varint-Reader, Contenthash-Varint, Miniscript-Satisfaction-Gewichten, Stealth-Worker (hash-bytes), Userop-Receipt-Decoder, Donation-Wallet-Flow u. a.
+- Technik konservativ gehalten: Guards statt Non-Null-Assertions; Laufzeit-Verhalten ungeaendert — beweisbar: volle Pipeline (Build 15 Seiten, dist-Audit, Dep-Audit) plus **128/128 Demo-Checks weiter gruen** (die Check-Matrix deckt die betroffenen Parser mit exakten Referenzvektoren ab).
+- Lock-in: tsconfig muss die Option aktiv halten; Rueckfall bricht die Pipeline.
+- Auf dem neuen Branch nach Merge von PR #2 (Squash 8681fbd).
+
 ## 2026-11-15 — Wave 20: Clean-Room-Verifikation (Pre-Merge)
 
 - Reproduzierbarkeit bewiesen: alle getrackten Dateien in leeren Raum kopiert, `npm ci` ausschliesslich aus dem Lockfile → komplette Pipeline gruen (typecheck, Build 15 Seiten, dist-Audit, Dep-Audit auf critical, 128/128 Checks). Lockfile hat keinen Drift durch die Weihen-Wellen erlitten.

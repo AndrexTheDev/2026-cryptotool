@@ -69,7 +69,7 @@ const DEMO_REF = JSON.stringify(
 
 function extractDomains(text: string): string[] {
   const found = new Set<string>();
-  for (const m of text.matchAll(/https?:\/\/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g)) found.add(m[1].toLowerCase());
+  for (const m of text.matchAll(/https?:\/\/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g)) { const h = m[1]; if (h) found.add(h.toLowerCase()); }
   return [...found];
 }
 

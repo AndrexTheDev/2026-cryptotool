@@ -9,7 +9,7 @@ export default function QrCode({ value, size = 168 }: { value: string; size?: nu
       let dd = '';
       for (let y = 0; y < q.size; y++) {
         for (let x = 0; x < q.size; x++) {
-          if (q.data[y][x]) dd += `M${x},${y}h1v1h-1z `;
+          if (q.data[y]?.[x]) dd += `M${x},${y}h1v1h-1z `;
         }
       }
       return { d: dd, n: q.size };

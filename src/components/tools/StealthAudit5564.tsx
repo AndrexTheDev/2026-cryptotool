@@ -43,9 +43,9 @@ function decodeAnnouncementLog(log: { topics: string[]; data: string; blockNumbe
     const lenM = Number(BigInt('0x' + '0' + data.slice(offM * 2, offM * 2 + 64)));
     const meta = '0x' + data.slice(offM * 2 + 64, offM * 2 + 64 + lenM * 2);
     return {
-      schemeId: Number(BigInt(topics[1])),
-      stealthAddress: '0x' + topics[2].slice(-40),
-      caller: '0x' + topics[3].slice(-40),
+      schemeId: Number(BigInt(topics[1] ?? '0x0')),
+      stealthAddress: '0x' + (topics[2] ?? '0x0').slice(-40),
+      caller: '0x' + (topics[3] ?? '0x0').slice(-40),
       ephemeralPubKey: eph,
       metadata: meta,
       blockNumber: Number(BigInt(log.blockNumber)),

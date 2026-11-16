@@ -65,8 +65,8 @@ export function parseStorageDump(text: string): StorageEntry[] {
     const out: StorageEntry[] = [];
     for (const line of lines) {
       const m = line.match(/^\s*(0x[0-9a-fA-F]+|\d+)\s*[:=,;\s]\s*(0x[0-9a-fA-F]+)/);
-      if (m) {
-        const slotRaw = m[1].startsWith('0x') ? BigInt(m[1]) : BigInt(m[1]);
+      if (m && m[1] !== undefined && m[2] !== undefined) {
+        const slotRaw = BigInt(m[1]);
         out.push({ slot: '0x' + slotRaw.toString(16).padStart(64, '0'), value: m[2] });
       }
     }
@@ -77,7 +77,7 @@ export function parseStorageDump(text: string): StorageEntry[] {
 /** Statischer Bytecode-Risikoscan: SKIP PUSH-Daten und suche kritische Opcodes. */
 export function scanBytecodePatterns(code: string): { opcode: string; label: string; count: number }[] {
   const bytes = (code.startsWith('0x') ? code.slice(2) : code).toLowerCase();
-  const found = { f4: 0, ff: 0, f0: 0 } as Record<string, number>;
+  const found: { f4: number; ff: number; f0: number } = { f4: 0, ff: 0, f0: 0 };
   let i = 0;
   while (i < bytes.length / 2) {
     const b = parseInt(bytes.slice(i * 2, i * 2 + 2), 16);
@@ -94,6 +94,6 @@ export function scanBytecodePatterns(code: string): { opcode: string; label: str
     { opcode: 'DELEGATECALL (0xf4)', label: 'Delegierte Ausfuehrung fremden Codes', count: found.f4 },
     { opcode: 'SELFDESTRUCT (0xff)', label: 'Selbstzerstoerungs-Pfad vorhanden', count: found.ff },
     { opcode: 'CREATE (0xf0)', label: 'Kann neue Contracts erzeugen', count: found.f0 },
-  ];
+  ] as const;
   return out.filter((o) => o.count > 0);
 }

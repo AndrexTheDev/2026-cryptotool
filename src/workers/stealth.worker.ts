@@ -85,7 +85,7 @@ export function scanAnnouncements(
         schemeId: a.schemeId,
         stealthAddress: a.stealthAddress,
         ephemeralPubKey: a.ephemeralPubKey,
-        viewTag: '0x' + viewTag.toString(16).padStart(2, '0'),
+        viewTag: '0x' + (viewTag ?? 0).toString(16).padStart(2, '0'),
         blockNumber: a.blockNumber,
         txHash: a.txHash,
         caller: a.caller,
@@ -128,13 +128,13 @@ export function genDemo(viewingPrivHex: string, spendingPubHex: string, count = 
     if (hit) {
       const shared = ephPub.multiply(vPriv).toBytes(true);
       const h = keccak_256(shared);
-      viewTag = h[0];
+      viewTag = h[0] ?? 0;
       const hPoint = secp256k1.Point.BASE.multiply(BigInt('0x' + Array.from(h, (x) => x.toString(16).padStart(2, '0')).join('')));
       stealth = P_spend.add(hPoint);
       hits++;
     } else {
       const rnd = keccak_256(new TextEncoder().encode('noise-' + i));
-      viewTag = rnd[0];
+      viewTag = rnd[0] ?? 0;
       stealth = secp256k1.Point.BASE.multiply(scalarFromBytes(new TextEncoder().encode('noise-scalar-' + i)));
     }
     const addr = pubToAddress(stealth.toBytes(false).slice(1));

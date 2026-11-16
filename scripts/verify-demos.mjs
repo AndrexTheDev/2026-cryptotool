@@ -424,6 +424,9 @@ function extractConst(src, name, kind) {
 
 // ---------------------------------------------------------------- M04: Passkey-Continuity-Checkliste (CXF/CXP Laufzeitstand)
 {
+  const tscfg = JSON.parse(readFileSync('tsconfig.json', 'utf8'));
+  ok(tscfg.compilerOptions?.noUncheckedIndexedAccess === true, 'HYGIENE: noUncheckedIndexedAccess dauerhaft aktiv');
+
   const lic = readFileSync('LICENSE', 'utf8');
   ok(lic.startsWith('MIT License') && lic.includes('Copyright (c) 2026 AndrexTheDev'), 'HYGIENE: MIT-LICENSE vorhanden');
   const pkg2 = JSON.parse(readFileSync('package.json', 'utf8'));

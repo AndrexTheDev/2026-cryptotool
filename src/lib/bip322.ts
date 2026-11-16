@@ -158,6 +158,7 @@ export function inspectPofPsbt(payloadBase64: string): PofInspection | null {
     let off = 5;
     const readVi = (): number => {
       const b = bytes[off++];
+      if (b === undefined) throw new Error('PSBT abgeschnitten');
       if (b < 0xfd) return b;
       const dv = new DataView(bytes.buffer, bytes.byteOffset);
       if (b === 0xfd) { const v = dv.getUint16(off, true); off += 2; return v; }
@@ -174,11 +175,13 @@ export function inspectPofPsbt(payloadBase64: string): PofInspection | null {
       const value = bytes.slice(off, off + vlen);
       off += vlen;
       const keyType = key[0];
+      if (keyType === undefined) throw new Error('PSBT Key korrupt');
       out.keyTypes.push(keyType);
       if (keyType === 0x09) out.message = new TextDecoder().decode(value);
       if (keyType === 0x00) {
         // unsigned tx: version(4) + [keine segwit-marker in PSBT] + vin-count
-        out.inputs = value.length >= 5 ? value[4] : 0;
+        const vinCount = value[4];
+        out.inputs = value.length >= 5 && vinCount !== undefined ? vinCount : 0;
       }
     }
     return out;

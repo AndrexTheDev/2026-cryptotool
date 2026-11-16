@@ -167,7 +167,9 @@ export default function Dac8SelfProof() {
     const m = h.match(/verify=([A-Za-z0-9\-_]+)/);
     if (m) {
       try {
-        const json = JSON.parse(new TextDecoder().decode(base64UrlDecode(m[1]))) as Cert;
+        const b64 = m[1];
+        if (b64 === undefined) throw new Error('PDF417-Payload-Feld fehlt');
+        const json = JSON.parse(new TextDecoder().decode(base64UrlDecode(b64))) as Cert;
         setAsset(json.asset);
         setTxid(json.txid);
         setTarget(json.targetAddress);
@@ -255,12 +257,16 @@ export default function Dac8SelfProof() {
         setWalletMsg('Keine Wallet gefunden. Challenge kopieren und in Ihrer Wallet-Software (Message Signing) signieren.');
         return;
       }
-      const provider: Eip1193Provider = wallets[0].provider;
+      const providerEntry = wallets[0];
+      if (!providerEntry) { setWalletMsg('Kein Wallet-Provider gefunden.'); return; }
+      const provider: Eip1193Provider = providerEntry.provider;
       const accounts = await provider.request<string[]>({ method: 'eth_requestAccounts' });
-      const sig = await personalSign(provider, accounts[0], challenge);
+      const account = accounts[0];
+      if (!account) { setWalletMsg('Wallet hat keine Adresse freigegeben.'); return; }
+      const sig = await personalSign(provider, account, challenge);
       setSigInput(sig);
-      setTarget((t) => t || accounts[0]);
-      setWalletMsg(`Signatur von ${shortHex(accounts[0])} erzeugt (${sig.slice(0, 18)}…). Jetzt unten verifizieren.`);
+      setTarget((t) => t || account);
+      setWalletMsg(`Signatur von ${shortHex(account)} erzeugt (${sig.slice(0, 18)}…). Jetzt unten verifizieren.`);
     } catch (e) {
       setWalletMsg('Signatur abgebrochen: ' + (e as Error).message);
     }
