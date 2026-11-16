@@ -388,6 +388,12 @@ function extractConst(src, name, kind) {
   }
   ok(src.includes('0x49628fd1471006c1482da88028e9ce4dbb080b815c9b0344d39e5a8e6ec1419f'), 'M06: UserOperationEvent-Topic (v0.6–v0.9 identisch)');
   ok(src.includes('0xd80b2cbd5dc420e00122d9f598731e3834f5d98a280dd183b5a3801dc1f2e967'), 'M06: IgnoredInitCode-Topic (v0.9)');
+  // Demo-Block deckt v0.6 UND v0.9 ab (inkl. IgnoredInitCode-Ereignis)
+  const demoBlock = src.match(/const demo = \(\) => \{([\s\S]*?)setTxInput/)?.[1] ?? '';
+  ok(
+    demoBlock.includes('0x433709009B8330FDa32311DF1C2AFA402eD8D009') && demoBlock.includes('IGNORED_INITCODE_TOPIC'),
+    'M06: Offline-Demo uebbt v0.9-Bundle + IgnoredInitCode-Pfad'
+  );
 }
 
 // ---------------------------------------------------------------- M11: Safe-Singleton-Registry (safe-deployments, kanonisch)

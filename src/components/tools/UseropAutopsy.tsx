@@ -156,30 +156,63 @@ export default function UseropAutopsy() {
     setMode('offline');
     setReceiptJson(
       JSON.stringify(
-        {
-          transactionHash: '0x53c6…demo',
-          from: '0x00000000000000000000000000000000b0b1e5',
-          blockNumber: '0x142f2a0',
-          gasUsed: '0x3d090',
-          effectiveGasPrice: '0xf5c1a0',
-          logs: [
-            {
-              address: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
-              topics: [
-                USEROP_EVENT_TOPIC,
-                '0xe7f1c8d1a2b3c4d5e6f70819283240506070819203142536475860718293a4b5c6',
-                '0x000000000000000000000000aa21b1b7ba2b71a22aef1234567890abcdef1234',
-                '0x0000000000000000000000000000000000000000000000000000000000000000',
-              ],
-              data:
-                '0x' +
-                '00'.padStart(64, '0') +
-                '1'.padStart(64, '0') +
-                (0x3d090n * 0xf5c1a0n * 108n / 100n).toString(16).padStart(64, '0') +
-                (0x3d090n * 104n / 100n).toString(16).padStart(64, '0'),
-            },
-          ],
-        },
+        [
+          {
+            transactionHash: '0x53c6…demo',
+            from: '0x00000000000000000000000000000000b0b1e5',
+            blockNumber: '0x142f2a0',
+            gasUsed: '0x3d090',
+            effectiveGasPrice: '0xf5c1a0',
+            logs: [
+              {
+                address: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
+                topics: [
+                  USEROP_EVENT_TOPIC,
+                  '0xe7f1c8d1a2b3c4d5e6f70819283240506070819203142536475860718293a4b5c6',
+                  '0x000000000000000000000000aa21b1b7ba2b71a22aef1234567890abcdef1234',
+                  '0x0000000000000000000000000000000000000000000000000000000000000000',
+                ],
+                data:
+                  '0x' +
+                  '00'.padStart(64, '0') +
+                  '1'.padStart(64, '0') +
+                  (0x3d090n * 0xf5c1a0n * 108n / 100n).toString(16).padStart(64, '0') +
+                  (0x3d090n * 104n / 100n).toString(16).padStart(64, '0'),
+              },
+            ],
+          },
+          {
+            transactionHash: '0xd09a…demo',
+            from: '0x00000000000000000000000000000000b670c7',
+            blockNumber: '0x1c4b2f0',
+            gasUsed: '0x2e1a0',
+            effectiveGasPrice: '0x17d7840',
+            logs: [
+              {
+                // v0.9-Bundle: UserOperationEvent auf dem v0.9-EntryPoint-Singleton
+                address: '0x433709009B8330FDa32311DF1C2AFA402eD8D009',
+                topics: [
+                  USEROP_EVENT_TOPIC,
+                  '0x11aa22bb33cc44dd55ee66ff7788009900112233445566778899a001122334aabbdd',
+                  '0x000000000000000000000000bb32c2c8cb3c82b33bf0234567891bcdef123455aa',
+                  '0x0000000000000000000000000000000000000000000000000000000000000000',
+                ],
+                data:
+                  '0x' +
+                  '00'.padStart(64, '0') +
+                  '1'.padStart(64, '0') +
+                  (0x2e1a0n * 0x17d7840n * 105n / 100n).toString(16).padStart(64, '0') +
+                  (0x2e1a0n * 103n / 100n).toString(16).padStart(64, '0'),
+              },
+              {
+                // v0.9 neu: IgnoredInitCode — initCode still ignoriert (Sender existiert bereits)
+                address: '0x433709009B8330FDa32311DF1C2AFA402eD8D009',
+                topics: [IGNORED_INITCODE_TOPIC, '0x11aa22bb33cc44dd55ee66ff7788009900112233445566778899a001122334aabbdd', '0x000000000000000000000000bb32c2c8cb3c82b33bf0234567891bcdef123455aa'],
+                data: '0x',
+              },
+            ],
+          },
+        ],
         null,
         2,
       ),

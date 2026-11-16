@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-15 — Wave 16: UserOp-Demo uebt v0.9-Pfad
+
+- Offline-Demo der UserOp-Autopsy ist jetzt ein **zwei-Receipt-Array**: v0.6-Bundle (bisher) + v0.9-Bundle auf dem v0.9-EntryPoint-Singleton inklusive `IgnoredInitCode`-Ereignis — die Wave-4-Erkennung (Versions-Badge, IgnoredInitCode-Zeile) wird im Demo-Klick direkt sichtbar statt nur latent.
+- verify-demos prueft den Demo-Block (nicht bloss die globale Map): v0.9-Adresse + IgnoredInitCode-Referenz muessen im Demo-Pfad referenziert sein.
+- Demo-Regression: 124 Checks.
+
 ## 2026-11-15 — Wave 15: Konsolidierung auf dem neuen Stack
 
 - Preview-Umgebung auf Astro 7.4.1 neu gestartet (alter Prozess lief noch auf 6.4.8-node_modules): **17/17 Routen 200**, Sitemap-Index korrekt, Title/Noscript unveraendert.
