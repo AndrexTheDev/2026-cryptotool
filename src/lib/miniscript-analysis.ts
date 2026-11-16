@@ -9,7 +9,7 @@
 
 export interface PolicyNode {
   type: 'pk' | 'older' | 'after' | 'and' | 'or' | 'thresh' | 'multi' | 'hash';
-  key?: string;
+  key?: string | undefined;
   n?: number;
   k?: number;
   children?: PolicyNode[];

@@ -41,9 +41,9 @@ interface ChainFinding {
   status: 'no-delegation' | 'delegation' | 'unknown-delegate' | 'error';
   code?: string;
   delegate?: string | null;
-  delegateHasCode?: boolean;
+  delegateHasCode?: boolean | undefined;
   delegateLabel?: string;
-  nonZeroSlots: { slot: string; label?: string; value: string }[];
+  nonZeroSlots: { slot: string; label?: string | undefined; value: string }[];
   scannedSlots: number;
   source?: 'user' | 'wallet' | 'public' | 'cache' | 'offline';
   note?: string;
@@ -57,7 +57,7 @@ interface SlotLayoutItem {
 interface CollisionItem {
   slot: string;
   value: string;
-  oldRole?: string;
+  oldRole?: string | undefined;
   newRole?: string;
   reason: string;
 }

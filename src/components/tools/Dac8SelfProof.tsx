@@ -22,13 +22,13 @@ type AssetType = 'evm' | 'btc';
 interface TxFacts {
   asset: AssetType;
   txid: string;
-  blockHash?: string;
-  blockHeight?: number;
-  timestamp?: number;
-  amountLabel?: string;
+  blockHash?: string | undefined;
+  blockHeight?: number | undefined;
+  timestamp?: number | undefined;
+  amountLabel?: string | undefined;
   fromLabel?: string;
   toLabel?: string;
-  confirmed?: boolean;
+  confirmed?: boolean | undefined;
   source: 'online' | 'manual' | 'offline-demo';
 }
 
@@ -37,15 +37,15 @@ interface Cert {
   purpose: string;
   asset: AssetType;
   txid: string;
-  blockHash?: string;
-  blockTimeUtc?: string;
-  blockHeight?: number;
+  blockHash?: string | undefined;
+  blockTimeUtc?: string | undefined;
+  blockHeight?: number | undefined;
   targetAddress: string;
-  note?: string;
-  costBasisHint?: string;
+  note?: string | undefined;
+  costBasisHint?: string | undefined;
   challengeMessage: string;
   signature?: { scheme: string; signer: string; signature: string };
-  verification?: { scheme: string; result: 'gueltig' | 'ungueltig' | 'nicht geprueft'; detail?: string };
+  verification?: { scheme: string; result: 'gueltig' | 'ungueltig' | 'nicht geprueft'; detail?: string | undefined };
   createdAt: string;
 }
 

@@ -49,8 +49,8 @@ interface TokenCharge {
 
 interface TxAutopsy {
   hash: string;
-  entryPointVersion?: string;
-  ignoredInitCode?: number;
+  entryPointVersion?: string | undefined;
+  ignoredInitCode?: number | undefined;
   bundler: string;
   txGasUsed: bigint;
   effGasPrice: bigint;

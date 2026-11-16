@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-16 — Wave 22: exactOptionalPropertyTypes dauerhaft aktiviert
+
+- **`exactOptionalPropertyTypes` permanent aktiviert** (tsconfig, zusaetzlich zu `noUncheckedIndexedAccess`). Alle gemessenen Diagnosen (27 Fehlerblöcke, Wellen-19b-Rest) behoben — ausschliesslich durch Verbreiterung der *Deklarationen*: optionale Properties, die Produzenten bereits explizit als `undefined` uebergeben, tragen jetzt den ehrlichen Typ `prop?: T | undefined`.
+- Geaenderte Typziele (reine Typ-Ebene, **kein einziges Byte Laufzeit-Code**): `StatusTile.detail` + `SourceBadge.source` (shared ui), `Analysis` (BitVault), `TxFacts`/`Cert` (DAC8: blockHash/blockHeight/timestamp/amountLabel/confirmed/note/costBasisHint/verification.detail), `DecodedOrder` + `resolveRefundRecipient`-Signatur (intents), `PolicyNode.key` (miniscript), `parseSafeExport`-Returntyp + `DecodedCall.descriptor` (stva), `PolicyDimension.evidence` + `HarLikeEntry.time` + `DeliveryFinding.time` (x402), `RawAnnouncement`/`StealthHit` txHash+caller (stealth.worker), `ChainFinding`/`CollisionItem` (SlotGuard), `TxAutopsy` (Userop), Export-`status.detail`.
+- Warum Deklarations-Seite statt Produzenten-Umbau: Prozent der Literale bauten `undefined`-Werte bereits als IST-Zustand (`note.trim() || undefined`, `facts?.blockHash`); das Flag zwingt die Typen nur, diese Wahrheit abzubilden. Ergebnis: `tsc --noEmit` mit beiden Flags 0 Fehler; volle Pipeline **129/129 gruen** (Referenzvektoren decken die betroffenen Parser erneut bitgenau ab).
+- Derselbe HYGIENE-Lock-in (bleibt genau 1 Check) erzwingt jetzt **beide** Flags dauerhaft — Check-Zahl bleibt 129, README/Drift-Lock-in unveraendert konsistent.
+- Notiz: Session-Git-Stand vor dieser Welle von GitHub neu abgeglichen (lokaler Branch zeigte auf Merge-Base, Remote-Head unveraendert uebernommen; kein Force-Push).
+
 ## 2026-11-16 — Wave 21: TypeScript-Stärke-Verdichtung umgesetzt
 
 - **`noUncheckedIndexedAccess` permanent aktiviert** (tsconfig). Alle gemessenen 68 Stellen (18 Dateien, Wellen 19b-Probe) behoben: Array-/Map-Indizes und Regex-Gruppen-Extraktionen in evm-utils, x402-Lockfile-Parsen (npm/go/pip), BIP-322-PoF-PSBT-Varint-Reader, Contenthash-Varint, Miniscript-Satisfaction-Gewichten, Stealth-Worker (hash-bytes), Userop-Receipt-Decoder, Donation-Wallet-Flow u. a.

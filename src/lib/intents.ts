@@ -105,14 +105,14 @@ export const RESOLVE_ABI = [
 ] as const;
 
 export interface DecodedOrder {
-  originSettler?: string;
-  user?: string;
-  nonce?: string;
-  originChainId?: string;
-  openDeadline?: number;
-  fillDeadline?: number;
-  orderDataType?: string;
-  orderData?: string;
+  originSettler?: string | undefined;
+  user?: string | undefined;
+  nonce?: string | undefined;
+  originChainId?: string | undefined;
+  openDeadline?: number | undefined;
+  fillDeadline?: number | undefined;
+  orderDataType?: string | undefined;
+  orderData?: string | undefined;
   orderDataFields?: { label: string; value: string }[];
   decodeConfidence: 'vollstaendig' | 'teilweise' | 'roh';
 }
@@ -298,11 +298,11 @@ export function computeSpread(order: DecodedOrder): SpreadResult | null {
 
 /** Refund-Empfaenger-Prioritaet: refundAddress -> recipient -> depositor. */
 export function resolveRefundRecipient(opts: {
-  refundAddress?: string;
-  recipient?: string;
-  depositor?: string;
-  user?: string;
-}): { address?: string; source: string } {
+  refundAddress?: string | undefined;
+  recipient?: string | undefined;
+  depositor?: string | undefined;
+  user?: string | undefined;
+}): { address?: string | undefined; source: string } {
   const isZero = (a?: string) => !a || /^0x0{40}$/i.test(a);
   if (!isZero(opts.refundAddress)) return { address: opts.refundAddress, source: 'refundAddress (explizit)' };
   if (!isZero(opts.recipient)) return { address: opts.recipient, source: 'recipient (Fallback 1)' };

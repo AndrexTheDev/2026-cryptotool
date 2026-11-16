@@ -29,6 +29,7 @@
     "noUnusedParameters": false,
     "skipLibCheck": true,
     "verbatimModuleSyntax": false,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true
   }
 }

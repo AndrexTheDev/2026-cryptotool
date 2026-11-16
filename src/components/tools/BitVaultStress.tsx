@@ -34,14 +34,14 @@ interface Analysis {
   context: VaultContext;
   policySource: string;
   descriptorKind: 'policy' | 'wsh' | 'tr' | 'unknown';
-  issane?: boolean;
+  issane?: boolean | undefined;
   usedCompiler: 'miniscript-policies' | 'interner Parser';
   paths: PathWeight[];
   warnings: { level: 'amber' | 'red'; text: string }[];
   utxos: (DustResult & { rate: number })[];
   rate: number;
-  source?: 'public' | 'offline' | 'user' | 'wallet' | 'cache';
-  address?: string;
+  source?: 'public' | 'offline' | 'user' | 'wallet' | 'cache' | undefined;
+  address?: string | undefined;
 }
 
 const DEMO_POLICY = 'or(pk(owner),and(pk(heir),after(210000)))';

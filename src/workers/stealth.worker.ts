@@ -12,8 +12,8 @@ export interface RawAnnouncement {
   ephemeralPubKey: string; // 0x + 66 hex (komprimiert, 33 B)
   metadata: string; // 0x…
   blockNumber: number;
-  txHash?: string;
-  caller?: string;
+  txHash?: string | undefined;
+  caller?: string | undefined;
 }
 
 export interface StealthHit {
@@ -22,8 +22,8 @@ export interface StealthHit {
   ephemeralPubKey: string;
   viewTag: string; // hex 1 Byte
   blockNumber: number;
-  txHash?: string;
-  caller?: string;
+  txHash?: string | undefined;
+  caller?: string | undefined;
   sharedSecretHash: string; // Zuordnungsnachweis (kein Viewing Key!)
 }
 

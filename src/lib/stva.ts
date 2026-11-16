@@ -111,7 +111,7 @@ export async function computeSafeTxHash(safeAddress: string, chainId: number, tx
 }
 
 /** Parst einen Safe-Web-App-JSON-Export (Toleranz fuer Schreibweisen). */
-export function parseSafeExport(text: string): { safeTx: SafeTx; safeAddress: string; chainId: number; safeTxHash?: string } | null {
+export function parseSafeExport(text: string): { safeTx: SafeTx; safeAddress: string; chainId: number; safeTxHash?: string | undefined } | null {
   try {
     const j = JSON.parse(text) as Record<string, unknown>;
     const tx = (j.tx ?? j.transaction ?? j) as Record<string, unknown>;
@@ -191,7 +191,7 @@ export interface DecodedCall {
   functionName?: string;
   selector: string;
   args?: Record<string, unknown>;
-  descriptor?: ClearSignDescriptor;
+  descriptor?: ClearSignDescriptor | undefined;
 }
 
 export async function decodeUpgradeCalldata(calldata: string): Promise<DecodedCall | null> {

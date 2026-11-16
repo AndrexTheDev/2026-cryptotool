@@ -293,7 +293,7 @@ export interface PolicyDimension {
   id: string;
   label: string;
   present: boolean;
-  evidence?: string;
+  evidence?: string | undefined;
 }
 
 const DIMS: { id: string; label: string; keys: RegExp[] }[] = [
@@ -330,13 +330,13 @@ export interface HarLikeEntry {
   url: string;
   status: number;
   hadPaymentHeader: boolean;
-  time?: string;
+  time?: string | undefined;
 }
 
 export interface DeliveryFinding {
   url: string;
   status: number;
-  time?: string;
+  time?: string | undefined;
   issue: string;
 }
 
