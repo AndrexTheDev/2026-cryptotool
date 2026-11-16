@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-15 — Wave 19b: TypeScript-Staerke-Probe (dokumentiert bewertet)
+
+- Aktuell `strict: true`. Probe gegen `noUncheckedIndexedAccess` + `exactOptionalPropertyTypes`: **103 Diagnosen**; nur-`noUncheckedIndexedAccess`: **68 Stellen** (ueberwiegend Array-Index-Pattern in Tools).
+- Bewertung: rein statische Vertiefung ohne Laufzeit-Aenderung; 68 Call-Sites spät in der Session anzufassen waere churn-riskant. Dokumentierter Antrag fuer Folgearbeit (gemessen, nicht gefuehlt).
+- GitHub-Lizenz-Erkennung greift erst nach Merge (LICENSE liegt auf PR-Branch): expected.
+
 ## 2026-11-15 — Wave 19: MIT-Lizenz (Owner-Entscheidung)
 
 - `LICENSE` (MIT, Copyright (c) 2026 AndrexTheDev) hinzugefuegt; `package.json` `license: MIT`; README-Lizenzsektion. Lock-in: LICENSE muss MIT-Kopfzeile tragen und package.json-Feld stimmen.
