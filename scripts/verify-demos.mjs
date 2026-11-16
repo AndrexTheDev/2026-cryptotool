@@ -424,6 +424,13 @@ function extractConst(src, name, kind) {
 
 // ---------------------------------------------------------------- M04: Passkey-Continuity-Checkliste (CXF/CXP Laufzeitstand)
 {
+  const lic = readFileSync('LICENSE', 'utf8');
+  ok(lic.startsWith('MIT License') && lic.includes('Copyright (c) 2026 AndrexTheDev'), 'HYGIENE: MIT-LICENSE vorhanden');
+  const pkg2 = JSON.parse(readFileSync('package.json', 'utf8'));
+  ok(pkg2.license === 'MIT', 'HYGIENE: package.json license = MIT');
+}
+
+{
   // Hygiene: content-hash/multiformats sind Referenz-Pakete fuer Vektorverifikation,
   // duerfen aber NICHT in den Projekt-Dependencies landen (Wave-5-Vorfall 641b898).
   const pkg = JSON.parse(readFileSync('package.json', 'utf8'));

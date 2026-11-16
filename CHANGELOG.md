@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-15 — Wave 19: MIT-Lizenz (Owner-Entscheidung)
+
+- `LICENSE` (MIT, Copyright (c) 2026 AndrexTheDev) hinzugefuegt; `package.json` `license: MIT`; README-Lizenzsektion. Lock-in: LICENSE muss MIT-Kopfzeile tragen und package.json-Feld stimmen.
+
 ## 2026-11-15 — Wave 18: Merge-Readiness-Sweep
 
 - **Secrets-/Key-Audit** ueber alle 73 getrackten Dateien: keine Private-Key-Artefakte (Testvektoren sind dokumentierte Konstrukte, kein Material). Regex-Scan (`BEGIN…PRIVATE`, 64-hex `private_key`-Muster) sauber.
