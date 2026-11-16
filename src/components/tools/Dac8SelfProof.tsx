@@ -528,10 +528,16 @@ export default function Dac8SelfProof() {
                 <p className="text-sm">
                   <strong>Rechtlicher Hinweis:</strong> Die Signatur dokumentiert kryptografische Verfuegungsmacht ueber
                   die Zieladresse zum Blockzeitpunkt. Sie ersetzt keine nationale Steuerberatung und keine behoerdliche
-                  Einzelfallpruefung (z. B. DAC8-/TFR-Zuordnung, Einstandspreiswertermittlung). Zeitkontext: DAC8 gilt
-                  seit 01.01.2026 (erster Meldezeitraum = Kalenderjahr 2026); die Einreichung der RCASP-Daten beim
-                  nationalen Fiskus erfolgt je Mitgliedstaat im Fenster 01.01.–30.09.2027 — bewahren Sie Befunde
-                  vollstaendig auf.
+                  Einzelfallpruefung (z. B. DAC8-/TFR-Zuordnung, Einstandspreiswertermittlung). Zeitkontext (Stand 11/2026):
+                  DAC8 gilt seit 01.01.2026 — in Deutschland umgesetzt durch das Kryptowerte-Steuertransparenzgesetz
+                  (KStTG; Bundestag 06.11.2025, Bundesrat-Zustimmung 19.12.2025). Das erste Meldejahr
+                  (Kalenderjahr 2026) laeuft bereits: RCASPs erfassen laufend Daten; erste Uebermittlungen an die
+                  nationalen Stellen (DE: BZSt) werden 2027 faellig — EU/CARF-Baseline 31.01.2027, KStTG-Frist
+                  31.07.2027 —, der erste automatische EU-Austausch folgt bis 30.09.2027. Bestands-Accounts muessen
+                  per Selbstauskunft bis 01.01.2027 verifiziert sein; KStTG-Verstoesse sind mit bis zu 50.000 EUR
+                  je Fall bewehrt. Praxis-Falle: Boersen melden Veraeusserungserloese — bei zugewanderten Coins mit
+                  Einstandsbasis 0, die Beweislast traegt der Nutzer. CARF startet international 2027 in 58 Laendern
+                  — bewahren Sie Befunde vollstaendig auf.
                 </p>
               </div>
               <ExportBar

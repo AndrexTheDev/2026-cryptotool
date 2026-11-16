@@ -533,6 +533,16 @@ function existsDistWellKnown() {
   ok(h4 !== h1, 'M02: Nonce aendert Digest');
 }
 
+// ---------------------------------------------------------------- M03: DAC8 Live-Status Q4/2026 (Recherche-Refresh)
+{
+  const d8 = readFileSync('src/components/tools/Dac8SelfProof.tsx', 'utf8');
+  ok(d8.includes('Stand 11/2026') && d8.includes('KStTG') && d8.includes('19.12.2025'),
+     'M03: DAC8-Live-Status DE (KStTG, Bundesrat-Zustimmung 19.12.2025) dokumentiert');
+  ok(d8.includes('31.01.2027') && d8.includes('31.07.2027') && d8.includes('30.09.2027')
+     && d8.includes('50.000 EUR') && d8.includes('58 Laendern'),
+     'M03: DAC8-Fristen 2027 (31.01./31.07./30.09.), Bussgeldrahmen + CARF-58 dokumentiert');
+}
+
 // ---------------------------------------------------------------- HYGIENE: Doku-Drift-Lock-in (letzter Check)
 {
   // README nennt die exakte aktuelle Check-Zahl; dieser Check selbst ist inklusive.
