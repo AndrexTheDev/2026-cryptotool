@@ -15,7 +15,8 @@ import { chainById } from '../../config/chains';
 import { downloadCSV, downloadJSON, openPrintableReport } from '../../lib/export';
 import { isHexAddress, shortHex } from '../../lib/format';
 
-// RIP-7212 / EIP-7212 Precompile-Adresse (P-256/secp256r1 Verifikation)
+// RIP-7212 (Rollups) / EIP-7951 (Ethereum Mainnet seit Fusaka, 03.12.2025) — gleiche Precompile-Adresse.
+// EIP-7951 spezifiziert die Malleability-Ablehnung (high-S) verbindlich; RIP-7212 ueberlies das den Chains.
 const RIP7212_PRECOMPILE = '0x0000000000000000000000000000000000000100';
 
 // Fest eingebetteter, kryptografisch GUELTIGER 160-Byte-Testvektor
@@ -70,6 +71,11 @@ const CHECKLIST = [
     id: 'chains',
     q: 'Sind alle vom Konto genutzten Chains getestet (Precompile oder Fallback-Contract vorhanden)?',
     hint: 'Wird automatisch aus der Matrix uebernommen, sobald die Pruefung gelaufen ist.',
+  },
+  {
+    id: 'portability',
+    q: 'Unterstuetzt der Passkey-Manager einen Export (FIDO CXF oder herstellereigenen Weg) — d. h. ueberlebt der Passkey einen Anbieterwechsel?',
+    hint: 'CXF 1.0 (Credential Exchange Format) ist seit 08/2025 FIDO Proposed Standard (Errata 03/2026); das Transport-Protokoll CXP ist weiter nur Working Draft (10/2024) — ohne Manager-Export droht bei Anbieterwechsel Zwangs-Neuregistrierung über den Recovery-Pfad.',
   },
 ];
 
@@ -136,8 +142,9 @@ export default function PasskeyContinuity() {
             row.malleabilityRaw = hsRes.data;
             const hs = classifyCall(hsRes.data);
             if (row.precompile === 'yes') {
-              // RIP-7212: low-S-Ablehnung ist NICHT zwingend Teil des Precompiles;
-              // korrekt: high-S muss "false" (fehl) liefern, wenn der Precompile strict ist.
+              // RIP-7212: low-S-Ablehnung ist NICHT zwingend Teil des Precompiles (Chain-Sache);
+              // high-S muss "false" liefern, wenn der Precompile strict ist.
+              // EIP-7951 (Mainnet, Fusaka) macht die high-S-Ablehnung dagegen verbindlich.
               row.malleability = hs === 'yes' ? 'accepts-high-s' : hs === 'zero' ? 'rejects-high-s' : hs === 'empty' ? 'unknown' : 'unknown';
             } else {
               row.malleability = 'skipped';
@@ -256,7 +263,7 @@ export default function PasskeyContinuity() {
 
       <StepSection n={2} title="Multi-Chain-Pruefung starten">
         <p className="text-sm">
-          Fuer jede Chain: <code>eth_call</code> an <code>{RIP7212_PRECOMPILE}</code> mit dem gueltigen Vektor
+          Fuer jede Chain: <code>eth_call</code> an <code>{RIP7212_PRECOMPILE}</code> (RIP-7212-/EIP-7951-Adresse) mit dem gueltigen Vektor
           (erwartet 32-Byte <code>1</code>), danach mit dem high-S-Gegenstueck (Malleability-Verhalten), dann
           Fallback-Code-Praesenz (0x ≠ 0x via <code>eth_getCode</code>).
         </p>
@@ -357,6 +364,15 @@ y:               ${P256_VECTOR.y}
 RIP-7212-Semantik: erfolgreiche Verifikation liefert 32-Byte 1; Fehler liefern je nach Chain LEER (0x) oder 0.
 Die "leere" Variante ist die still-fehlerquelle: Signaturen schlagen fehl, ohne dass ein Ablehnungsgrund
 sichtbar wird — Deshalb ist der positive Nachweis (32B=1) mit echtem Vektor entscheidend.`}</pre>
+              <p className="text-sm text-dim">
+                <strong className="text-ink">Adoptions-Referenz (Stand 2026):</strong> Auf dem Ethereum-Mainnet ist der
+                Precompile seit dem Fusaka-Hardfork (03.12.2025) als <strong>EIP-7951</strong> konsensfaegig aktiv —
+                selbe Adresse, aber mit verbindlicher high-S-Ablehnung (Malleability-Schutz). Auf Rollups laeuft er als
+                <strong>RIP-7212</strong> finalisiert auf Optimism, Base, zkSync Era, Polygon zkEVM, Linea und Scroll — die Precompile-Verifikation
+                zieht die Kosten von ~200.000–300.000 Gas auf ~3.450 Gas (~98 % Reduktion). Der Live-Test oben
+                verifiziert jede ausgewaehlte Chain dennoch individuell — Chain-Listen alterieren schneller als
+                statische Dokumentation.
+              </p>
             </div>
           </details>
 

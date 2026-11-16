@@ -432,6 +432,23 @@ export default function StealthAudit5564() {
           />
         </StepSection>
       )}
+
+      <details className="acc">
+        <summary>Referenzen & Einschränkungen</summary>
+        <div className="acc-body space-y-2 text-sm text-dim">
+          <p>
+            Gescannt wird der <strong className="text-ink">kanonische ERC-5564 Announcer</strong>{' '}
+            <code className="mono text-xs break-all">0x55649E01B5Df198D18D95b5cc5051630cfD45564</code> (identische
+            Singleton-Deployment auf mehreren Netzwerken, u. a. Mainnet/Polygon/Scroll). Die dazugehörige
+            ERC-6538 Meta-Address Registry liegt unter{' '}
+            <code className="mono text-xs break-all">0x6538E6bf4B0eBd30A8Ea093027Ac2422ce5d6538</code>.
+          </p>
+          <p>
+            Der Scanner erkennt ausschließlich Schema 1 (secp256k1). Ankündigungen ohne View-Tag im Metadatenfeld
+            werden vollstaendig geprueft (langsamer), mit View-Tag dagegen ueber den billigen Vorfilter.
+          </p>
+        </div>
+      </details>
     </div>
   );
 }

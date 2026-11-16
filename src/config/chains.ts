@@ -87,10 +87,11 @@ export const chainById = (id: number): ChainDef | undefined => CHAINS.find((c) =
 export const ENTRYPOINT_V06 = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789' as const;
 export const ENTRYPOINT_V07 = '0x0000000071727De22E5E9d8BAf0edAc6f37da032' as const;
 
-// EIP-5564 Announcer (ERC-6538 Registry, kanonische Adresse)
-export const STEALTH_ANNOUNCER = '0x55649E01B5Df1D8A95f09785c879364171dDbB88' as const;
+// ERC-5564 Announcer — kanonische Singleton-Deployment (ScopeLift-Referenz-Contracts,
+// identisch auf Ethereum Mainnet, Polygon, Scroll u. a.)
+export const STEALTH_ANNOUNCER = '0x55649E01B5Df198D18D95b5cc5051630cfD45564' as const;
 
-// ERC-6538 Stealth Meta-Address Registry
+// ERC-6538 Stealth Meta-Address Registry — kanonische Singleton-Deployment
 export const STEALTH_REGISTRY = '0x6538E6bf4B0eBd30A8Ea093027Ac2422ce5d6538' as const;
 
 // Bitcoin-Datenquellen (CORS-faehige, schluessellose Lese-Endpunkte)

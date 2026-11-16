@@ -349,6 +349,11 @@ export default function IntentLens7683() {
                 <li>Annahme: Der Solver nutzt das dekodierte Messaging/Calls-Schema der beteiligten Protokolle — Callbacks und Messaging-Trust sind aus den Rohdaten nicht beweisbar.</li>
                 <li>Annahme: Fill-Status auf der Ziel-Chain wurde zum Abfrage-Zeitpunkt korrekt gespiegelt ({chainNote}).</li>
                 <li>Annahme: Token-Dezimalstellen und Cross-Asset-Kurse sind bei Spread-Vergleichen extern zu bewerten.</li>
+                <li>
+                  Referenzrahmen (Oekosystem, finaler Standard): ERC-7683-kompatible Orders werden 2026 v. a. von den
+                  Filler-Netzwerken Across, Eco, LI.FI, UniswapX und Symbiosis settled — herstellerunabhaengiges
+                  Dee-Referenz-Dekodieren bleibt trotzdem Schema-heuristisch (keine Garantie auf Vollstaendigkeit).
+                </li>
               </ul>
             </div>
           </details>

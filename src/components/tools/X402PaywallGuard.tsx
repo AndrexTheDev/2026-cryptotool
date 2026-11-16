@@ -156,7 +156,7 @@ export default function X402PaywallGuard() {
 
   return (
     <div className="space-y-5">
-      <StepSection n={1} title="Artefakte einsammeln" hint="Lockfile/Manifest, SIWX-/x402-Code, ERC-7715-Policy (wallet_grantPermissions) und optional HAR-Logs — alles bleibt lokal.">
+      <StepSection n={1} title="Artefakte einsammeln" hint="Lockfile/Manifest, SIWX-/x402-Code, ERC-7715-Policy und optional HAR-Logs — alles bleibt lokal. Hinweis: Der Draft (Stand 09/2026) heisst die Methode nun wallet_requestExecutionPermissions; MetaMask-Integrationen verwenden historisch wallet_grantPermissions.">
         <div className="flex flex-wrap gap-2 items-center">
           <DemoButton onClick={demo} />
           <span className="text-xs text-dim">Demo: angreifbares Lockfile + anfaelliger SIWX-Code + Policy</span>
@@ -172,7 +172,7 @@ export default function X402PaywallGuard() {
             <textarea id="x4-code" className="textarea mono" rows={6} value={code} onChange={(e) => setCode(e.target.value)} placeholder="// TypeScript/JS-Code der Zahlungs- oder Login-Middleware" />
           </div>
           <div>
-            <label className="label" htmlFor="x4-pol">ERC-7715 wallet_grantPermissions (JSON)</label>
+            <label className="label" htmlFor="x4-pol">ERC-7715 Policy-JSON (wallet_requestExecutionPermissions / wallet_grantPermissions)</label>
             <textarea id="x4-pol" className="textarea mono" rows={5} value={policy} onChange={(e) => setPolicy(e.target.value)} placeholder='{"method":"wallet_grantPermissions", …}' />
           </div>
           <div>

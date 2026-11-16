@@ -405,6 +405,40 @@ export default function BitVaultStress() {
             <SourceBadge source={analysis.source} />
           </div>
 
+          <details className="acc">
+            <summary>Gebühren-Bumping-Landschaft 2026 (pre-signierte Recovery-TXs)</summary>
+            <div className="acc-body space-y-2 text-sm">
+              <p>
+                Pre-signierte Tresor-Transaktionen tragen eine <strong>fixe Fee</strong> — ob sie bei Broadcast
+                konkurrenzfaehig ist, haengt von der Netz-Relais-Policy ab:
+              </p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>
+                  <strong>Full-RBF ist Standard:</strong> seit Bitcoin Core 28.0 (10/2024) default eingeschaltet, seit
+                  29.0 (04/2025) verpflichtend — jede unbestaetigte Transaktion ist ersetzbar, egal ob sie BIP-125-signalisiert.
+                  Ein Recovery-TX kann also nachtraeglich gebumped werden, solange eine signierte Ersatz-Fee-Stufe existiert.
+                </li>
+                <li>
+                  <strong>CPFP ueber Ephemeral Anchors (P2A):</strong> seit Core 28.0 standard-relay-faehig
+                  (<code>OP_1 0x4e73</code>, dust-frei, jeder darf ausgeben). Damit laesst sich die Gebuehr komplett
+                  zum Broadcast-Zeitpunkt bestimmen — geeignet fuer Zero-Fee-Commitment-Transaktionen in Vault-Designs.
+                </li>
+                <li>
+                  <strong>TRUC (v3-Transaktionen):</strong> begrenzen Pinning-Risiko (Groessenlimit 10.000 vB, eine
+                  unbestaetigte Vorfahre pro Package, incentiven-kompatible Ersetzungen) und werden seit Core 28.0 relayt.
+                </li>
+                <li>
+                  <strong>1p1c-Package-Relay:</strong> ein unterbezahlter Parent kann mit einem gut bezahlten Child als
+                  Paket eingereicht werden (Core 28.0+) — praktikabler Rettungsweg fuer zu knapp bepreiste pre-signierte TXs.
+                </li>
+              </ul>
+              <p className="text-dim text-xs">
+                Fazit: Dust-/Fee-Analyse oben bleibt worst-case-orientiert (fixe Stufen!). Ob Ihre Vault-Policy von
+                Anchor-Ausgaeben/TRUC profitiert, entscheidet die Konstruktion (Liana-artige Designs setzen z. T. auf TRUC).
+              </p>
+            </div>
+          </details>
+
           <details className="acc" open>
             <summary>Pfad-Gewichtstabelle</summary>
             <div className="acc-body">

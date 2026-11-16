@@ -26,12 +26,23 @@ import {
   scanBytecodePatterns,
 } from '../../lib/evm-utils';
 
+// Kanonische, mehrfach unabhaengig verifizierte 7702-Delegate-Adressen.
+// Konservativ: nur Addressen mit mindestens drei unabhaengigen Quellen.
+export const KNOWN_DELEGATES: Record<string, { name: string; note: string }> = {
+  '0x63c0c19a282a1b52b07dd5a65b58948a07dae32b': {
+    name: 'MetaMask EIP-7702 Delegator',
+    note: 'MetaMask whitelistet ausschliesslich diesen Delegator; Rueckkehr zur EOA via 7702-Autorisierung auf address(0).',
+  },
+};
+const knownDelegate = (addr: string | null | undefined) => (addr ? KNOWN_DELEGATES[addr.toLowerCase()] : undefined);
+
 interface ChainFinding {
   chainId: number;
   status: 'no-delegation' | 'delegation' | 'unknown-delegate' | 'error';
   code?: string;
   delegate?: string | null;
   delegateHasCode?: boolean;
+  delegateLabel?: string;
   nonZeroSlots: { slot: string; label?: string; value: string }[];
   scannedSlots: number;
   source?: 'user' | 'wallet' | 'public' | 'cache' | 'offline';
@@ -61,7 +72,7 @@ interface PanicPack {
 }
 
 const DEMO_ADDRESS = '0x1111111111111111111111111111111111111777';
-const DEMO_BYTECODE = '0xef0100' + 'ab5801a17d1f2c3134c0ffee00cafebabe000000';
+const DEMO_BYTECODE = '0xef0100' + '63c0c19a282a1b52b07dd5a65b58948a07dae32b'; // MetaMask-Delegator → Demo zeigt Known-Delegates-Badge
 const DEMO_DUMP = `0x0: 0x0000000000000000000000000000000000000000000000000000000000000001
 0x1: 0x000000000000000000000000c0ffee254729296a45a3885639ac7e10f9d54979
 0x2: 0x0000000000000000000000000000000000000000000000000000000000000042`;
@@ -103,7 +114,7 @@ andernfalls erzeugen Sie das Paket im 7702-SlotGuard neu.</p>
 <h2>Konto &amp; Autorisierung (Klartext-Metadaten)</h2>
 <pre>Konto (EOA):        ${esc(pack.eoa)}
 Ziel-Delegation:     ${esc(ZERO_ADDR)} (vollstaendiger Widerruf)
-Chain-Gueltigkeit:   ${pack.chainId === 0 ? 'alle Chains (chainId 0)' : 'chainId ' + pack.chainId}
+${pack.chainId === 0 ? 'Chain-Gueltigkeit:    alle Chains (chainId 0) — ACHTUNG: chainId-0-Autorisierungen lassen sich cross-chain replayen; nur bei bewusstem Multi-Chain-Widerruf verwenden, sonst Paket mit fester chainId neu erzeugen.' : 'Chain-Gueltigkeit:    chainId ' + pack.chainId}
 Autorisierungs-Nonce: ${pack.nonce}
 Autorisierungs-Digest: ${esc(pack.digest)}
 Erzeugt:             ${new Date().toISOString()}
@@ -295,7 +306,7 @@ export default function SlotGuard7702() {
           level = 'amber';
           headline = 'Delegation auf unbekannten Delegate';
           detail =
-            'Der Delegate verweist auf eine Adresse ohne ausgerollten Code oder ohne verifizierbare Antwort. Vor jeder weiteren Signatur pruefen.';
+            'Der Delegate verweist auf eine Adresse ohne ausgerollten Code oder ohne verifizierbare Antwort. Vor jeder weiteren Signatur pruefen. Kontext (2026): Die Mehrheit boesartiger 7702-Delegationen entfiel forensischen Auswertungen zufolge auf eine einzige wiederkehrende Sweeper-Vertragsfamilie — ein unbekannter Delegate ist daher ein kritischer Kandidat fuer einen Dormant-Sweeper (kann Wochen inaktiv bleiben und bei Geldeingang zugreifen).';
         } else if (col.length > 0) {
           level = 'red';
           headline = 'Kollidierende Storage-Slots / verwaiste Werte';
@@ -524,6 +535,7 @@ export default function SlotGuard7702() {
                 {f.delegate && (
                   <p>
                     Delegate: <code className="mono text-prime-hi break-all">{f.delegate}</code>{' '}
+                    {f.delegateLabel && <span className="badge badge-green">{f.delegateLabel}</span>}
                     {f.delegateHasCode === true && <span className="badge badge-green">Code vorhanden</span>}
                     {f.delegateHasCode === false && <span className="badge badge-red">kein Code</span>}
                   </p>

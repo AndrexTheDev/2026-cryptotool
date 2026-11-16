@@ -20,11 +20,13 @@ Zehn spezialisierte Web3-, Bitcoin- und Compliance-Werkzeuge, vollständig **lok
 ## Entwicklung
 
 ```bash
-npm ci          # Node >= 22 (Astro 6)
-npm run dev     # Dev-Server
-npm run build   # Produktions-Build nach dist/
-npm run preview # dist/ lokal ausliefern
-node scripts/audit-dist.mjs  # Nach dem Build: Policy-Audit
+npm ci             # Node >= 22 (Astro 6)
+npm run dev        # Dev-Server
+npm run build      # Produktions-Build nach dist/
+npm run preview    # dist/ lokal ausliefern
+npm run audit      # Policy-Audit ueber dist/ (nach Build)
+npm run test:demos # 128-Check Demo-Regression aller 10 Module
+npm run verify     # Gesamtpipeline: typecheck + build + audit-dist + audit:deps (npm audit, critical) + test:demos
 ```
 
 ## Architektur-Regeln (safety invariants)
@@ -49,3 +51,7 @@ node scripts/audit-dist.mjs  # Nach dem Build: Policy-Audit
 
 AGB, Disclaimer und Datenschutz-Transparenz: siehe `/agb`, `/disclaimer`, `/datenschutz`.
 Kontakt: **hippie.highho@gmail.com** · Spenden freiwillig (SOL/BTC/EVM, siehe `/donate`).
+
+## Lizenz
+
+[MIT](LICENSE) © 2026 AndrexTheDev

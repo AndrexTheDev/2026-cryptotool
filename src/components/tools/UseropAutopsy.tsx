@@ -15,10 +15,21 @@ import { chainById } from '../../config/chains';
 import { downloadCSV, downloadJSON } from '../../lib/export';
 import { isTxHash, num, shortHex } from '../../lib/format';
 
-// UserOperationEvent (v0.6 & v0.7 identisch):
+// UserOperationEvent ist ABI-kompatibel ueber v0.6/v0.7/v0.8/v0.9:
 // event UserOperationEvent(bytes32,address sender,address paymaster,uint256 nonce,bool success,uint256 actualGasCost,uint256 actualGasUsed)
 const USEROP_EVENT_TOPIC = '0x49628fd1471006c1482da88028e9ce4dbb080b815c9b0344d39e5a8e6ec1419f';
 const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+// v0.9: IgnoredInitCode(bytes32 userOpHash, address sender) — initCode wird still ignoriert,
+// wenn der Sender schon existiert (observability neuer Codepfad).
+const IGNORED_INITCODE_TOPIC = '0xd80b2cbd5dc420e00122d9f598731e3834f5d98a280dd183b5a3801dc1f2e967'; // keccak256("IgnoredInitCode(bytes32,address)")
+
+// Kanonische EntryPoint-Singletons (eth-infinitism, multi-chain identisch)
+const ENTRYPOINTS: Record<string, string> = {
+  '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789': 'v0.6',
+  '0x0000000071727de22e5e9d8baf0edac6f37da032': 'v0.7',
+  '0x4337084d9e255ff0702461cf8895ce9e3b5ff108': 'v0.8 (7702-native)',
+  '0x433709009b8330fda32311df1c2afa402ed8d009': 'v0.9',
+};
 
 interface UserOpEvent {
   sender: string;
@@ -38,6 +49,8 @@ interface TokenCharge {
 
 interface TxAutopsy {
   hash: string;
+  entryPointVersion?: string;
+  ignoredInitCode?: number;
   bundler: string;
   txGasUsed: bigint;
   effGasPrice: bigint;
@@ -67,8 +80,13 @@ function parseReceipt(hash: string, r: Record<string, unknown>): TxAutopsy {
   const userOps: UserOpEvent[] = [];
   const tokenCharges: TokenCharge[] = [];
   const paymasters = new Set<string>();
+  let entryPointVersion: string | undefined;
+  let ignoredInitCode = 0;
   for (const log of logs) {
     const t0 = (log.topics?.[0] ?? '').toLowerCase();
+    const epLabel = ENTRYPOINTS[String(log.address).toLowerCase()];
+    if (epLabel && t0 === USEROP_EVENT_TOPIC) entryPointVersion = epLabel;
+    if (epLabel && t0 === IGNORED_INITCODE_TOPIC) ignoredInitCode++;
     if (t0 === USEROP_EVENT_TOPIC) {
       const data = log.data.slice(2);
       const w = [0, 1, 2, 3].map((i) => '0x' + data.slice(i * 64, (i + 1) * 64));
@@ -114,6 +132,8 @@ function parseReceipt(hash: string, r: Record<string, unknown>): TxAutopsy {
     gasUnitMarkupPct: unitMarkup,
     gasPriceMarkupPct: priceMarkup,
     tokenCharges: relevant,
+    entryPointVersion,
+    ignoredInitCode,
     blockNumber: Number(BigInt(String(r.blockNumber ?? '0x0'))),
   };
 }
@@ -136,30 +156,63 @@ export default function UseropAutopsy() {
     setMode('offline');
     setReceiptJson(
       JSON.stringify(
-        {
-          transactionHash: '0x53c6…demo',
-          from: '0x00000000000000000000000000000000b0b1e5',
-          blockNumber: '0x142f2a0',
-          gasUsed: '0x3d090',
-          effectiveGasPrice: '0xf5c1a0',
-          logs: [
-            {
-              address: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
-              topics: [
-                USEROP_EVENT_TOPIC,
-                '0xe7f1c8d1a2b3c4d5e6f70819283240506070819203142536475860718293a4b5c6',
-                '0x000000000000000000000000aa21b1b7ba2b71a22aef1234567890abcdef1234',
-                '0x0000000000000000000000000000000000000000000000000000000000000000',
-              ],
-              data:
-                '0x' +
-                '00'.padStart(64, '0') +
-                '1'.padStart(64, '0') +
-                (0x3d090n * 0xf5c1a0n * 108n / 100n).toString(16).padStart(64, '0') +
-                (0x3d090n * 104n / 100n).toString(16).padStart(64, '0'),
-            },
-          ],
-        },
+        [
+          {
+            transactionHash: '0x53c6…demo',
+            from: '0x00000000000000000000000000000000b0b1e5',
+            blockNumber: '0x142f2a0',
+            gasUsed: '0x3d090',
+            effectiveGasPrice: '0xf5c1a0',
+            logs: [
+              {
+                address: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
+                topics: [
+                  USEROP_EVENT_TOPIC,
+                  '0xe7f1c8d1a2b3c4d5e6f70819283240506070819203142536475860718293a4b5c6',
+                  '0x000000000000000000000000aa21b1b7ba2b71a22aef1234567890abcdef1234',
+                  '0x0000000000000000000000000000000000000000000000000000000000000000',
+                ],
+                data:
+                  '0x' +
+                  '00'.padStart(64, '0') +
+                  '1'.padStart(64, '0') +
+                  (0x3d090n * 0xf5c1a0n * 108n / 100n).toString(16).padStart(64, '0') +
+                  (0x3d090n * 104n / 100n).toString(16).padStart(64, '0'),
+              },
+            ],
+          },
+          {
+            transactionHash: '0xd09a…demo',
+            from: '0x00000000000000000000000000000000b670c7',
+            blockNumber: '0x1c4b2f0',
+            gasUsed: '0x2e1a0',
+            effectiveGasPrice: '0x17d7840',
+            logs: [
+              {
+                // v0.9-Bundle: UserOperationEvent auf dem v0.9-EntryPoint-Singleton
+                address: '0x433709009B8330FDa32311DF1C2AFA402eD8D009',
+                topics: [
+                  USEROP_EVENT_TOPIC,
+                  '0x11aa22bb33cc44dd55ee66ff7788009900112233445566778899a001122334aabbdd',
+                  '0x000000000000000000000000bb32c2c8cb3c82b33bf0234567891bcdef123455aa',
+                  '0x0000000000000000000000000000000000000000000000000000000000000000',
+                ],
+                data:
+                  '0x' +
+                  '00'.padStart(64, '0') +
+                  '1'.padStart(64, '0') +
+                  (0x2e1a0n * 0x17d7840n * 105n / 100n).toString(16).padStart(64, '0') +
+                  (0x2e1a0n * 103n / 100n).toString(16).padStart(64, '0'),
+              },
+              {
+                // v0.9 neu: IgnoredInitCode — initCode still ignoriert (Sender existiert bereits)
+                address: '0x433709009B8330FDa32311DF1C2AFA402eD8D009',
+                topics: [IGNORED_INITCODE_TOPIC, '0x11aa22bb33cc44dd55ee66ff7788009900112233445566778899a001122334aabbdd', '0x000000000000000000000000bb32c2c8cb3c82b33bf0234567891bcdef123455aa'],
+                data: '0x',
+              },
+            ],
+          },
+        ],
         null,
         2,
       ),
@@ -280,7 +333,7 @@ export default function UseropAutopsy() {
             }
             detail={
               stats.ok === 0
-                ? 'Pruefen Sie, ob die Hashes EntryPoint-Bundles enthalten (EntryPoint v0.6/v0.7) und das richtige Netzwerk gewaehlt ist.'
+                ? 'Pruefen Sie, ob die Hashes EntryPoint-Bundles enthalten (v0.6–v0.9, identisches Event-Format) und das richtige Netzwerk gewaehlt ist.'
                 : `Durchschnittlicher Netto-Aufschlag ${stats.avgPct.toFixed(2)} % ueber ${stats.ok} Transaktion(en).`
             }
           />
@@ -311,6 +364,24 @@ export default function UseropAutopsy() {
                           <td>Block</td>
                           <td className="mono">{num(r.blockNumber)}</td>
                         </tr>
+                        <tr>
+                          <td>EntryPoint</td>
+                          <td>
+                            {r.entryPointVersion ? (
+                              <span className="badge badge-green">{r.entryPointVersion}</span>
+                            ) : (
+                              <span className="badge badge-amber">unbestimmt</span>
+                            )}
+                          </td>
+                        </tr>
+                        {(r.ignoredInitCode ?? 0) > 0 && (
+                          <tr>
+                            <td>IgnoredInitCode (v0.9)</td>
+                            <td className="text-gold-hi">
+                              {r.ignoredInitCode} × — initCode ignoriert, da Sender bereits existiert (häufige Fehldiagnose-Quelle, siehe v0.9-Release-Notes)
+                            </td>
+                          </tr>
+                        )}
                         <tr>
                           <td>TX-GasUsed × eff. Gaspreis</td>
                           <td className="mono">

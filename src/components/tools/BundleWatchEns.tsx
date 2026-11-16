@@ -314,6 +314,12 @@ export default function BundleWatchEns() {
             <details className="acc" open>
               <summary>Governance-Ampel (ENS-Kontrolle)</summary>
               <div className="acc-body space-y-2">
+                <p className="text-xs text-dim">
+                  Hinweis ENSv2: Die Aufloesung laeuft ueber den DAO-eigenen Universal-Resolver-Proxy
+                  (0xeEeEEEeE…E144EeEe) — die ENS-DAO migriert unter ENSv2 schrittweise Registries
+                  (Sepolia seit 08/2026, Mainnet bei Aktivierung); die Abfrage bleibt kompatibel, weil der
+                  Proxy vom DAO aktualisiert wird.
+                </p>
                 <p>
                   Owner: <code className="mono text-xs break-all">{gov.owner}</code>{' '}
                   <span className={`badge ${gov.kind === 'multisig-contract' ? 'badge-green' : gov.kind === 'eoa' ? 'badge-red' : 'badge-amber'}`}>
