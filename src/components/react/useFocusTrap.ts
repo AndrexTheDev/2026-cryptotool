@@ -33,10 +33,11 @@ export function useFocusTrap<T extends HTMLElement>(active: boolean) {
       const idx = list.indexOf(document.activeElement as HTMLElement);
       if (e.shiftKey && (idx <= 0)) {
         e.preventDefault();
-        list[list.length - 1].focus();
+        const last = list[list.length - 1];
+        last?.focus();
       } else if (!e.shiftKey && (idx === -1 || idx === list.length - 1)) {
         e.preventDefault();
-        list[0].focus();
+        list[0]?.focus();
       }
     };
     document.addEventListener('keydown', onKey);

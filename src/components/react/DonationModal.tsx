@@ -75,7 +75,13 @@ export default function DonationModal({ open, onClose }: { open: boolean; onClos
         );
         return;
       }
-      const provider: Eip1193Provider = wallets[0].provider;
+      const w0 = wallets[0];
+      if (!w0) {
+        setSendState('error');
+        setSendMsg('Kein Wallet-Provider gefunden. Nutzen Sie QR-Code oder Kopieren stattdessen.');
+        return;
+      }
+      const provider: Eip1193Provider = w0.provider;
       if (!amount || Number(amount) <= 0) {
         setSendState('error');
         setSendMsg('Bitte zuerst einen Betrag angeben.');

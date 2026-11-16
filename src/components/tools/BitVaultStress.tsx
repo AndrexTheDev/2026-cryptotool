@@ -34,14 +34,14 @@ interface Analysis {
   context: VaultContext;
   policySource: string;
   descriptorKind: 'policy' | 'wsh' | 'tr' | 'unknown';
-  issane?: boolean;
+  issane?: boolean | undefined;
   usedCompiler: 'miniscript-policies' | 'interner Parser';
   paths: PathWeight[];
   warnings: { level: 'amber' | 'red'; text: string }[];
   utxos: (DustResult & { rate: number })[];
   rate: number;
-  source?: 'public' | 'offline' | 'user' | 'wallet' | 'cache';
-  address?: string;
+  source?: 'public' | 'offline' | 'user' | 'wallet' | 'cache' | undefined;
+  address?: string | undefined;
 }
 
 const DEMO_POLICY = 'or(pk(owner),and(pk(heir),after(210000)))';
@@ -64,8 +64,9 @@ function parseUtxos(text: string): UtxoRow[] {
     const rows: UtxoRow[] = [];
     for (const line of t.split(/\r?\n/)) {
       const parts = line.split(/[;,\t]/).map((p) => p.trim());
-      if (parts.length >= 3 && /^\d+$/.test(parts[2])) {
-        rows.push({ txid: parts[0], vout: Number(parts[1]), sats: Number(parts[2]) });
+      const [txid, vout, sats] = parts;
+      if (txid !== undefined && vout !== undefined && sats !== undefined && /^\d+$/.test(sats)) {
+        rows.push({ txid, vout: Number(vout), sats: Number(sats) });
       }
     }
     return rows;
@@ -76,7 +77,7 @@ function parseUtxos(text: string): UtxoRow[] {
 function extractScript(input: string): { ctx: VaultContext; inner: string; kind: Analysis['descriptorKind'] } {
   const t = input.trim().replace(/\s/g, '');
   const wsh = t.match(/^wsh\((.*)\)(?:#[0-9a-z]+)?$/i);
-  if (wsh) return { ctx: 'wsh', inner: wsh[1], kind: 'wsh' };
+  if (wsh && wsh[1] !== undefined) return { ctx: 'wsh', inner: wsh[1], kind: 'wsh' };
   const tr = t.match(/^tr\((.*?)(?:,(.*))?\)(?:#[0-9a-z]+)?$/i);
   if (tr) return { ctx: 'tr', inner: tr[2] ?? '', kind: 'tr' };
   return { ctx: 'wsh', inner: t, kind: /^(wsh|sh|pkh|wpkh|tr)\(/i.test(t) ? 'unknown' : 'policy' };
@@ -578,10 +579,14 @@ function policyToApproxAsm(node: PolicyNode): string {
       return `<${node.n}> OP_CHECKSEQUENCEVERIFY`;
     case 'hash':
       return `OP_SHA256 <ff> OP_EQUAL`;
-    case 'and':
-      return `${policyToApproxAsm(node.children![0])} OP_DROP ${policyToApproxAsm(node.children![1])}`;
-    case 'or':
-      return `OP_IF ${policyToApproxAsm(node.children![0])} OP_ELSE ${policyToApproxAsm(node.children![1])} OP_ENDIF`;
+    case 'and': {
+      const [c0, c1] = node.children ?? [];
+      return `${c0 ? policyToApproxAsm(c0) : '<?> '} OP_DROP ${c1 ? policyToApproxAsm(c1) : '<?> '}`;
+    }
+    case 'or': {
+      const [c0, c1] = node.children ?? [];
+      return `OP_IF ${c0 ? policyToApproxAsm(c0) : '<?> '} OP_ELSE ${c1 ? policyToApproxAsm(c1) : '<?> '} OP_ENDIF`;
+    }
     case 'multi':
       return `${node.k} ${node.children!.map(() => '<key>').join(' ')} ${node.children!.length} OP_CHECKMULTISIG`;
     case 'thresh':

@@ -41,9 +41,9 @@ interface ChainFinding {
   status: 'no-delegation' | 'delegation' | 'unknown-delegate' | 'error';
   code?: string;
   delegate?: string | null;
-  delegateHasCode?: boolean;
+  delegateHasCode?: boolean | undefined;
   delegateLabel?: string;
-  nonZeroSlots: { slot: string; label?: string; value: string }[];
+  nonZeroSlots: { slot: string; label?: string | undefined; value: string }[];
   scannedSlots: number;
   source?: 'user' | 'wallet' | 'public' | 'cache' | 'offline';
   note?: string;
@@ -57,7 +57,7 @@ interface SlotLayoutItem {
 interface CollisionItem {
   slot: string;
   value: string;
-  oldRole?: string;
+  oldRole?: string | undefined;
   newRole?: string;
   reason: string;
 }
@@ -83,8 +83,8 @@ function parseLayout(text: string): SlotLayoutItem[] {
   const out: SlotLayoutItem[] = [];
   for (const line of text.split(/\r?\n/)) {
     const m = line.match(/^\s*(0x[0-9a-fA-F]+|\d+)\s*[:=,;|]\s*(.+)$/);
-    if (!m) continue;
-    const slotBig = m[1].startsWith('0x') ? BigInt(m[1]) : BigInt(m[1]);
+    if (!m || m[1] === undefined || m[2] === undefined) continue;
+    const slotBig = BigInt(m[1]);
     out.push({ slot: '0x' + slotBig.toString(16).padStart(64, '0'), role: m[2].trim() });
   }
   return out;

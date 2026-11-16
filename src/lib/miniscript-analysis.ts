@@ -9,7 +9,7 @@
 
 export interface PolicyNode {
   type: 'pk' | 'older' | 'after' | 'and' | 'or' | 'thresh' | 'multi' | 'hash';
-  key?: string;
+  key?: string | undefined;
   n?: number;
   k?: number;
   children?: PolicyNode[];
@@ -188,14 +188,19 @@ export function satisfactionOptions(node: PolicyNode, ctx: VaultContext): number
     case 'hash':
       return [[PREIMAGE]];
     case 'and': {
-      const a = satisfactionOptions(node.children![0], ctx);
-      const b = satisfactionOptions(node.children![1], ctx);
+      const [c0, c1] = node.children ?? [];
+      if (!c0 || !c1) return [];
+      const a = satisfactionOptions(c0, ctx);
+      const b = satisfactionOptions(c1, ctx);
       const out: number[][] = [];
       for (const x of a) for (const y of b) out.push([...x, ...y]);
       return out;
     }
-    case 'or':
-      return [...satisfactionOptions(node.children![0], ctx), ...satisfactionOptions(node.children![1], ctx)];
+    case 'or': {
+      const [c0, c1] = node.children ?? [];
+      if (!c0 || !c1) return [];
+      return [...satisfactionOptions(c0, ctx), ...satisfactionOptions(c1, ctx)];
+    }
     case 'multi': {
       const k = node.k!;
       return [Array.from({ length: k }, () => sig)];
@@ -216,7 +221,9 @@ export function satisfactionOptions(node: PolicyNode, ctx: VaultContext): number
           return;
         }
         for (let i = start; i <= subs.length - need; i++) {
-          for (const opt of satisfactionOptions(subs[i], ctx)) {
+          const sub = subs[i];
+          if (!sub) continue;
+          for (const opt of satisfactionOptions(sub, ctx)) {
             choose(i + 1, need - 1, [...acc, opt]);
           }
         }
@@ -271,8 +278,10 @@ function scriptnum(n: number): Uint8Array {
     out.push(v & 0xff);
     v >>= 8;
   }
-  if (out[out.length - 1] & 0x80) out.push(n < 0 ? 0x80 : 0);
-  else if (n < 0) out[out.length - 1] |= 0x80;
+  const last = out[out.length - 1];
+  if (last === undefined) return new Uint8Array([]);
+  if (last & 0x80) out.push(n < 0 ? 0x80 : 0);
+  else if (n < 0) out[out.length - 1] = last | 0x80;
   return new Uint8Array(out);
 }
 

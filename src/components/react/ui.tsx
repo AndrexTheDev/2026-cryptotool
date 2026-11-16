@@ -33,7 +33,7 @@ export function StepSection({
 
 export type StatusLevel = 'green' | 'amber' | 'red' | 'neutral';
 
-export function StatusTile({ level, headline, detail }: { level: StatusLevel; headline: string; detail?: string }) {
+export function StatusTile({ level, headline, detail }: { level: StatusLevel; headline: string; detail?: string | undefined }) {
   const icon = { green: '✓', amber: '⚠', red: '✕', neutral: 'ℹ' }[level];
   return (
     <div className={`status-tile status-${level}`} role="status" aria-live="polite">
@@ -231,7 +231,7 @@ export function DemoButton({ onClick, label = 'Demo-Szenario laden' }: { onClick
   );
 }
 
-export function SourceBadge({ source }: { source?: 'user' | 'wallet' | 'public' | 'cache' | 'offline' }) {
+export function SourceBadge({ source }: { source?: 'user' | 'wallet' | 'public' | 'cache' | 'offline' | undefined }) {
   if (!source) return null;
   const map = {
     user: ['badge-green', 'Eigener Endpunkt'],

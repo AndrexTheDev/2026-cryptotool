@@ -108,9 +108,10 @@ export default function PasskeyContinuity() {
       const rows: ChainResult[] = [];
       for (const line of offlineRows.split(/\r?\n/)) {
         const m = line.match(/^\s*(\d+)\s*[,;\s]\s*(0x[0-9a-fA-F]*)/);
-        if (m) {
+        if (m && m[1] !== undefined) {
           const cid = Number(m[1]);
-          rows.push({ chainId: cid, precompile: classifyCall(m[2]), precompileRaw: m[2], malleability: 'skipped' });
+          const raw = m[2] ?? '';
+          rows.push({ chainId: cid, precompile: classifyCall(raw), precompileRaw: raw, malleability: 'skipped' });
         }
       }
       if (rows.length === 0) {

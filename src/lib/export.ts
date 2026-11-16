@@ -39,7 +39,7 @@ export function downloadCSV(rows: Record<string, unknown>[], filename: string) {
 export interface PrintableReport {
   title: string;
   subtitle?: string;
-  status?: { level: 'green' | 'amber' | 'red' | 'neutral'; headline: string; detail?: string };
+  status?: { level: 'green' | 'amber' | 'red' | 'neutral'; headline: string; detail?: string | undefined };
   sections: { heading: string; body: string }[];
   footerNote?: string;
 }

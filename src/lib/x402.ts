@@ -181,7 +181,7 @@ export function parseDependencies(content: string, filenameHint: string): { name
       if (packages) {
         for (const [path, meta] of Object.entries(packages)) {
           const m = path.match(/node_modules\/(.+)$/);
-          if (m && meta?.version) out.push({ name: m[1], version: meta.version, ecosystem: 'npm' });
+          if (m && m[1] !== undefined && meta?.version) out.push({ name: m[1], version: meta.version, ecosystem: 'npm' });
         }
       }
       const deps = { ...(j.dependencies as Record<string, string>), ...(j.devDependencies as Record<string, string>) };
@@ -198,14 +198,21 @@ export function parseDependencies(content: string, filenameHint: string): { name
     const re = /^\s*(?:require)?\s*([a-zA-Z0-9./_-]+)\s+v?(\d+\.\d+\.\d+(?:[-+][\w.]*)?)/gm;
     let m: RegExpExecArray | null;
     while ((m = re.exec(content))) {
-      if (m[1].includes('/') || m[1].includes('.')) out.push({ name: m[1], version: m[2], ecosystem: 'go' });
+      const name = m[1];
+      const version = m[2];
+      if (name && version && (name.includes('/') || name.includes('.')))
+        out.push({ name, version, ecosystem: 'go' });
     }
     return out;
   }
   // requirements.txt
   const re = /^\s*([A-Za-z0-9_-]+)\s*==\s*([0-9][\w.]*)/gm;
   let m: RegExpExecArray | null;
-  while ((m = re.exec(content))) out.push({ name: m[1], version: m[2], ecosystem: 'pip' });
+  while ((m = re.exec(content))) {
+    const name = m[1];
+    const version = m[2];
+    if (name && version) out.push({ name, version, ecosystem: 'pip' });
+  }
   return out;
 }
 
@@ -286,7 +293,7 @@ export interface PolicyDimension {
   id: string;
   label: string;
   present: boolean;
-  evidence?: string;
+  evidence?: string | undefined;
 }
 
 const DIMS: { id: string; label: string; keys: RegExp[] }[] = [
@@ -323,13 +330,13 @@ export interface HarLikeEntry {
   url: string;
   status: number;
   hadPaymentHeader: boolean;
-  time?: string;
+  time?: string | undefined;
 }
 
 export interface DeliveryFinding {
   url: string;
   status: number;
-  time?: string;
+  time?: string | undefined;
   issue: string;
 }
 

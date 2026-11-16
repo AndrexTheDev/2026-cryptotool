@@ -308,14 +308,14 @@ export default function StvaUpgradeDiff() {
           .split(/\r?\n/)
           .map((l) => l.trim())
           .filter(Boolean)
-          .map((l) => l.split(/[:=,;|]/)[0].trim()),
+          .map((l) => (l.split(/[:=,;|]/)[0] ?? '').trim()),
       );
       const ln = new Set(
         layoutNew
           .split(/\r?\n/)
           .map((l) => l.trim())
           .filter(Boolean)
-          .map((l) => l.split(/[:=,;|]/)[0].trim()),
+          .map((l) => (l.split(/[:=,;|]/)[0] ?? '').trim()),
       );
       const added = [...ln].filter((s) => !lo.has(s));
       const removed = [...lo].filter((s) => !ln.has(s));
