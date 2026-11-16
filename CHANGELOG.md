@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-15 — Wave 20: Clean-Room-Verifikation (Pre-Merge)
+
+- Reproduzierbarkeit bewiesen: alle getrackten Dateien in leeren Raum kopiert, `npm ci` ausschliesslich aus dem Lockfile → komplette Pipeline gruen (typecheck, Build 15 Seiten, dist-Audit, Dep-Audit auf critical, 128/128 Checks). Lockfile hat keinen Drift durch die Weihen-Wellen erlitten.
+
 ## 2026-11-15 — Wave 19b: TypeScript-Staerke-Probe (dokumentiert bewertet)
 
 - Aktuell `strict: true`. Probe gegen `noUncheckedIndexedAccess` + `exactOptionalPropertyTypes`: **103 Diagnosen**; nur-`noUncheckedIndexedAccess`: **68 Stellen** (ueberwiegend Array-Index-Pattern in Tools).
