@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-15 — Wave 14: npm-Audit-Sweep, Astro-Major 6 → 7, Security-Gate in verify
+
+- **Ausloeser:** `npm audit` zeigte 3 Findings — darunter **GHSA-26w7-cxv4-gfx2 (RCE über AVIF-Bildoptimierung, CVSS 9.8, range < 7.2.8)**, womit der bewusste Astro-6-Pin (Wave 9) nicht mehr tragfaehig war.
+- **Major-Upgrade kontrolliert durchgefuehrt:** API-Abwaertskompatibilitaet vorab verifiziert (kein `Astro.glob`, keine Content-Collections, keine ViewTransitions im Code; rein statischer Output). Groesste Node-kompatible Version gewaehlt: **astro 7.0→7.4.1** (7.4.2+ erfordert Node >=22.23.4, Sandbox hat 22.22.3 — engines-Kompatibilitaet gegen npm pro Version geprueft) + @astrojs/react 7.1.9.
+- **Overrides** `esbuild ^0.28.2`, `sharp ^0.35.5` (GHSA-g7r4 Dev-Server, diverse libvips/libheif/libsvg-CVEs) eingezogen.
+- **Verbleibende Findings bewertet (not applicable fuer diese Suite):** GHSA-mh32 (XSS nur via dynamischer Tag-Namen — nicht verwendet) und GHSA-r3h5 (@astrojs/node Datei-Lesen — wir nutzen reinen Static-Output, no Server-Adapter). Beide mit Range <=7.4.6; Nachzug bei Node>=22.23.4-Umgebungen.
+- **Neues Quality-Gate:** `npm run verify` inkludiert jetzt `audit:deps` (npm audit, `--audit-level=critical --omit=dev`) — kritische Dep-Findings brechen kuenftig die Pipeline.
+- Version **1.1.0**. Komplette Pipeline (inkl. Build, 15 Seiten) auf Astro 7.4.1 reproduzierbar gruen.
+
 ## 2026-11-15 — Wave 13: Fee-Bumping-Landschaft (BitVaultStress)
 
 - Neues Wissensaccordion „Gebuehren-Bumping-Landschaft 2026" im Stress-Bericht: pre-signierte Recovery-TXs tragen fixe Fees — die Bewertung haengt von der Relais-Policy ab. Dokumentiert (Quellen: Optech #323, Core-Release-Notes): Full-RBF default seit Core 28.0 (10/2024), verpflichtend seit 29.0 (04/2025); Ephemeral Anchors (P2A `OP_1 0x4e73`) seit 28.0 standard-relay-faehig fuer Zero-Fee-Commitments; TRUC/v3-Pinning-Begrenzung (10.000 vB, eine unbestaetigte Vorfahre); 1p1c-Package-Relay als Rettungsweg unterbezahlter Parents.

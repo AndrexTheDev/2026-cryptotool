@@ -26,7 +26,7 @@ npm run build      # Produktions-Build nach dist/
 npm run preview    # dist/ lokal ausliefern
 npm run audit      # Policy-Audit ueber dist/ (nach Build)
 npm run test:demos # 123-Check Demo-Regression aller 10 Module
-npm run verify     # Gesamtpipeline: typecheck + build + audit + test:demos
+npm run verify     # Gesamtpipeline: typecheck + build + audit-dist + audit:deps (npm audit, critical) + test:demos
 ```
 
 ## Architektur-Regeln (safety invariants)
