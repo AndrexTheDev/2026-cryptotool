@@ -309,6 +309,11 @@ function extractConst(src, name, kind) {
 
 // ---------------------------------------------------------------- Modul 05/01: Struktur-Check
 {
+  const bv = readFileSync('src/components/tools/BitVaultStress.tsx', 'utf8');
+  ok(
+    bv.includes('Full-RBF') && bv.includes('TRUC') && bv.includes('Ephemeral Anchors') && bv.includes('1p1c'),
+    'M04: Fee-Bumping-Landschaft 2026 (Full-RBF/TRUC/Ephemeral Anchors/1p1c) dokumentiert'
+  );
   const src = readFileSync('src/components/tools/PasskeyContinuity.tsx', 'utf8');
   ok(/160|testVector|testvector/i.test(src) && src.includes('p256'), 'M05 Passkey: 160-Byte-Testvektor + P-256-Pfad vorhanden');
   const sg = readFileSync('src/components/tools/SlotGuard7702.tsx', 'utf8');
@@ -421,6 +426,11 @@ function extractConst(src, name, kind) {
 }
 
 {
+  const bv = readFileSync('src/components/tools/BitVaultStress.tsx', 'utf8');
+  ok(
+    bv.includes('Full-RBF') && bv.includes('TRUC') && bv.includes('Ephemeral Anchors') && bv.includes('1p1c'),
+    'M04: Fee-Bumping-Landschaft 2026 (Full-RBF/TRUC/Ephemeral Anchors/1p1c) dokumentiert'
+  );
   const src = readFileSync('src/components/tools/PasskeyContinuity.tsx', 'utf8');
   ok(src.includes("id: 'portability'") && src.includes('CXF 1.0'), 'M04: Portabilitaets-Check (FIDO CXF) in Checkliste');
   ok(src.includes('EIP-7951') && src.includes('Fusaka') && src.includes('03.12.2025'), 'M04: EIP-7951/Fusaka-Mainnet-Kontext benannt');

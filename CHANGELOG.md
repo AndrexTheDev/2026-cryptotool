@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-15 — Wave 13: Fee-Bumping-Landschaft (BitVaultStress)
+
+- Neues Wissensaccordion „Gebuehren-Bumping-Landschaft 2026" im Stress-Bericht: pre-signierte Recovery-TXs tragen fixe Fees — die Bewertung haengt von der Relais-Policy ab. Dokumentiert (Quellen: Optech #323, Core-Release-Notes): Full-RBF default seit Core 28.0 (10/2024), verpflichtend seit 29.0 (04/2025); Ephemeral Anchors (P2A `OP_1 0x4e73`) seit 28.0 standard-relay-faehig fuer Zero-Fee-Commitments; TRUC/v3-Pinning-Begrenzung (10.000 vB, eine unbestaetigte Vorfahre); 1p1c-Package-Relay als Rettungsweg unterbezahlter Parents.
+- Demo-Regression: 123 Checks; Drift-Lock-in hat erneut die README-Zahl gezogen.
+
 ## 2026-11-15 — Wave 12: Known-Delegates, CI-Majors, security.txt
 
 - **SlotGuard-7702**: Known-Delegates-Registry (konservativ, >= 3 unabhaengige Quellen je Adresse): MetaMask EIP-7702 Delegator `0x63c0c19a282a1B52b07dD5a65b58948A07DAE32B` wird bei Delegationen namentlich als Badge markiert — Triage-Trennung „bekannte Implementierung" vs. „unbekannter Delegate" (Dormant-Sweeper-Kandidat). Reset-Hinweis via address(0)-Autorisierung.
