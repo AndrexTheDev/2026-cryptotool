@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-15 — Wave 18: Merge-Readiness-Sweep
+
+- **Secrets-/Key-Audit** ueber alle 73 getrackten Dateien: keine Private-Key-Artefakte (Testvektoren sind dokumentierte Konstrukte, kein Material). Regex-Scan (`BEGIN…PRIVATE`, 64-hex `private_key`-Muster) sauber.
+- **CSP-Entscheidung erneut bestaetigt:** Meta-CSP in BaseLayout deckt `object-src 'none'`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'` ab; `script-src … 'unsafe-inline'` ist zwingend, solange 61 Astro-Inline-Skripte (DE|EN-Toggle, Hydration-Guards, JSON-LD) ohne Nonce-Mechanik bestehen — Hashes neben `'unsafe-inline'` waeren wirkungslos. Entscheidung ROADMAP #8 steht.
+- **og:image** verweist absolut auf /og-image.svg (vorhanden); robots.txt verlinkt die Sitemap; .gitignore deckt node_modules/dist/.astro/.env ab; groessster getrackter Blob ist package-lock.json (200 KB) — keine grossen Artefakte im Repo.
+- Repo-Befund: LICENSE fehlt upstream — Lizenzwahl liegt beim Owner (nicht Teil des Code-PRs).
+
 ## 2026-11-15 — Wave 17: Feature↔Demo-Paritaet
 
 - **SlotGuard-Demo** zeigt jetzt auf den MetaMask-Delegator (0x63c0c19a…E32B) → uebt den Known-Delegates-Badge-Pfad aus Wave 12 (Delegation mit Code, Label, Reset-Hinweis greifbar).
