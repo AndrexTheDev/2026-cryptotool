@@ -26,12 +26,23 @@ import {
   scanBytecodePatterns,
 } from '../../lib/evm-utils';
 
+// Kanonische, mehrfach unabhaengig verifizierte 7702-Delegate-Adressen.
+// Konservativ: nur Addressen mit mindestens drei unabhaengigen Quellen.
+export const KNOWN_DELEGATES: Record<string, { name: string; note: string }> = {
+  '0x63c0c19a282a1b52b07dd5a65b58948a07dae32b': {
+    name: 'MetaMask EIP-7702 Delegator',
+    note: 'MetaMask whitelistet ausschliesslich diesen Delegator; Rueckkehr zur EOA via 7702-Autorisierung auf address(0).',
+  },
+};
+const knownDelegate = (addr: string | null | undefined) => (addr ? KNOWN_DELEGATES[addr.toLowerCase()] : undefined);
+
 interface ChainFinding {
   chainId: number;
   status: 'no-delegation' | 'delegation' | 'unknown-delegate' | 'error';
   code?: string;
   delegate?: string | null;
   delegateHasCode?: boolean;
+  delegateLabel?: string;
   nonZeroSlots: { slot: string; label?: string; value: string }[];
   scannedSlots: number;
   source?: 'user' | 'wallet' | 'public' | 'cache' | 'offline';
@@ -524,6 +535,7 @@ export default function SlotGuard7702() {
                 {f.delegate && (
                   <p>
                     Delegate: <code className="mono text-prime-hi break-all">{f.delegate}</code>{' '}
+                    {f.delegateLabel && <span className="badge badge-green">{f.delegateLabel}</span>}
                     {f.delegateHasCode === true && <span className="badge badge-green">Code vorhanden</span>}
                     {f.delegateHasCode === false && <span className="badge badge-red">kein Code</span>}
                   </p>

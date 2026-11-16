@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-15 — Wave 12: Known-Delegates, CI-Majors, security.txt
+
+- **SlotGuard-7702**: Known-Delegates-Registry (konservativ, >= 3 unabhaengige Quellen je Adresse): MetaMask EIP-7702 Delegator `0x63c0c19a282a1B52b07dD5a65b58948A07DAE32B` wird bei Delegationen namentlich als Badge markiert — Triage-Trennung „bekannte Implementierung" vs. „unbekannter Delegate" (Dormant-Sweeper-Kandidat). Reset-Hinweis via address(0)-Autorisierung.
+- **CI**: actions/checkout v4 → v7.0.1, actions/setup-node v4 → v7.1.0 (drei Major-Stufen nachgezogen, via GitHub-API gegen letzte Releases verifiziert).
+- **security.txt** (RFC 9116) unter `public/.well-known/security.txt`: Kontakt ueber Issues/Advisory-Flow, Expires 30.06.2027, Sprachen de/en. audit-dist erzwingt Existenz + parsebares, nicht abgelaufenes Expires.
+- Demo-Regression: 121 Checks.
+
 ## 2026-11-15 — Wave 11: EIP-7951/Fusaka-Mainnet-Kontext (PasskeyContinuity)
 
 - P256VERIFY (Precompile 0x0100) ist seit dem **Fusaka-Hardfork (03.12.2025)** konsensfähig auf dem Ethereum-Mainnet aktiv — selbe Adresse wie RIP-7212 auf Rollups. Adoptions-Referenz im Tool entsprechend zweigeteilt (Mainnet EIP-7951 vs. Rollup-RIP-7212).

@@ -159,5 +159,20 @@ for (const slug of TOOLSLUGS) {
 }
 ok('Tool-Seiten: noscript vorhanden, initiales JS <= 400 KB');
 
+// ---------------------------------------------------------------- 8) security.txt (RFC 9116)
+{
+  const sec = join(DIST, '.well-known', 'security.txt');
+  if (!existsSync(sec)) fail('.well-known/security.txt fehlt im Build');
+  else {
+    const t = readFileSync(sec, 'utf8');
+    const exp = t.match(/^Expires:\s*(.+)$/m)?.[1]?.trim();
+    if (!exp) fail('security.txt ohne Expires-Feld');
+    const expDate = exp ? new Date(exp) : null;
+    if (!expDate || Number.isNaN(expDate.getTime())) fail('security.txt Expires nicht parsebar');
+    else if (expDate.getTime() < Date.now()) fail('security.txt Expires ist abgelaufen');
+  }
+  ok('security.txt vorhanden, Expires gueltig');
+}
+
 console.log(failures ? `\n${failures} Befund(e) — Audit NICHT bestanden` : '\nAudit bestanden');
 process.exit(failures ? 1 : 0);

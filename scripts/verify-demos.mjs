@@ -428,6 +428,23 @@ function extractConst(src, name, kind) {
   ok((cl.match(/id: '/g) ?? []).length === 5, `M04: exakt 5 Checklisten-Items im CHECKLIST-Array (${(cl.match(/id: '/g) ?? []).length})`);
 }
 
+// ---------------------------------------------------------------- HYGIENE: CI-Versionen + bekannte Delegates
+{
+  const wf = readFileSync('.github/workflows/build-audit.yml', 'utf8');
+  ok(wf.includes('actions/checkout@v7') && wf.includes('actions/setup-node@v7'), 'HYGIENE: CI-Actions auf v7 (Stand 11/2026)');
+  ok(!wf.includes('@v4') && !wf.includes('@v3'), 'HYGIENE: keine ausgelaufenen Action-Majors mehr');
+  const sg = readFileSync('src/components/tools/SlotGuard7702.tsx', 'utf8');
+  ok(sg.includes('0x63c0c19a282a1b52b07dd5a65b58948a07dae32b'), 'M05: MetaMask-Delegator in Known-Delegates-Registry');
+  ok(existsDistWellKnown(), 'M05/HYGIENE: security.txt landet im Build (Vorab pruefbar an public/)');
+}
+function existsDistWellKnown() {
+  try {
+    return readFileSync('public/.well-known/security.txt', 'utf8').includes('Expires:');
+  } catch {
+    return false;
+  }
+}
+
 // ---------------------------------------------------------------- contenthash Vektoren vs. Referenz-Implementierungen
 // Referenzen: multiformats CID.decode().toV1().toString(base32) bzw. content-hash.decode()
 // (Beide offiziell gegen den EIP-Vektor verifiziert — Regression gegen Varint-Bug-klasse
