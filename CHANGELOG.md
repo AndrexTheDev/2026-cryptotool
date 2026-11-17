@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-16 — Wave 23: DAC8 Live-Status-Refresh (Q4/2026-Recherche)
+
+- Hintergrund: DAC8 ist seit 01.01.2026 **live**, das erste Meldejahr 2026 laeuft gerade — der bisherige Tool-Hinweis war bereits im Praesens formuliert, aber ohne deutsche Umsetzungs- und Frist-Fakten. Verifizierte Aktualisierung des rechtlichen Zeitkontexts in `Dac8SelfProof.tsx`:
+  - **DE-Umsetzung** durch das Kryptowerte-Steuertransparenzgesetz (**KStTG**): Bundestag 06.11.2025, Bundesrat-Zustimmung **19.12.2025** (Deloitte German Tax News, 23.12.2025; kleinstb.de, Stand 09/2026).
+  - Erster Meldezeitraum = **KJ 2026**; erste Uebermittlungen 2027: EU/CARF-Baseline **31.01.2027** (EY), deutsche **KStTG-Frist 31.07.2027** ans BZSt (kleinstb/PPI); erster automatischer EU-Austausch bis **30.09.2027**.
+  - Nutzer-**Selbstauskunft bis 01.01.2027** (Bestands-Accounts); KStTG-Bussgeldrahmen **bis 50.000 EUR** je Verstoß; Praxis-Falle **Einstandsbasis 0** bei zugewanderten Coins (Beweislast beim Nutzer); **CARF international ab 2027 in 58 Laendern**.
+- Lock-in: **+2 Checks (129 → 131)** — M03-Content-Asserts auf KStTG/Datum/Fristen/Bussgeld/CARF-58; README-Drift-Lock-in auf 131 aktualisiert.
+- Pipeline: 131/131 gruen; tsc mit beiden Strictness-Flags 0 Fehler.
+- **PR #3 zuvor squash-gemergt** (Owner-Entscheidung, Commit 2523235 auf main; Branch auf origin/main neubasiert).
+
 ## 2026-11-16 — Wave 22: exactOptionalPropertyTypes dauerhaft aktiviert
 
 - **`exactOptionalPropertyTypes` permanent aktiviert** (tsconfig, zusaetzlich zu `noUncheckedIndexedAccess`). Alle gemessenen Diagnosen (27 Fehlerblöcke, Wellen-19b-Rest) behoben — ausschliesslich durch Verbreiterung der *Deklarationen*: optionale Properties, die Produzenten bereits explizit als `undefined` uebergeben, tragen jetzt den ehrlichen Typ `prop?: T | undefined`.
