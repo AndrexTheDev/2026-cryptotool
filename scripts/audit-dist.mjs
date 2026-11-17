@@ -93,7 +93,7 @@ if (homeJsBytes > 300 * KB) fail(`homepage JS too heavy: ${(homeJsBytes / KB).to
 else ok(`homepage JS initial: ${(homeJsBytes / KB).toFixed(0)} KB (limit 300 KB)`);
 
 // ---------------------------------------------------------------- 4) mandatory artifacts
-for (const must of ['sitemap-index.xml', 'robots.txt', 'llms.txt', 'agb/index.html', 'disclaimer/index.html', 'datenschutz/index.html']) {
+for (const must of ['sitemap-index.xml', 'robots.txt', 'llms.txt', 'agb/index.html', 'disclaimer/index.html', 'datenschutz/index.html', 'favicon.svg', 'og-image.svg', 'logo.png']) {
   if (!existsSync(join(DIST, must))) fail(`mandatory artifact missing: ${must}`);
   else ok(`artifact present: ${must}`);
 }
