@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-17 — Wave 32: Glamsterdam schedule correction (Hoodi postponed)
+
+- **Stale schedule fixed** in `PasskeyContinuity.tsx` (fork-landscape block): the Hoodi testnet fork (planned 26.10.2026) was **postponed on 22.10.2026** with no new date (EF blog), so the floated December mainnet candidates (01./02./08./09.12.) lapsed — no mainnet date is fixed (EIP-7773 leaves the row blank; ethereum.org: "Q4 2026 · not confirmed"). The previous wording still had Hoodi on track for late October.
+- Sources: coinpaprika roadmap review (09.11.2026), EF postponement notice (22.10.2026), EIP-7773.
+- Lock-in unchanged: the M04 fork-landscape assert (Glamsterdam/06.10.2026/BPO-2/EIP-7732) still passes — all asserted strings retained.
+- Verified: tsc 0 errors (both flags); full pipeline runs in CI (sandbox Node 22.22.3 < 22.23.4).
+
 ## 2026-11-17 — Wave 31: TypeScript 7 assessment (documented decision)
 
 - **Dedicated evaluation of TS 7.0.2** (PR #15) against this repo, per the wave-9/14/26 deferral. Findings: tsconfig is TS7-clean (`module: ESNext`, `moduleResolution: Bundler`, `target: ES2022`, no removed options); zero programmatic-API consumers (no typescript-eslint/ts-jest/ts-morph/typedoc; Vite transpiles via esbuild); no `astro check`/Volar usage — the known TS 7.0 template-checking blocker (compiler API absent until 7.1) does not apply here. CI on PR #15 is green with the full pipeline.
