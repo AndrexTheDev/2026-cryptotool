@@ -2,9 +2,15 @@
 
 ## Open follow-ups
 
-- [ ] **Astro bump ≥ 7.4.7** (clears GHSA-mh32-jxcr-mh9f XSS low + GHSA-r3h5-4585-7x3w @astrojs/node medium): blocked in this sandbox — 7.4.2+ requires Node ≥ 22.23.4, we have 22.22.3. Neither advisory is reachable here (static output, no adapter, no dynamic tags). Re-attempt when the environment provides Node ≥ 22.23.4.
-- [ ] **picomatch ReDoS (GHSA-fc5q-39xc-vjpf / CVE-2026-112366, high):** no patched release exists yet (fix PR merged, unpublished). ReDoS needs attacker-controlled extglob patterns; only our own build config globs are used — not exploitable. Re-audit once picomatch > 4.0.7 ships; it propagates via fdir/tinyglobby/vite/astro (build-time only).
-- [ ] **typescript 7.x** (native Go port, changed build/tooling behavior): assess only after the Astro/Node lift (wave-9/14 decision).
+All three are **environment-blocked** (this sandbox runs Node 22.22.3); none is a code change we can land here. Each lists its exact trigger command so it can be executed the moment the precondition is met.
+
+- [ ] **Astro bump ≥ 7.4.7** (clears GHSA-mh32-jxcr-mh9f XSS low + GHSA-r3h5-4585-7x3w @astrojs/node medium): blocked — 7.4.2+ requires Node ≥ 22.23.4, we have 22.22.3. Neither advisory is reachable here (static output, no adapter, no dynamic tags). **Trigger:** when `node --version` ≥ v22.23.4 → `npm install astro@latest @astrojs/react@latest` then `npm run verify` and a fresh `npm audit`.
+- [ ] **picomatch ReDoS (GHSA-fc5q-39xc-vjpf / CVE-2026-112366, high):** no patched release exists yet (fix PR micromatch/picomatch#194 merged, unpublished). ReDoS needs attacker-controlled extglob patterns; only our own build config globs are used — not exploitable. Propagates via fdir/tinyglobby/vite/astro (build-time only). **Trigger:** when `npm view picomatch version` > 4.0.7 → add an `overrides` entry `"picomatch": "^<fixed>"` in package.json, `npm ci`, `npm run verify`, `npm audit`.
+- [ ] **typescript 7.x** (native Go port, changed build/tooling behavior): assess only after the Astro/Node lift (wave-9/14 decision). **Trigger:** after the astro bump lands and the toolchain is stable → evaluate the TS7 native port against the typecheck + build.
+
+### Periodic re-audit
+
+Run `npm audit` (full, all severities) at the start of each session; `npm run audit:deps` (prod-only, critical) is the enforced pipeline gate and currently reports 0.
 
 ## Waves 1–3 (completed, Nov 2026)
 
