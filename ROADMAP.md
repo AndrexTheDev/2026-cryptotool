@@ -2,10 +2,9 @@
 
 ## Open follow-ups
 
-The astro blocker is resolved (Wave 30). Two items remain, neither landable from this sandbox; each lists its exact trigger command.
+Only one external blocker remains; the trigger command is documented.
 
 - [ ] **picomatch ReDoS (GHSA-fc5q-39xc-vjpf / CVE-2026-112366, high):** no patched release exists yet (fix PR micromatch/picomatch#194 merged, unpublished). ReDoS needs attacker-controlled extglob patterns; only our own build config globs are used — not exploitable. Propagates via fdir/tinyglobby/vite/astro (build-time only). **Trigger:** when `npm view picomatch version` > 4.0.7 → add an `overrides` entry `"picomatch": "^<fixed>"` in package.json, `npm ci`, `npm run verify`, `npm audit`.
-- [ ] **typescript 7.x** (native Go port): **assessed in Wave 31** (full write-up as comment on PR #15). Verdict: technically adoptable today — tsconfig is TS7-clean (no removed options), zero programmatic-API consumers, no `astro check`/Volar usage, CI on PR #15 green. Deferred to **7.1+** because diagnostics parity with the classic compiler is not yet guaranteed and 7.0 ships no stable compiler API (would block future `astro check`/lint tooling). No urgency (no security issue; typecheck speed irrelevant at this size). **Trigger:** Dependabot proposes 7.1 → re-run the assessment, then merge.
 
 ### Periodic re-audit
 
@@ -13,6 +12,8 @@ Run `npm audit` (full, all severities) at the start of each session; `npm run au
 
 ## Resolved follow-ups
 
+- [x] **typescript 7.x** (Wave 33, PR #15, owner decision): typescript 5.9.3 → 7.0.2 (native Go compiler) adopted after local verification — tsc 7.0.2 reports 0 errors in both modes (standard + noUncheckedIndexedAccess/exactOptionalPropertyTypes) on this codebase, identical to 5.9.3; runs fine on the sandbox Node 22.22.3. Note: TS 7.0 ships no stable programmatic compiler API (7.1) — relevant only if future tooling (astro check, lint stack) is adopted.
+- [x] **Brand-asset audit lock** (PR #19): favicon.svg / og-image.svg / logo.png are mandatory artifacts in audit-dist.
 - [x] **Astro bump ≥ 7.4.7** (Wave 30, PR #14): astro 7.4.12 via Dependabot — CI-verified end-to-end (runner Node 22.23.x satisfies the engine floor the dev sandbox lacks). Clears GHSA-mh32-jxcr-mh9f + GHSA-r3h5-4585-7x3w (both were unreachable: static output, no adapter, no dynamic tags). Consequence: `engines` floor raised to Node ≥ 22.23.4 and `.nvmrc` → 22.23.4; **sandboxes on Node 22.22.x can no longer build locally — CI is the verification path.**
 
 ## Waves 1–3 (completed, Nov 2026)
