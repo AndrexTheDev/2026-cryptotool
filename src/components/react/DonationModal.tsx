@@ -112,7 +112,7 @@ export default function DonationModal({ open, onClose }: { open: boolean; onClos
       className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-6"
       role="dialog"
       aria-modal="true"
-      aria-label="Support AndrexTheDev"
+      aria-label="Support StackAutopsy"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -120,7 +120,7 @@ export default function DonationModal({ open, onClose }: { open: boolean; onClos
       <div className="card w-full sm:max-w-lg max-h-[92vh] overflow-y-auto rounded-b-none sm:rounded-b-xl p-5 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-lg">Support AndrexTheDev</h2>
+            <h2 className="text-lg">Support StackAutopsy</h2>
             <p className="text-sm mt-1">
               The suite is funded by voluntary on-chain support from the community. Independent, no account,
               no tracking.

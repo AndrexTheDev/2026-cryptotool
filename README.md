@@ -1,4 +1,8 @@
-# AndrexTheDev — Web3 Security & Forensics Suite
+# StackAutopsy — Web3 Security & Forensics Suite
+
+<p align="center">
+  <img src="public/logo.png" alt="StackAutopsy logo — three-layer stack with the dissected middle layer in gold" width="360" />
+</p>
 
 Ten specialized Web3, Bitcoin and compliance tools, executed **fully locally in the browser**: no accounts, no server upload, no tracking pixels. Static site generation with **Astro 7 + React islands + TypeScript + Tailwind 4**.
 

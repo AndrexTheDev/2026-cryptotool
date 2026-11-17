@@ -195,7 +195,7 @@ function extractConst(src, name, kind) {
 // ---------------------------------------------------------------- module 03: DAC8 BIP-322
 {
   const { signBip322P2tr, verifyBip322, classifyBip322Signature, inspectPofPsbt } = await import('../src/lib/bip322.ts');
-  const message = 'AndrexTheDev DAC8-SelfProof demo-check';
+  const message = 'StackAutopsy DAC8-SelfProof demo-check';
   const priv = new Uint8Array(32);
   priv[31] = 1;
   const { address, signatureBase64 } = await signBip322P2tr(priv, message);
@@ -329,14 +329,14 @@ function extractConst(src, name, kind) {
   const { donationUri, DONATION_CHAINS } = await import('/tmp/donation.bundle.mjs');
   const DONATION = Object.fromEntries(DONATION_CHAINS.map((c) => [c.id, c.address]));
   const btc = donationUri('btc', '0.01');
-  ok(btc === `bitcoin:${DONATION.btc}?label=AndrexTheDev&amount=0.01`, 'donations: BTC BIP-21 exact');
+  ok(btc === `bitcoin:${DONATION.btc}?label=StackAutopsy&amount=0.01`, 'donations: BTC BIP-21 exact');
   const sol = donationUri('sol');
-  ok(sol === `solana:${DONATION.sol}?label=AndrexTheDev`, 'donations: SOL Solana Pay format');
+  ok(sol === `solana:${DONATION.sol}?label=StackAutopsy`, 'donations: SOL Solana Pay format');
   const eth = donationUri('eth', '0.05');
   ok(eth === `ethereum:${DONATION.eth}?value=50000000000000000`, 'donations: ETH EIP-681 value-in-wei');
   const ethRaw = donationUri('eth', undefined, true);
   ok(ethRaw === DONATION.eth, 'donations: raw address mode');
-  ok(donationUri('btc', 'abc') === `bitcoin:${DONATION.btc}?label=AndrexTheDev`, 'donations: invalid amount is ignored');
+  ok(donationUri('btc', 'abc') === `bitcoin:${DONATION.btc}?label=StackAutopsy`, 'donations: invalid amount is ignored');
 }
 
 // ---------------------------------------------------------------- QR encoding (uqr)
