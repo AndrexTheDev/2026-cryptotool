@@ -5,7 +5,7 @@
 The astro blocker is resolved (Wave 30). Two items remain, neither landable from this sandbox; each lists its exact trigger command.
 
 - [ ] **picomatch ReDoS (GHSA-fc5q-39xc-vjpf / CVE-2026-112366, high):** no patched release exists yet (fix PR micromatch/picomatch#194 merged, unpublished). ReDoS needs attacker-controlled extglob patterns; only our own build config globs are used — not exploitable. Propagates via fdir/tinyglobby/vite/astro (build-time only). **Trigger:** when `npm view picomatch version` > 4.0.7 → add an `overrides` entry `"picomatch": "^<fixed>"` in package.json, `npm ci`, `npm run verify`, `npm audit`.
-- [ ] **typescript 7.x** (native Go port, changed build/tooling behavior): Dependabot PR #15 stands open as the assessment candidate (CI there is green — TS7 typechecks this codebase with both strictness flags). Dedicated evaluation before any switch; no security urgency. **Trigger:** deliberate owner decision after reviewing PR #15.
+- [ ] **typescript 7.x** (native Go port): **assessed in Wave 31** (full write-up as comment on PR #15). Verdict: technically adoptable today — tsconfig is TS7-clean (no removed options), zero programmatic-API consumers, no `astro check`/Volar usage, CI on PR #15 green. Deferred to **7.1+** because diagnostics parity with the classic compiler is not yet guaranteed and 7.0 ships no stable compiler API (would block future `astro check`/lint tooling). No urgency (no security issue; typecheck speed irrelevant at this size). **Trigger:** Dependabot proposes 7.1 → re-run the assessment, then merge.
 
 ### Periodic re-audit
 
