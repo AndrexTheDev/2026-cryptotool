@@ -57,7 +57,7 @@ export const UPGRADE_ABIS = [
   },
 ] as const;
 
-/** Safe v1.3.x Typed-Data fuer safeTxHash (Contract-Version mit chainId in der Domain). */
+/** Safe v1.3.x typed data for safeTxHash (contract version with chainId in the domain). */
 export interface SafeTx {
   to: string;
   value: string | bigint;
@@ -110,7 +110,7 @@ export async function computeSafeTxHash(safeAddress: string, chainId: number, tx
   });
 }
 
-/** Parst einen Safe-Web-App-JSON-Export (Toleranz fuer Schreibweisen). */
+/** Parses a Safe web app JSON export (tolerant of spelling variants). */
 export function parseSafeExport(text: string): { safeTx: SafeTx; safeAddress: string; chainId: number; safeTxHash?: string | undefined } | null {
   try {
     const j = JSON.parse(text) as Record<string, unknown>;
@@ -142,8 +142,8 @@ export function parseSafeExport(text: string): { safeTx: SafeTx; safeAddress: st
 
 // ---------------------------------------------------------------------------
 // Eingebettete, minimal ERC-7730-inspirierte Clear-Signing-Deskriptoren
-// (Registry-Auszug, lokal gebundelt - kein Netzabruf). Format angelehnt an
-// ERC-7730: selektor -> menschenlesbare Feldbeschreibung.
+// (registry excerpt, bundled locally — no network fetch). Format modeled on
+// ERC-7730: selector -> human-readable field description.
 // ---------------------------------------------------------------------------
 
 export interface ClearSignDescriptor {
@@ -158,7 +158,7 @@ export const LOCAL_ERC7730_REGISTRY: ClearSignDescriptor[] = [
     selector: '0x3659cfe6',
     label: 'Transparent-Proxy: Implementierung wechseln (upgradeTo)',
     fields: [{ path: 'newImplementation', label: 'Neue Implementierung' }],
-    riskNote: 'Ersetzt die gesamte Ausfuehrungslogik des Proxys.',
+    riskNote: 'Replaces the entire execution logic of the proxy.',
   },
   {
     selector: '0x4f1ef286',
@@ -167,17 +167,17 @@ export const LOCAL_ERC7730_REGISTRY: ClearSignDescriptor[] = [
       { path: 'newImplementation', label: 'Neue Implementierung' },
       { path: 'data', label: 'Initialisierungs-Calldata' },
     ],
-    riskNote: 'Ersetzt die Logik UND fuehrt sofort Code im Proxy-Kontext aus.',
+    riskNote: 'Replaces the logic AND immediately executes code in the proxy context.',
   },
   {
     selector: '0x6a761202',
-    label: 'Safe Multisig: Transaktion ausfuehren (execTransaction)',
+    label: 'Safe multisig: execute transaction (execTransaction)',
     fields: [
-      { path: 'to', label: 'Ziel' },
-      { path: 'value', label: 'ETH-Betrag (wei)' },
+      { path: 'to', label: 'Target' },
+      { path: 'value', label: 'ETH amount (wei)' },
       { path: 'operation', label: 'Operation (0=Call, 1=DelegateCall)' },
     ],
-    riskNote: 'operation=1 (DelegateCall) fuehrt fremden Code mit Multisig-Berechtigungen aus.',
+    riskNote: 'operation=1 (DelegateCall) executes foreign code with multisig privileges.',
   },
 ];
 
@@ -201,7 +201,7 @@ export async function decodeUpgradeCalldata(calldata: string): Promise<DecodedCa
   try {
     const v = await import('viem');
     const decoded = v.decodeFunctionData({ abi: UPGRADE_ABIS as unknown as never[], data: cd as `0x${string}` });
-    // args ist positionelles Array → auf Parameternamen der verwendeten ABI mappen
+    // args is a positional array → map onto the parameter names of the ABI used
     const abiEntry = (UPGRADE_ABIS as readonly { name: string; inputs: readonly { name: string }[] }[]).find(
       (a) => a.name === decoded.functionName,
     );
@@ -254,7 +254,7 @@ export async function eip712HashJson(typedDataJson: string): Promise<{ domainSep
 // Kanonische Safe-Singleton-Registry (Quelle: safe-global/safe-deployments,
 // Stand 2026-11; v1.5.0 seit 03.07.2025 onchain, seit 09/2026 offiziell als
 // Upgrade-Empfehlung in Safe{Wallet}).
-// Adressen sind lowercase-normalisiert abzulegen (Summenpruefung via Pruefsumme
+// addresses are stored lowercase-normalized (checksum verification via
 // im Upstream-Repo).
 export interface SafeSingleton {
   version: string;

@@ -12,8 +12,8 @@ interface Props {
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   robots?: string;
   /**
-   * shell: 'interactive' (Standard, laedt GlobalApp-Client fuer Palette/RPC/Spenden)
-   *         'static'      (Landing + Recht: 0 KB JavaScript — harte Vorgabe)
+   * shell: 'interactive' (default, loads the GlobalApp client for palette/RPC/donations)
+   *         'static'      (landing + legal: 0 KB JavaScript — hard requirement)
    */
   shell?: 'interactive' | 'static';
 }
@@ -24,7 +24,7 @@ const ogImage = SITE_URL + '/og-image.svg?v=1';
 ---
 
 <!doctype html>
-<html lang="de" class={shell === 'interactive' ? 'js-shell' : ''}>
+<html lang="en" class={shell === 'interactive' ? 'js-shell' : ''}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -47,7 +47,7 @@ const ogImage = SITE_URL + '/og-image.svg?v=1';
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
     <meta property="og:site_name" content={`${BRAND} — ${SUITE_NAME}`} />
-    <meta property="og:locale" content="de_DE" />
+    <meta property="og:locale" content="en_GB" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
@@ -57,7 +57,7 @@ const ogImage = SITE_URL + '/og-image.svg?v=1';
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
   <body class="min-h-screen flex flex-col">
-    <a href="#main" class="skip-link">Zum Inhalt springen</a>
+    <a href="#main" class="skip-link">Skip to content</a>
     <TopNav currentPath={Astro.url.pathname} />
     <main id="main" class="flex-1 w-full" tabindex="-1">
       <slot />
@@ -69,8 +69,8 @@ const ogImage = SITE_URL + '/og-image.svg?v=1';
       ) : (
         <noscript>
           <p class="container-x py-3 text-xs text-dim">
-            Diese Seite funktioniert vollständig ohne JavaScript. Interaktive Werkzeuge (Palette, RPC-Status,
-            Spenden-QR) stehen auf den Werkzeug-Seiten zur Verfuegung.
+            This page works fully without JavaScript. Interactive tools (palette, RPC status,
+            donation QR) are available on the tool pages.
           </p>
         </noscript>
       )

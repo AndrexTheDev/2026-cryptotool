@@ -64,7 +64,7 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
       onClick={(e) => e.target === e.currentTarget && onClose()}
       role="dialog"
       aria-modal="true"
-      aria-label="Schnell-Tool-Wechsler"
+      aria-label="Quick tool switcher"
     >
       <div className="card w-full max-w-xl overflow-hidden" onKeyDown={onKey}>
         <div className="flex items-center gap-2 border-b border-line px-4 py-3">
@@ -72,15 +72,15 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
           <input
             ref={inputRef}
             className="w-full bg-transparent outline-none text-ink placeholder:text-dim"
-            placeholder="Werkzeug suchen … (10 Module)"
+            placeholder="Search tools … (10 modules)"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            aria-label="Werkzeug suchen"
+            aria-label="Search tools"
           />
           <kbd className="text-[10px] text-dim border border-line rounded px-1.5 py-0.5">ESC</kbd>
         </div>
         <ul className="max-h-[50vh] overflow-y-auto p-1.5" role="listbox">
-          {items.length === 0 && <li className="px-3 py-4 text-sm text-dim">Kein Werkzeug gefunden.</li>}
+          {items.length === 0 && <li className="px-3 py-4 text-sm text-dim">No tool found.</li>}
           {items.map((t, i) => {
             const catHeader = CATEGORY_LABEL[t.category] !== lastCat ? CATEGORY_LABEL[t.category] : null;
             lastCat = CATEGORY_LABEL[t.category];

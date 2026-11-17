@@ -1,13 +1,13 @@
-// x402-PaywallGuard: lokale Advisory-Datenbank, Lockfile-Parser, Pattern-Scanner,
-// ERC-7715-Policy-Radar und HAR-Lieferabgleich. Alles clientseitig deterministisch.
+// x402-PaywallGuard: local advisory database, lockfile parser, pattern scanner,
+// ERC-7715 policy radar and HAR delivery reconciliation. All client-side deterministic.
 
 // ---------------------------------------------------------------------------
-// Advisory-DB (Stand 2026-11, eingebettet). Schwellen aus der Pflichtvorgabe:
-// - ungepatchte x402-TypeScript-Pakete < 2.23.0
+// Advisory DB (as of 2026-11, embedded). Thresholds from the specification:
+// - unpatched x402 TypeScript packages < 2.23.0
 // - @x402/core < 2.28.0
-// - Alt-Pakete (x402-legacy-Linie, z. B. x402-express/x402-fetch) < 0.5.2
-// - Python-Paket < 2.20.0
-// - Go-Modul < v2.23.0
+// - legacy packages (x402 legacy line, e.g. x402-express/x402-fetch) < 0.5.2
+// - Python package < 2.20.0
+// - Go module < v2.23.0
 // ---------------------------------------------------------------------------
 
 export interface Advisory {
@@ -19,11 +19,11 @@ export interface Advisory {
   summary: string;
 }
 
-// Stand der Matrix: Oktober/November 2026. Quellenlage: Oeffentliche Advisory-Meldungen
-// (V12-Disclosure mit 25 Findings vom 22.10.2026, darunter 3 kritische ohne Advisory-Eintrag in
-// npm audit/PyPI; Payment-Bypass-Fix in @x402/core 2.27.0 vom 22.09.2026; PT-2026-118463,
-// CVSS 6.5 (3.1) / 6.9 (4.0), SIWX-Server-Auth-Bypass). Versions-Schwellen sind konservativ
-// auf die jeweils erste gefixte Linie gesetzt.
+// Matrix status: October/November 2026. Sources: public advisory reports
+// (V12 disclosure with 25 findings dated 22.10.2026, including 3 critical ones without an advisory entry in
+// npm audit/PyPI; payment bypass fix in @x402/core 2.27.0 dated 22.09.2026; PT-2026-118463,
+// CVSS 6.5 (3.1) / 6.9 (4.0), SIWX server auth bypass). Version thresholds are conservatively
+// set to the first fixed line in each case.
 export const X402_ADVISORIES: Advisory[] = [
   {
     id: 'V12-2026-CRIT-1',
@@ -32,7 +32,7 @@ export const X402_ADVISORIES: Advisory[] = [
     belowVersion: '2.23.0',
     severity: 'critical',
     summary:
-      'Kein Default-Spend-Limit im Standard-Client: boesartige API kann das gesamte Agent-Token-Guthaben anfordern. Fix in @x402/core, @x402/fetch, @x402/axios 2.23.0 (18.08.2026).',
+      'No default spend limit in the standard client: a malicious API can request the entire agent token balance. Fixed in @x402/core, @x402/fetch, @x402/axios 2.23.0 (18.08.2026).',
   },
   {
     id: 'V12-2026-CRIT-2',
@@ -41,7 +41,7 @@ export const X402_ADVISORIES: Advisory[] = [
     belowVersion: '2.23.0',
     severity: 'critical',
     summary:
-      'Solana-Facilitator akzeptierte ApproveChecked als Zahlung (kompletter Payment-Bypass, betroffen 2.0.0–2.22.0). Fix: @x402/svm 2.23.0.',
+      'Solana facilitator accepted ApproveChecked as payment (complete payment bypass, affected 2.0.0–2.22.0). Fix: @x402/svm 2.23.0.',
   },
   {
     id: 'V12-2026-CRIT-3',
@@ -50,7 +50,7 @@ export const X402_ADVISORIES: Advisory[] = [
     belowVersion: '2.23.0',
     severity: 'critical',
     summary:
-      'SIWx-Sign-In signierte Logins fuer Fremd-Domains (Session-Uebernahme via relayed Login). Fix: createSIWxPayload mit Pflicht-Finale-URL in @x402/extensions/core 2.23.0.',
+      'SIWx sign-in signed logins for third-party domains (session takeover via relayed login). Fix: createSIWxPayload with mandatory final URL in @x402/extensions/core 2.23.0.',
   },
   {
     id: 'X402-CORE-2026-09',
@@ -67,7 +67,7 @@ export const X402_ADVISORIES: Advisory[] = [
     belowVersion: '2.29.0',
     severity: 'high',
     summary:
-      'Transitivabhaengigkeit zod 3.x mit GHSA-mrhx-c7xc-m3w5 (CVE-2023-54404); erst 2.29.0 nutzt zod >= 4.6.6 und deckelt accepts/discovery/SIWX-Listen auf 1024 Eintraege sowie Facilitator-Antworten auf 1 MiB (Speicher-DoS). Fix: 2.29.0 (10/2026).',
+      'Transitive dependency zod 3.x with GHSA-mrhx-c7xc-m3w5 (CVE-2023-54404); only 2.29.0 uses zod >= 4.6.6 and caps accepts/discovery/SIWX lists at 1024 entries and facilitator responses at 1 MiB (memory DoS). Fix: 2.29.0 (10/2026).',
   },
   {
     id: 'X402-CORE-2026-11',
@@ -76,7 +76,7 @@ export const X402_ADVISORIES: Advisory[] = [
     belowVersion: '2.30.0',
     severity: 'high',
     summary:
-      'Advisory-Hook-Isolation: ein werfender afterSettle-Hook liess settle() ablehnen, obwohl die onchain-Settlement bereits final ausgefuehrt war (Zahlung vollzogen, Server meldet Fehler). Fix: 2.30.0 (Fehler werden geloggt/uebersprungen; Gate-Hooks bleiben fail-closed).',
+      'Advisory hook isolation: a throwing afterSettle hook made settle() reject although the onchain settlement had already executed finally (payment completed, server reports error). Fix: 2.30.0 (errors are logged/skipped; gate hooks stay fail-closed).',
   },
   {
     id: 'PT-2026-118463',
@@ -109,7 +109,7 @@ export const X402_ADVISORIES: Advisory[] = [
     match: (n) => /^x402-(express|fetch|axios|legacy)/.test(n),
     belowVersion: '0.5.2',
     severity: 'high',
-    summary: 'Alt-Pakete der 0.x-Linie: verify-Flow ohne Retry-/Nonce-Schutz; migrieren auf >= 2.x-Linie.',
+    summary: 'Legacy packages of the 0.x line: verify flow without retry/nonce protection; migrate to the >= 2.x line.',
   },
   {
     id: 'X402-PY-2026',
@@ -117,7 +117,7 @@ export const X402_ADVISORIES: Advisory[] = [
     match: (n) => /^x402/.test(n),
     belowVersion: '2.20.0',
     severity: 'high',
-    summary: 'Python-x402 < 2.20.0: fehlende Betrags-Validierung am Middleware-Rand (zusaetzlich PT-2026-118463 bis 2.25.0).',
+    summary: 'Python x402 < 2.20.0: missing amount validation at the middleware edge (additionally PT-2026-118463 up to 2.25.0).',
   },
   {
     id: 'X402-GO-2026',
@@ -125,11 +125,11 @@ export const X402_ADVISORIES: Advisory[] = [
     match: (n) => /x402/i.test(n),
     belowVersion: '2.23.0',
     severity: 'high',
-    summary: 'Go-x402 < v2.23.0: Settlement-Timing-Race bei parallelen Agenten-Requests (zusaetzlich PT-2026-118463 bis 2.28.0).',
+    summary: 'Go x402 < v2.23.0: settlement timing race with parallel agent requests (additionally PT-2026-118463 up to 2.28.0).',
   },
 ];
 
-/** Einfacher Semver-Vergleich a.b.c (Texte mit v-Praefix/Epoch toleriert). */
+/** Simple semver comparison a.b.c (tolerates text with v prefix/epoch). */
 export function semverBelow(version: string, min: string): boolean {
   const pa = version.replace(/^[v=~^]/, '').split(/[.\-+]/).map((x) => parseInt(x, 10) || 0);
   const pb = min.replace(/^[v=~^]/, '').split('.').map((x) => parseInt(x, 10) || 0);
@@ -239,7 +239,7 @@ export function scanCodePatterns(code: string): CodeFinding[] {
 
   lines.forEach((line, idx) => {
     const l = line.trim();
-    // SIWX Zwei-Argument-Verifikation (Cross-Site-Login-Phishing trotz Paket-Update)
+    // SIWX two-argument verification (cross-site login phishing despite package update)
     if (mentionsSiwx && /\bverify(Siwx)?(Signature)?\s*\([^,()]*,\s*[^,()]+\)\s*[;)]/.test(l) && !/nonce|domain/i.test(l)) {
       findings.push({
         rule: 'SIWX-2ARG-VERIFY',
@@ -247,8 +247,8 @@ export function scanCodePatterns(code: string): CodeFinding[] {
         line: idx + 1,
         snippet: l.slice(0, 200),
         explanation:
-          'Zwei-Argument-SIWX-Verifikation ohne Domain-/Nonce-Validierung: Signaturen koennen domain-uebergreifend wiederverwendet werden (Cross-Site-Login-Phishing) — auch mit aktuellem Paketstand.',
-        fix: 'Verifikation mit explizitem Domain- und Nonce-Abgleich gegen serverseitig gebundene Erwartungswerte (Drei-Argument- bzw. Optionsobjekt-Form).',
+          'Two-argument SIWX verification without domain/nonce validation: signatures can be reused across domains (cross-site login phishing) — even with current package versions.',
+        fix: 'Verify with explicit domain and nonce comparison against server-side bound expectation values (three-argument or options-object form).',
       });
     }
     if (/\bverify\s*\(\s*[^,]+,\s*[^,]+\)/.test(l) && /x402|payment/i.test(l) && !/requirement|network|amount/i.test(l)) {
@@ -257,8 +257,8 @@ export function scanCodePatterns(code: string): CodeFinding[] {
         severity: 'high',
         line: idx + 1,
         snippet: l.slice(0, 200),
-        explanation: 'x402-Verifikation ohne Payment-Requirements-Bindung (Betrag/Netzwerk/Empfaenger nicht abgeglichen).',
-        fix: 'verify(payload, paymentRequirements) verwenden und Requirements serverseitig aus der eigenen Order-Konfiguration aufbauen.',
+        explanation: 'x402 verification without payment-requirements binding (amount/network/recipient not reconciled).',
+        fix: 'Use verify(payload, paymentRequirements) and build the requirements server-side from your own order configuration.',
       });
     }
     if (/systemProgram|transfer\s*\(/i.test(l) && /solana|@solana\/web3/i.test(code) && !/transferChecked/i.test(code) && /spl|token/i.test(code)) {
@@ -267,8 +267,8 @@ export function scanCodePatterns(code: string): CodeFinding[] {
         severity: 'high',
         line: idx + 1,
         snippet: l.slice(0, 200),
-        explanation: 'SPL-Token-Ueberweisung ohne TransferChecked (Mint-/Decimals-Pinning) — falsche Token oder Dezimalstellen koennen untergeschoben werden.',
-        fix: 'spl-token transferChecked mit expliziter Mint- und Dezimalstellen-Pruefung verwenden.',
+        explanation: 'SPL token transfer without transferChecked (mint/decimals pinning) — wrong tokens or decimals can be smuggled in.',
+        fix: 'Use spl-token transferChecked with explicit mint and decimals checks.',
       });
     }
     if (/\.approve\s*\(/.test(l) && !/allowance|decreaseAllowance/.test(code)) {
@@ -277,8 +277,8 @@ export function scanCodePatterns(code: string): CodeFinding[] {
         severity: 'medium',
         line: idx + 1,
         snippet: l.slice(0, 200),
-        explanation: 'approve() ohne Begrenzung/Allowance-Auswertung: Bei Agenten-Wallets muss die Freigabe Cap- und Ziel-restriktiert sein.',
-        fix: 'Exakte Betrags-Approval, Recipient-Pinning und nach Verbrauch Ruecksetzung auf 0 (oder ERC-7715-Policy).',
+        explanation: 'approve() without a cap/allowance evaluation: for agent wallets the approval must be cap- and target-restricted.',
+        fix: 'Exact amount approval, recipient pinning and reset to 0 after use (or an ERC-7715 policy).',
       });
     }
   });
@@ -301,10 +301,10 @@ const DIMS: { id: string; label: string; keys: RegExp[] }[] = [
   { id: 'rolling', label: 'Rolling-Window-Cap', keys: [/rolling|periodLimit|budget.*(window|period)|windowCap/i] },
   { id: 'recipient', label: 'Recipient-Allowlist', keys: [/recipient|allowlist|to:|targets/i] },
   { id: 'token', label: 'Token-Restriktion', keys: [/token|asset|erc20|contractAddress/i] },
-  { id: 'time', label: 'Zeitfenster', keys: [/validFrom|validUntil|expiresAt|start.*end|notAfter/i] },
-  { id: 'fnlock', label: 'Funktionssperre (Selektoren)', keys: [/selector|function.*(allow|deny)|abi|method/i] },
+  { id: 'time', label: 'Time window', keys: [/validFrom|validUntil|expiresAt|start.*end|notAfter/i] },
+  { id: 'fnlock', label: 'Function locks (selectors)', keys: [/selector|function.*(allow|deny)|abi|method/i] },
   { id: 'rate', label: 'Rate-Limit', keys: [/rateLimit|maxCalls|callsPer|opsPer/i] },
-  { id: 'human', label: 'Human-Escalation-Schwelle', keys: [/human|escalat|approval.*above|threshold.*confirm/i] },
+  { id: 'human', label: 'Human escalation threshold', keys: [/human|escalat|approval.*above|threshold.*confirm/i] },
 ];
 
 export function analyzePolicy7715(jsonText: string): { dims: PolicyDimension[]; ok: number; error?: string } {
@@ -312,7 +312,7 @@ export function analyzePolicy7715(jsonText: string): { dims: PolicyDimension[]; 
   try {
     parsed = JSON.parse(jsonText);
   } catch {
-    return { dims: DIMS.map((d) => ({ id: d.id, label: d.label, present: false })), ok: 0, error: 'JSON nicht parsebar.' };
+    return { dims: DIMS.map((d) => ({ id: d.id, label: d.label, present: false })), ok: 0, error: 'JSON not parseable.' };
   }
   const flat = JSON.stringify(parsed);
   const dims: PolicyDimension[] = DIMS.map((d) => {
@@ -323,7 +323,7 @@ export function analyzePolicy7715(jsonText: string): { dims: PolicyDimension[]; 
 }
 
 // ---------------------------------------------------------------------------
-// Delivery-Reconciler (HAR / Logs, komplett lokal)
+// delivery reconciler (HAR / logs, fully local)
 // ---------------------------------------------------------------------------
 
 export interface HarLikeEntry {
@@ -348,7 +348,7 @@ export function reconcileDeliveries(entries: HarLikeEntry[]): DeliveryFinding[] 
         url: e.url,
         status: e.status,
         time: e.time,
-        issue: `Zahlungsbeleg gesendet, aber Antwort ${e.status} — moeglichebezahlte aber nicht gelieferte Antwort.`,
+        issue: `Payment proof sent, but response ${e.status} — possibly a paid but undelivered response.`,
       });
     }
   }

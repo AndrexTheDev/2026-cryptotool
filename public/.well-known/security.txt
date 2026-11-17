@@ -1,5 +1,5 @@
 Contact: https://github.com/AndrexTheDev/2026-cryptotool/issues/new
 Contact: https://github.com/AndrexTheDev/2026-cryptotool/security/advisories/new
 Expires: 2027-06-30T00:00:00.000Z
-Preferred-Languages: de, en
-Comments: Diese Suite verarbeitet ausnahmslos oeffentliche Daten clientseitig; Funde bitte mit reproduzierbaren Schritten und betroffener Modul-Version melden.
+Preferred-Languages: en, de
+Comments: This suite processes exclusively public data client-side; please report findings with reproducible steps and the affected module version.

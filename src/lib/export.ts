@@ -1,5 +1,5 @@
-// Lokale Export-Helfer: 1-Klick-Download fuer JSON/CSV/HTML + Druckansicht.
-// Kein Netzwerk, keine Serialisierung ueber Server.
+// Local export helpers: one-click download for JSON/CSV/HTML + print view.
+// No network, no serialization via servers.
 
 export function downloadBlob(content: BlobPart, filename: string, mime: string) {
   const blob = new Blob([content], { type: mime });
@@ -46,7 +46,7 @@ export interface PrintableReport {
 
 /**
  * Erzeugt eine eigenstaendige, offline oeffnbare HTML-Druckansicht
- * (Self-Contained, keine externen Assets) und oeffnet sie in einem neuen Tab.
+ * (self-contained, no external assets) and opens it in a new tab.
  */
 export function openPrintableReport(rep: PrintableReport) {
   const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -72,7 +72,7 @@ pre{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:.5rem;padding:.8re
 ${rep.subtitle ? `<p class="sub">${esc(rep.subtitle)}</p>` : ''}
 ${rep.status ? `<div class="status"><strong>${esc(rep.status.headline)}</strong>${rep.status.detail ? esc(rep.status.detail) : ''}</div>` : ''}
 ${rep.sections.map((s) => `<h2>${esc(s.heading)}</h2><div>${s.body}</div>`).join('\n')}
-<p class="meta">${esc(rep.footerNote ?? 'Erzeugt lokal im Browser durch die AndrexTheDev Web3 Security & Forensics Suite. Keine Server-Speicherung, keine Uebertragung privater Schluessel.')}</p>
+<p class="meta">${esc(rep.footerNote ?? 'Generated locally in the browser by the AndrexTheDev Web3 Security & Forensics Suite. No server storage, no transfer of private keys.')}</p>
 <script>window.addEventListener('load',()=>{/* Druckdialog optional via Button */});<\/script>
 </body></html>`;
   const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }));

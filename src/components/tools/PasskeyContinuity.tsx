@@ -15,19 +15,19 @@ import { chainById } from '../../config/chains';
 import { downloadCSV, downloadJSON, openPrintableReport } from '../../lib/export';
 import { isHexAddress, shortHex } from '../../lib/format';
 
-// RIP-7212 (Rollups) / EIP-7951 (Ethereum Mainnet seit Fusaka, 03.12.2025) — gleiche Precompile-Adresse.
-// EIP-7951 spezifiziert die Malleability-Ablehnung (high-S) verbindlich; RIP-7212 ueberlies das den Chains.
+// RIP-7212 (rollups) / EIP-7951 (Ethereum mainnet since Fusaka, 03.12.2025) — same precompile address.
+// EIP-7951 makes the malleability rejection (high-S) mandatory; RIP-7212 left that to the chains.
 const RIP7212_PRECOMPILE = '0x0000000000000000000000000000000000000100';
 
-// Fest eingebetteter, kryptografisch GUELTIGER 160-Byte-Testvektor
-// (hash || r || s || x || y), generiert aus Testkey p256-priv = 7, low-S.
+// Permanently embedded, cryptographically VALID 160-byte test vector
+// (hash || r || s || x || y), generated from test key p256-priv = 7, low-S.
 const P256_VECTOR = {
   hash: '6a229ed70d44d53273bd7b714743cdae936731f6d9cfb10ac10764f717227baa',
   r: '8487654b9b8493ca3d284994fba005a8494073d706cffcdbdd41d537a018c1d6',
   s: '2c7888ebd65e3a2830b6262626c5a0a425b192d7ed576750a8328138e780e0a7',
   x: '8e533b6fa0bf7b4625bb30667c01fb607ef9f8b8a80fef5b300628703187b2a3',
   y: '73eb1dbde03318366d069f83a6f5900053c73633cb041b21c55e1a86c1f400b4',
-  // high-S-Gegenstueck (n - s) fuer den Malleability-Test:
+  // high-S counterpart (n - s) for the malleability test:
   sHigh: 'd387771329a1c5d8cf49d9d9d93a5f5b973567d5b9c037344b87498a14e244aa',
 };
 
@@ -54,28 +54,28 @@ function classifyCall(raw: string): ChainResult['precompile'] {
 const CHECKLIST = [
   {
     id: 'rp-self',
-    q: 'Steuern Sie die rpId-Domain selbst (kein Abhaengigkeit von Drittanbieter-Domains)?',
-    hint: 'passkey-signaturen sind an die rpId-Domain gebunden — deren Ausfall sperrt das Konto.',
+    q: 'Do you control the rpId domain yourself (no dependency on third-party domains)?',
+    hint: 'passkey signatures are bound to the rpId domain — its outage locks the account.',
   },
   {
     id: 'rp-backup',
-    q: 'Existiert ein dokumentierter fallback-faehiger Zweit-Signer fuer Domain-Verlust?',
-    hint: 'z. B. zweiter Signer-Typ, Guardian oder zeitverzoegerter Recovery-Modus.',
+    q: 'Does a documented fallback-capable second signer exist for domain loss?',
+    hint: 'e.g. a second signer type, guardian or time-delayed recovery mode.',
   },
   {
     id: 'synced',
-    q: 'Ist der Passkey cloud-synchronisiert UND zusaetzlich ein geraetegebundener Backup-Passkey registriert?',
-    hint: 'Reine Sync-Passkeys fallen mit dem Konto des Sync-Dienstes; rein geraetegebundene mit dem Geraet.',
+    q: 'Is the passkey cloud-synced AND additionally a device-bound backup passkey registered?',
+    hint: 'Pure sync passkeys die with the sync service account; purely device-bound ones die with the device.',
   },
   {
     id: 'chains',
-    q: 'Sind alle vom Konto genutzten Chains getestet (Precompile oder Fallback-Contract vorhanden)?',
-    hint: 'Wird automatisch aus der Matrix uebernommen, sobald die Pruefung gelaufen ist.',
+    q: 'Are all chains used by the account tested (precompile or fallback contract present)?',
+    hint: 'Automatically taken over from the matrix once the check has run.',
   },
   {
     id: 'portability',
-    q: 'Unterstuetzt der Passkey-Manager einen Export (FIDO CXF oder herstellereigenen Weg) — d. h. ueberlebt der Passkey einen Anbieterwechsel?',
-    hint: 'CXF 1.0 (Credential Exchange Format) ist seit 08/2025 FIDO Proposed Standard (Errata 03/2026); das Transport-Protokoll CXP ist weiter nur Working Draft (10/2024) — ohne Manager-Export droht bei Anbieterwechsel Zwangs-Neuregistrierung über den Recovery-Pfad.',
+    q: 'Does the passkey manager support an export (FIDO CXF or a vendor-specific path) — i.e. does the passkey survive a provider switch?',
+    hint: 'CXF 1.0 (Credential Exchange Format) has been a FIDO Proposed Standard since 08/2025 (errata 03/2026); the transport protocol CXP is still only a Working Draft (10/2024) — without a manager export, a provider switch threatens forced re-registration via the recovery path.',
   },
 ];
 
@@ -104,7 +104,7 @@ export default function PasskeyContinuity() {
     setError('');
     setResults([]);
     if (offlineMode) {
-      // Offline: manuelle Konsolenausgaben parsen ("chainId,returndata" pro Zeile)
+      // offline: parse manual console outputs ("chainId,returndata" per line)
       const rows: ChainResult[] = [];
       for (const line of offlineRows.split(/\r?\n/)) {
         const m = line.match(/^\s*(\d+)\s*[,;\s]\s*(0x[0-9a-fA-F]*)/);
@@ -115,7 +115,7 @@ export default function PasskeyContinuity() {
         }
       }
       if (rows.length === 0) {
-        setError('Offline-Modus: mindestens eine Zeile „chainId, returndata“ einfuegen (z. B. aus einem lokalen Node-Call).');
+        setError('Offline mode: paste at least one line "chainId, returndata" (e.g. from a local node call).');
         return;
       }
       setResults(rows);
@@ -123,7 +123,7 @@ export default function PasskeyContinuity() {
       return;
     }
     if (chains.length === 0) {
-      setError('Bitte mindestens ein Netzwerk waehlen.');
+      setError('Please select at least one network.');
       return;
     }
     setBusy(true);
@@ -143,9 +143,9 @@ export default function PasskeyContinuity() {
             row.malleabilityRaw = hsRes.data;
             const hs = classifyCall(hsRes.data);
             if (row.precompile === 'yes') {
-              // RIP-7212: low-S-Ablehnung ist NICHT zwingend Teil des Precompiles (Chain-Sache);
-              // high-S muss "false" liefern, wenn der Precompile strict ist.
-              // EIP-7951 (Mainnet, Fusaka) macht die high-S-Ablehnung dagegen verbindlich.
+              // RIP-7212: low-S rejection is NOT mandatorily part of the precompile (chain's choice);
+              // high-S must return "false" when the precompile is strict.
+              // EIP-7951 (mainnet, Fusaka) makes the high-S rejection mandatory instead.
               row.malleability = hs === 'yes' ? 'accepts-high-s' : hs === 'zero' ? 'rejects-high-s' : hs === 'empty' ? 'unknown' : 'unknown';
             } else {
               row.malleability = 'skipped';
@@ -202,15 +202,15 @@ export default function PasskeyContinuity() {
     <div className="space-y-5">
       <StepSection
         n={1}
-        title="Account & Ziel-Chains festlegen"
-        hint="Der Precompile-Test nutzt einen fix eingebetteten, gueltigen P-256-Vektor (160 Byte). Optional: Signer-/Verifier-Adresse fuer Chain-Fallback-Pruefung."
+        title="Define account & target chains"
+        hint="The precompile test uses a fixed embedded, valid P-256 vector (160 bytes). Optional: signer/verifier address for chain fallback checks."
       >
         <div className="flex flex-wrap gap-2">
           <button className={`btn btn-sm ${!offlineMode ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setOfflineMode(false)}>
             Online
           </button>
           <button className={`btn btn-sm ${offlineMode ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setOfflineMode(true)}>
-            Offline (Ergebnisse einfuegen)
+            Offline (paste results)
           </button>
           <span className="ml-auto">
             <DemoButton onClick={demo} />
@@ -218,22 +218,22 @@ export default function PasskeyContinuity() {
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="label" htmlFor="pc-acc">Smart-Account-Adresse (optional)</label>
+            <label className="label" htmlFor="pc-acc">Smart account address (optional)</label>
             <input id="pc-acc" className="input mono" placeholder="0x…" value={account} onChange={(e) => setAccount(e.target.value)} />
           </div>
           <div>
-            <label className="label" htmlFor="pc-signer">WebAuthn-Signer / P-256-Verifier-Adresse (optional)</label>
+            <label className="label" htmlFor="pc-signer">WebAuthn signer / P-256 verifier address (optional)</label>
             <input id="pc-signer" className="input mono" placeholder="0x…" value={signer} onChange={(e) => setSigner(e.target.value)} />
           </div>
         </div>
         {!offlineMode ? (
           <div>
-            <span className="label">Ziel-Netzwerke</span>
+            <span className="label">Target networks</span>
             <ChainMultiSelect selected={chains} onChange={setChains} />
           </div>
         ) : (
           <div>
-            <label className="label" htmlFor="pc-off">Offline-Ergebnisse (pro Zeile: chainId, eth_call-Return an 0x…0100)</label>
+            <label className="label" htmlFor="pc-off">Offline results (per line: chainId, eth_call return to 0x…0100)</label>
             <textarea
               id="pc-off"
               className="textarea mono"
@@ -262,53 +262,53 @@ export default function PasskeyContinuity() {
         </div>
       </StepSection>
 
-      <StepSection n={2} title="Multi-Chain-Pruefung starten">
+      <StepSection n={2} title="Start multi-chain check">
         <p className="text-sm">
-          Fuer jede Chain: <code>eth_call</code> an <code>{RIP7212_PRECOMPILE}</code> (RIP-7212-/EIP-7951-Adresse) mit dem gueltigen Vektor
-          (erwartet 32-Byte <code>1</code>), danach mit dem high-S-Gegenstueck (Malleability-Verhalten), dann
-          Fallback-Code-Praesenz (0x ≠ 0x via <code>eth_getCode</code>).
+          For each chain: <code>eth_call</code> to <code>{RIP7212_PRECOMPILE}</code> (RIP-7212/EIP-7951 address) with the valid vector
+          (expects 32-byte <code>1</code>), then with the high-S counterpart (malleability behavior), then
+          fallback code presence (0x ≠ 0x via <code>eth_getCode</code>).
         </p>
         <button className="btn btn-primary w-full sm:w-auto" onClick={() => void run()} disabled={busy}>
-          {busy ? 'Pruefe Chains…' : 'Prüfen'}
+          {busy ? 'Checking chains…' : 'Check'}
         </button>
         {error && <ErrorNote message={error} />}
       </StepSection>
 
       {ran && scorecard && (
-        <StepSection n={3} title="Kompatibilitätsmatrix & Recovery-Readiness">
+        <StepSection n={3} title="Compatibility matrix & recovery readiness">
           <StatusTile
             level={level!}
             headline={
               level === 'green'
-                ? 'Passkey-Konto multi-chain ueberlebensfaehig'
+                ? 'Passkey account viable multi-chain'
                 : level === 'amber'
-                  ? 'Teilweise abgesichert — Luecken dokumentieren'
-                  : 'Stilles Ausfallrisiko erkannt'
+                  ? 'Partially secured — document the gaps'
+                  : 'Silent failure risk detected'
             }
             detail={
               scorecard.kills.length > 0
-                ? `Auf ${scorecard.kills.map((k) => chainById(k.chainId)?.short ?? k.chainId).join(', ')} weder natives Precompile noch Fallback-Contract — Signaturen fallen dort still aus (0x0100-Ambiguitaet).`
+                ? `On ${scorecard.kills.map((k) => chainById(k.chainId)?.short ?? k.chainId).join(', ')} neither a native precompile nor a fallback contract — signatures silently fail there (0x0100 ambiguity).`
                 : scorecard.native === 0
-                  ? 'Auf keiner geprueften Chain ein natives P-256-Precompile nachgewiesen — Fallback-Contracts werden zwingend.'
-                  : `Nativ verifizierbar auf ${scorecard.native} Chain(s), Checklist ${scorecard.clDone}/${CHECKLIST.length} erledigt.`
+                  ? 'No native P-256 precompile detected on any checked chain — fallback contracts become mandatory.'
+                  : `Natively verifiable on ${scorecard.native} chain(s), checklist ${scorecard.clDone}/${CHECKLIST.length} done.`
             }
           />
           <KpiGrid>
-            <Kpi label="Natives Precompile" value={`${scorecard.native}/${results.length}`} tone={scorecard.native ? 'green' : 'red'} />
-            <Kpi label="Still leer/0x (Ambiguitaet)" value={scorecard.silentlyNo} tone={scorecard.silentlyNo ? 'amber' : 'green'} />
-            <Kpi label="Signer-Fallback (Code da)" value={signer.trim() ? `${scorecard.signerOk}/${results.length}` : 'n/a'} tone={signer.trim() ? (scorecard.signerOk ? 'default' : 'amber') : 'default'} />
-            <Kpi label="Readiness-Score" value={`${scorecard.score}/${scorecard.max}`} tone={level === 'green' ? 'green' : level === 'amber' ? 'amber' : 'red'} />
+            <Kpi label="Native precompile" value={`${scorecard.native}/${results.length}`} tone={scorecard.native ? 'green' : 'red'} />
+            <Kpi label="Silently empty/0x (ambiguity)" value={scorecard.silentlyNo} tone={scorecard.silentlyNo ? 'amber' : 'green'} />
+            <Kpi label="Signer fallback (code present)" value={signer.trim() ? `${scorecard.signerOk}/${results.length}` : 'n/a'} tone={signer.trim() ? (scorecard.signerOk ? 'default' : 'amber') : 'default'} />
+            <Kpi label="Readiness score" value={`${scorecard.score}/${scorecard.max}`} tone={level === 'green' ? 'green' : level === 'amber' ? 'amber' : 'red'} />
           </KpiGrid>
 
           <div className="overflow-x-auto">
             <table className="table-x">
               <thead>
                 <tr>
-                  <th>Netzwerk</th>
-                  <th>P-256-Precompile</th>
-                  <th>High-S-Verhalten</th>
-                  <th>Signer-Code</th>
-                  <th>Account-Code</th>
+                  <th>Network</th>
+                  <th>P-256 precompile</th>
+                  <th>High-S behavior</th>
+                  <th>Signer code</th>
+                  <th>Account code</th>
                 </tr>
               </thead>
               <tbody>
@@ -322,25 +322,25 @@ export default function PasskeyContinuity() {
                         }`}
                       >
                         {r.precompile === 'yes'
-                          ? 'nativ aktiv (32B=1)'
+                          ? 'native active (32B=1)'
                           : r.precompile === 'empty'
-                            ? 'leer (Ambiguitaet!)'
+                            ? 'empty (ambiguity!)'
                             : r.precompile === 'zero'
                               ? 'false (0)'
                               : r.precompile === 'error'
-                                ? 'Fehler'
+                                ? 'error'
                                 : 'revert'}
                       </span>
                       {r.error && <span className="block text-xs text-dim mt-1">{shortHex(r.error, 40, 0)}</span>}
                     </td>
                     <td>
-                      {r.malleability === 'rejects-high-s' && <span className="badge badge-green">lehnt high-S ab</span>}
-                      {r.malleability === 'accepts-high-s' && <span className="badge badge-red">akzeptiert high-S!</span>}
-                      {r.malleability === 'unknown' && <span className="badge badge-amber">unbestimmt</span>}
+                      {r.malleability === 'rejects-high-s' && <span className="badge badge-green">rejects high-S</span>}
+                      {r.malleability === 'accepts-high-s' && <span className="badge badge-red">accepts high-S!</span>}
+                      {r.malleability === 'unknown' && <span className="badge badge-amber">undetermined</span>}
                       {r.malleability === 'skipped' && <span className="badge">n/a</span>}
                     </td>
                     <td>
-                      {r.signerCode === 'contract' ? <span className="badge badge-green">Contract</span> : r.signerCode === 'empty' ? <span className="badge badge-red">0x</span> : r.signerCode ? <span className="badge">?</span> : <span className="badge">nicht geprueft</span>}
+                      {r.signerCode === 'contract' ? <span className="badge badge-green">Contract</span> : r.signerCode === 'empty' ? <span className="badge badge-red">0x</span> : r.signerCode ? <span className="badge">?</span> : <span className="badge">not checked</span>}
                     </td>
                     <td>
                       {r.accountCode === 'contract' ? <span className="badge badge-green">Contract</span> : r.accountCode === 'empty' ? <span className="badge badge-amber">0x</span> : r.accountCode ? <span className="badge">?</span> : <span className="badge">—</span>}
@@ -352,7 +352,7 @@ export default function PasskeyContinuity() {
           </div>
 
           <details className="acc">
-            <summary>Technische Details & Testvektor</summary>
+            <summary>Technical details & test vector</summary>
             <div className="acc-body">
               <pre className="mono text-xs whitespace-pre-wrap break-all">{`Precompile:      ${RIP7212_PRECOMPILE}
 hash:            ${P256_VECTOR.hash}
@@ -362,22 +362,22 @@ s (high-Twin):   ${P256_VECTOR.sHigh}
 x:               ${P256_VECTOR.x}
 y:               ${P256_VECTOR.y}
 
-RIP-7212-Semantik: erfolgreiche Verifikation liefert 32-Byte 1; Fehler liefern je nach Chain LEER (0x) oder 0.
-Die "leere" Variante ist die still-fehlerquelle: Signaturen schlagen fehl, ohne dass ein Ablehnungsgrund
-sichtbar wird — Deshalb ist der positive Nachweis (32B=1) mit echtem Vektor entscheidend.`}</pre>
+RIP-7212 semantics: successful verification returns 32-byte 1; failures return either EMPTY (0x) or 0 depending on the chain.
+The "empty" variant is the silent failure source: signatures fail without a rejection reason
+becoming visible — that is why the positive proof (32B=1) with a real vector is crucial.`}</pre>
               <p className="text-sm text-dim">
-                <strong className="text-ink">Adoptions-Referenz (Stand 2026):</strong> Auf dem Ethereum-Mainnet ist der
-                Precompile seit dem Fusaka-Hardfork (03.12.2025) als <strong>EIP-7951</strong> konsensfaegig aktiv —
-                selbe Adresse, aber mit verbindlicher high-S-Ablehnung (Malleability-Schutz). Auf Rollups laeuft er als
-                <strong>RIP-7212</strong> finalisiert auf Optimism, Base, zkSync Era, Polygon zkEVM, Linea und Scroll — die Precompile-Verifikation
-                zieht die Kosten von ~200.000–300.000 Gas auf ~3.450 Gas (~98 % Reduktion).{' '}
-                <strong className="text-ink">Fork-Landschaft (Stand 11/2026):</strong> Die Fusaka-Nachzuegler BPO-1
-                (17.12.2025) und BPO-2 (07.01.2026) hoben die Blob-Kapazitaet schrittweise auf 14 Ziel- / 21
-                Max-Blobs pro Block; naechster grosser Fork ist <strong>Glamsterdam</strong> (ePBS via EIP-7732,
-                Block-Level Access Lists via EIP-7928) — seit 06.10.2026 auf Sepolia aktiv, Mainnet-Termin
-                (angestrebt: Anfang 12/2026) zum Zeitpunkt dieses Textes noch nicht fixiert. Der Live-Test oben
-                verifiziert jede ausgewaehlte Chain dennoch individuell — Chain-Listen alterieren schneller als
-                statische Dokumentation.
+                <strong className="text-ink">Adoption reference (as of 2026):</strong> On Ethereum mainnet the
+                precompile has been consensus-active as <strong>EIP-7951</strong> since the Fusaka hard fork (03.12.2025) —
+                same address, but with mandatory high-S rejection (malleability protection). On rollups it runs as
+                <strong>RIP-7212</strong>, finalized on Optimism, Base, zkSync Era, Polygon zkEVM, Linea and Scroll — precompile verification
+                cuts the cost from ~200,000–300,000 gas to ~3,450 gas (~98 % reduction).{' '}
+                <strong className="text-ink">Fork landscape (as of 11/2026):</strong> The Fusaka follow-ups BPO-1
+                (17.12.2025) and BPO-2 (07.01.2026) raised blob capacity stepwise to 14 target / 21
+                max blobs per block; the next major fork is <strong>Glamsterdam</strong> (ePBS via EIP-7732,
+                block-level access lists via EIP-7928) — active on Sepolia since 06.10.2026, the mainnet date
+                (targeted: early 12/2026) was not fixed at the time of writing. The live test above
+                nevertheless verifies every selected chain individually — chain lists change faster than
+                static documentation.
               </p>
             </div>
           </details>
@@ -386,14 +386,14 @@ sichtbar wird — Deshalb ist der positive Nachweis (32B=1) mit echtem Vektor en
             onJson={() =>
               downloadJSON(
                 { tool: 'passkey-continuity', generatedAt: new Date().toISOString(), account, signer, results, checklist, scorecard },
-                'passkey-continuity-bericht.json',
+                'passkey-continuity-report.json',
               )
             }
             onCsv={() =>
               downloadCSV(
                 results.map((r) => ({
                   chainId: r.chainId,
-                  netzwerk: chainById(r.chainId)?.name,
+                  network: chainById(r.chainId)?.name,
                   precompile: r.precompile,
                   high_s: r.malleability,
                   signer_code: r.signerCode ?? '',
@@ -405,11 +405,11 @@ sichtbar wird — Deshalb ist der positive Nachweis (32B=1) mit echtem Vektor en
             onPrint={() =>
               openPrintableReport({
                 title: 'Passkey-Continuity Scorecard',
-                subtitle: `Account ${account || '-'} · ${new Date().toLocaleString('de-DE')}`,
-                status: { level: level!, headline: level === 'green' ? 'Multi-chain bereit' : level === 'amber' ? 'Teilweise bereit' : 'Ausfallrisiko', detail: `Score ${scorecard.score}/${scorecard.max}` },
+                subtitle: `Account ${account || '-'} · ${new Date().toLocaleString('en-GB')}`,
+                status: { level: level!, headline: level === 'green' ? 'Multi-chain ready' : level === 'amber' ? 'Partially ready' : 'Failure risk', detail: `Score ${scorecard.score}/${scorecard.max}` },
                 sections: [
                   {
-                    heading: 'Multi-Chain-Matrix',
+                    heading: 'Multi-chain matrix',
                     body:
                       '<pre>' +
                       results
@@ -418,7 +418,7 @@ sichtbar wird — Deshalb ist der positive Nachweis (32B=1) mit echtem Vektor en
                       '</pre>',
                   },
                   {
-                    heading: 'Checkliste',
+                    heading: 'Checklist',
                     body: '<ul>' + CHECKLIST.map((c) => `<li>[${checklist[c.id] ? 'x' : ' '}] ${c.q}</li>`).join('') + '</ul>',
                   },
                 ],

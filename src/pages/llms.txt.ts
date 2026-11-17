@@ -1,62 +1,62 @@
 import type { APIRoute } from 'astro';
 import { BRAND, CATEGORY_LABEL, CONTACT_EMAIL, SITE_URL, SUITE_NAME, TOOLS } from '../config/site';
 
-// llms.txt (KI-Sichtbarkeit 2026) — enthaelt bewusst keine Infrastruktur-
-// oder Preis-Aussagen (Pflichtvorgabe 2.2), nur Funktions- und Nutzwert-Texte.
+// llms.txt (AI visibility 2026) — deliberately contains no infrastructure
+// or pricing statements (specification 2.2), only function and value texts.
 
 export const GET: APIRoute = () => {
   const lines: string[] = [];
   lines.push(`# ${BRAND} — ${SUITE_NAME}`);
   lines.push('');
   lines.push(
-    '> Zehn spezialisierte Web3-, Bitcoin- und Compliance-Werkzeuge fuer forensische Sicherheitsdiagnosen, die komplett lokal im Browser ausgefuehrt werden: keine Konten, keine zentrale Datenspeicherung, keine Eingabe privater Schluessel. Alle Module arbeiten nach einem identischen 3-Schritt-Prinzip (Eingabe, Pruefung, Ampel-Bericht) mit Demo-Datensaetzen, Offline-Modi und portablen Exporten (JSON, CSV, Druck/PDF, Offline-HTML).',
+    '> Ten specialized Web3, Bitcoin and compliance tools for forensic security diagnostics, executed entirely locally in the browser: no accounts, no central data storage, no entry of private keys. All modules follow an identical 3-step principle (input, check, traffic-light report) with demo datasets, offline modes and portable exports (JSON, CSV, print/PDF, offline HTML).',
   );
   lines.push('');
-  lines.push(`Betreiber: ${BRAND} · Kontakt: ${CONTACT_EMAIL}`);
+  lines.push(`Operator: ${BRAND} · Contact: ${CONTACT_EMAIL}`);
   lines.push('');
-  lines.push('## Werkzeuge');
+  lines.push('## Tools');
   lines.push('');
   for (const t of TOOLS) {
     lines.push(`- [${t.name}](${SITE_URL}/tools/${t.slug}) (${CATEGORY_LABEL[t.category]}): ${t.tagline} — ${t.solution}`);
   }
   lines.push('');
-  lines.push('## Recht & Transparenz');
+  lines.push('## Legal & transparency');
   lines.push('');
-  lines.push(`- [AGB / Nutzungsbedingungen](${SITE_URL}/agb)`);
-  lines.push(`- [Disclaimer / Haftungsausschluss](${SITE_URL}/disclaimer)`);
-  lines.push(`- [Datenschutz-Transparenz](${SITE_URL}/datenschutz)`);
+  lines.push(`- [Terms of use (AGB)](${SITE_URL}/agb)`);
+  lines.push(`- [Disclaimer / liability](${SITE_URL}/disclaimer)`);
+  lines.push(`- [Privacy transparency](${SITE_URL}/datenschutz)`);
   lines.push('');
-  lines.push('## Technische Rahmenbedingungen');
+  lines.push('## Technical framework');
   lines.push('');
-  lines.push('- Clientseitige Verarbeitung ohne zentrale Datenspeicherung; lokale Ausfuehrung direkt im Browser.');
-  lines.push('- Lesezugriffe erfolgen direkt aus dem Browser an vom Nutzer waehlbare Blockchain-Endpunkte; jedes Modul besitzt einen Offline-Modus mit manueller oder dateibasierter Eingabe.');
-  lines.push('- Freiwillige On-Chain-Unterstuetzung moeglich; kein Funktionsunterschied ohne Unterstuetzung.');
-  lines.push('- Keine Anlage-, Finanz-, Rechts- oder Steuerberatung — alle Ergebnisse sind Diagnosehinweise.');
+  lines.push('- Client-side processing without central data storage; local execution directly in the browser.');
+  lines.push('- Read calls go directly from the browser to blockchain endpoints chosen by the user; every module has an offline mode with manual or file-based input.');
+  lines.push('- Voluntary on-chain support possible; no functional difference without support.');
+  lines.push('- No investment, financial, legal or tax advice — all results are diagnostic indicators.');
   lines.push('');
-  lines.push('## Eingebettete Aktualisierungen (Stand dieser Suite)');
+  lines.push('## Embedded updates (status of this suite)');
   lines.push('');
   lines.push(
-    '- x402-PaywallGuard fuehrt eine eingebettete Advisory-Matrix (12 npm/pip/go-Eintraege, Stand November 2026, npm-Aktuell-linie 2.31.0): V12-Disclosure 10/2026 (25 Findings, 3 kritische — Spend-Limit-Fix, Solana-ApproveChecked-Bypass, SIWx-Login-Replay ab 2.23.0), Payment-Bypass-Fix 2.27.0, PT-2026-118463 SIWX-Auth-Bypass (bis 2.28.1/2.25.1), zod-CVE/DoS-Caps ab 2.29.0 sowie afterSettle-Hook-Isolation ab 2.30.0. Da diese Findings nicht in npm audit/PyPI-Warnungen auftauchen, prueft das Modul explizit gegen diese Matrix.',
+    '- x402-PaywallGuard carries an embedded advisory matrix (12 npm/pip/go entries, as of November 2026, current npm line 2.31.0): V12 disclosure 10/2026 (25 findings, 3 critical — spend-limit fix, Solana ApproveChecked bypass, SIWx login replay from 2.23.0), payment bypass fix 2.27.0, PT-2026-118463 SIWX auth bypass (up to 2.28.1/2.25.1), zod CVE/DoS caps from 2.29.0 and afterSettle hook isolation from 2.30.0. Because these findings do not appear in npm audit/PyPI warnings, the module checks explicitly against this matrix.',
   );
   lines.push(
-    '- UserOp-Autopsy erkennt alle vier kanonischen EntryPoint-Singletons v0.6/v0.7/v0.8/v0.9 (inkl. v0.9 Adresse 0x433709009B8330FDa32311DF1C2AFA402eD8D009) und markiert v0.9 IgnoredInitCode-Ereignisse am Befund.',
+    '- UserOp-Autopsy recognizes all four canonical EntryPoint singletons v0.6/v0.7/v0.8/v0.9 (incl. the v0.9 address 0x433709009B8330FDa32311DF1C2AFA402eD8D009) and flags v0.9 IgnoredInitCode events on the finding.',
   );
   lines.push(
-    '- STVA-UpgradeDiff gleicht Upgrade-Ziele gegen die kanonische Safe-Singleton-Registry ab (safe-global/safe-deployments, v1.3.0 eip155/canonical, v1.4.1, v1.5.0 inkl. SafeL2/SafeMigration); Treffer unter < 1.5.0 erhalten den Hinweis auf die offizielle v1.5.0-Upgrade-Empfehlung (09/2026).',
+    '- STVA-UpgradeDiff reconciles upgrade targets against the canonical Safe singleton registry (safe-global/safe-deployments, v1.3.0 eip155/canonical, v1.4.1, v1.5.0 incl. SafeL2/SafeMigration); hits below 1.5.0 receive the note on the official v1.5.0 upgrade recommendation (09/2026).',
   );
   lines.push(
-    '- DAC8-SelfProof versteht BIP-322 in der finalen Fassung (Complete seit 04/2026): smp/ful/pof-Praefixe, Legacy ohne Praefix sowie Proof-of-Funds-PSBTs mit eingebetteter Challenge (UTXO-Zustand onchain pruefen).',
+    '- DAC8-SelfProof understands BIP-322 in its final form (Complete since 04/2026): smp/ful/pof prefixes, legacy without prefix, and proof-of-funds PSBTs with an embedded challenge (verify the UTXO state onchain).',
   );
   lines.push(
-    '- PasskeyContinuity fragt Passkey-Portabilitaet ab: FIDO CXF 1.0 ist seit 08/2025 Proposed Standard (Errata 03/2026); das Transport-Protokoll CXP bleibt Working Draft.',
+    '- PasskeyContinuity asks about passkey portability: FIDO CXF 1.0 has been a Proposed Standard since 08/2025 (errata 03/2026); the transport protocol CXP remains a Working Draft.',
   );
   lines.push(
-    '- Clear-Signing: Deskriptoren (ERC-7730) stammen seit 05/2026 aus dem EF-gehosteten Registry (clearsigning.org) mit ERC-8176-Attestierungen; STVA berechnet den ERC-8213-artigen Calldata-Digest-Fallback.',
+    '- Clear signing: descriptors (ERC-7730) have come from the EF-hosted registry (clearsigning.org) with ERC-8176 attestations since 05/2026; STVA computes the ERC-8213-like calldata-digest fallback.',
   );
   lines.push(
-    '- StealthAudit-5564 scannt den kanonischen ERC-5564 Announcer 0x55649E01B5Df198D18D95b5cc5051630cfD45564 und kennt die ERC-6538 Registry 0x6538E6bf4B0eBd30A8Ea093027Ac2422ce5d6538.',
+    '- StealthAudit-5564 scans the canonical ERC-5564 announcer 0x55649E01B5Df198D18D95b5cc5051630cfD45564 and knows the ERC-6538 registry 0x6538E6bf4B0eBd30A8Ea093027Ac2422ce5d6538.',
   );
-  lines.push('- DAC8-SelfProof referenziert den Meldezeitraum 2026 mit Filing-Fenster 01.01.–30.09.2027.');
+  lines.push('- DAC8-SelfProof references the reporting period 2026 with the filing window 01.01.–30.09.2027.');
   lines.push('');
 
   return new Response(lines.join('\n'), {

@@ -1,11 +1,11 @@
-// ENS-Aufloesung + Governance-Pruefung (rein via eth_call, clientseitig).
+// ENS resolution + governance check (purely via eth_call, client-side).
 import { ethCall, getCode } from './rpc';
 
 export const ENS_REGISTRY = '0x00000000000C2E13eAa9B0DC45C480Ff132742Da';
-// ENS Universal Resolver (kanonische Mainnet-Adresse)
+// ENS Universal Resolver (canonical mainnet address)
 export const UNIVERSAL_RESOLVER = '0xeeeeeeee14d718c2b47d9923deab1335e144eeee';
 
-/** DNS-kodierte ENS-Namen (wire format) fuer den Universal Resolver. */
+/** DNS-encoded ENS names (wire format) for the Universal Resolver. */
 export function dnsEncodeName(name: string): string {
   const bytes: number[] = [];
   for (const label of name.toLowerCase().replace(/\.$/, '').split('.')) {
@@ -25,15 +25,15 @@ export interface EnsResolution {
 }
 
 /**
- * Liest contenthash ueber den Universal Resolver: resolve(dnsName, contenthash(namehash(name)))
- * und den Owner ueber das Registry-Contract (ownerOf(node)).
+ * Reads contenthash via the Universal Resolver: resolve(dnsName, contenthash(namehash(name)))
+ * and the owner via the registry contract (ownerOf(node)).
  */
 export async function resolveEns(name: string): Promise<EnsResolution> {
   const v = await import('viem');
   const node = v.namehash(name);
   const out: EnsResolution = { name };
 
-  // contenthash ueber Universal Resolver
+  // contenthash via Universal Resolver
   const contenthashCall = v.encodeFunctionData({
     abi: [
       {
@@ -86,7 +86,7 @@ export async function resolveEns(name: string): Promise<EnsResolution> {
       out.resolverAddress = resolver;
     }
   } catch (e) {
-    out.error = 'ENS/contenthash nicht lesbar: ' + (e as Error).message;
+    out.error = 'ENS/contenthash not readable: ' + (e as Error).message;
   }
 
   // Owner via Registry
@@ -107,7 +107,7 @@ export async function resolveEns(name: string): Promise<EnsResolution> {
     const res = await ethCall(1, ENS_REGISTRY, ownerCall);
     if (res.data && res.data.length >= 66) out.owner = '0x' + res.data.slice(-40);
   } catch (e) {
-    out.error = (out.error ? out.error + ' ' : '') + 'Owner nicht lesbar: ' + (e as Error).message;
+    out.error = (out.error ? out.error + ' ' : '') + 'Owner not readable: ' + (e as Error).message;
   }
   return out;
 }
@@ -119,7 +119,7 @@ export interface GovernanceResult {
   detail: string;
 }
 
-/** Prueft, ob der ENS-Owner ein Multisig (Safe-Interface) oder ein einzelner EOA ist. */
+/** Checks whether the ENS owner is a multisig (Safe interface) or a single EOA. */
 export async function checkGovernance(owner: string): Promise<GovernanceResult> {
   const v = await import('viem');
   try {
@@ -128,10 +128,10 @@ export async function checkGovernance(owner: string): Promise<GovernanceResult> 
       return {
         owner,
         kind: 'eoa',
-        detail: 'Ein einzelner EOA kontrolliert den ENS-Namen — ein kompromittierter Schluessel reicht, um das Frontend umzulenken.',
+        detail: 'A single EOA controls the ENS name — one compromised key is enough to redirect the frontend.',
       };
     }
-    // Vertrag: Safe-getOwners() probieren
+    // contract: try Safe getOwners()
     try {
       const getOwners = v.encodeFunctionData({
         abi: [{ type: 'function', name: 'getOwners', stateMutability: 'view', inputs: [], outputs: [{ name: '', type: 'address[]' }] }] as const,
@@ -144,15 +144,15 @@ export async function checkGovernance(owner: string): Promise<GovernanceResult> 
           owner,
           kind: 'multisig-contract',
           ownerCount: decoded[0].length,
-          detail: `Contract mit Safe-aehnlichem getOwners(): ${decoded[0].length} Owner. Multisig-Exposition niedriger, aber Threshold pruefen.`,
+          detail: `Contract with Safe-like getOwners(): ${decoded[0].length} owners. Multisig exposure lower, but check the threshold.`,
         };
       }
     } catch {
-      /* kein Safe-Interface */
+      /* no Safe interface */
     }
-    return { owner, kind: 'contract', detail: 'Contract als Owner (Multisig-Ablesewidertest fehlgeschlagen oder anderes Schema). Manuell verifizieren.' };
+    return { owner, kind: 'contract', detail: 'Contract as owner (multisig read test failed or different scheme). Verify manually.' };
   } catch (e) {
-    return { owner, kind: 'unknown', detail: 'Governance nicht bestimmbar: ' + (e as Error).message };
+    return { owner, kind: 'unknown', detail: 'Governance not determinable: ' + (e as Error).message };
   }
 }
 

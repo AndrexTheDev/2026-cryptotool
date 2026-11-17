@@ -4,10 +4,10 @@ const FOCUSABLE =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /**
- * Barrierefreier Focus-Trap fuer modal Dialoge:
- * - initialer Fokus auf erstes fokussierbares Element
- * - Tab/Shift+Tab rotiert innerhalb des Dialogs
- * - beim Schliessen kehrt der Fokus zum Ausloeser zurueck
+ * Accessible focus trap for modal dialogs:
+ * - initial focus on the first focusable element
+ * - Tab/Shift+Tab rotates within the dialog
+ * - on close, focus returns to the trigger
  */
 export function useFocusTrap<T extends HTMLElement>(active: boolean) {
   const ref = useRef<T | null>(null);

@@ -6,12 +6,12 @@
     <text x="90" y="180" font-size="34" fill="#10b981" font-weight="700" letter-spacing="6">ANDREXTHEDEV</text>
     <text x="88" y="270" font-size="56" fill="#f8fafc" font-weight="800">Web3 Security &amp;</text>
     <text x="88" y="345" font-size="56" fill="#f8fafc" font-weight="800">Forensics Suite</text>
-    <text x="90" y="420" font-size="26" fill="#94a3b8">Forensische Web3-Sicherheit, Smart-Account-Audits &amp;</text>
-    <text x="90" y="458" font-size="26" fill="#94a3b8">kryptografische Nachweise — direkt in Ihrem Browser</text>
+    <text x="90" y="420" font-size="26" fill="#94a3b8">Forensic Web3 security, smart account audits &amp;</text>
+    <text x="90" y="458" font-size="26" fill="#94a3b8">cryptographic proofs — directly in your browser</text>
     <g font-size="20" fill="#facc15" font-weight="700">
       <text x="90" y="540">10 Module</text>
-      <text x="250" y="540" fill="#34d399">Nur Client. Keine Keys.</text>
-      <text x="560" y="540" fill="#34d399">Deterministische Prüflogik</text>
+      <text x="250" y="540" fill="#34d399">Client only. No keys.</text>
+      <text x="560" y="540" fill="#34d399">Deterministic audit logic</text>
     </g>
   </g>
 </svg>

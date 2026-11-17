@@ -1,11 +1,11 @@
-// Deterministische Miniscript/Policy-Analyse fuer BitVault-Stress.
+// Deterministic miniscript/policy analysis for BitVault Stress.
 //
-// - Policy-Parser (Recursive Descent) fuer: pk, or, and, thresh, multi, after,
-//   older, sha256, hash256, hash160 (vom begleitenden Modul miniscript-policies
-//   unabhaengig, reine lokale Mathematik).
-// - Zufriedenstellungs-Gewichte: exakte vByte-Berechnung pro Ausgabepfad
-//   (P2WSH & Taproot-Skriptpfad, konservative DER/Schnorr-Obergrenzen).
-// - Konsens-Fallen-Erkennung (CLTV/CSV-Mischung, Blockhoehe vs. Timestamp).
+// - Policy parser (recursive descent) for: pk, or, and, thresh, multi, after,
+//   older, sha256, hash256, hash160 (independent of the companion module
+//   miniscript-policies, pure local math).
+// - Satisfaction weights: exact vByte calculation per spending path
+//   (P2WSH & Taproot script path, conservative DER/Schnorr upper bounds).
+// - Consensus pitfall detection (CLTV/CSV mixing, block height vs. timestamp).
 
 export interface PolicyNode {
   type: 'pk' | 'older' | 'after' | 'and' | 'or' | 'thresh' | 'multi' | 'hash';
@@ -43,8 +43,8 @@ export function parsePolicy(src: string): PolicyNode {
 
   function parse(): PolicyNode {
     const head = next();
-    if (head === undefined || head === ')' || head === ',') throw new Error('Parser: unerwartetes Token');
-    if (peek() !== '(') return { type: 'pk', key: head }; // barer Schluessel-Ausdruck
+    if (head === undefined || head === ')' || head === ',') throw new Error('Parser: unexpected token');
+    if (peek() !== '(') return { type: 'pk', key: head }; // bare key expression
     expect('(');
     switch (head) {
       case 'pk':
@@ -107,11 +107,11 @@ export function parsePolicy(src: string): PolicyNode {
         return { type: 'multi', k, children: keys };
       }
       default:
-        throw new Error(`Parser: unbekannte Funktion '${head}'`);
+        throw new Error(`Parser: unknown function '${head}'`);
     }
   }
   const node = parse();
-  if (pos < toks.length) throw new Error('Parser: ueberschuessige Tokens');
+  if (pos < toks.length) throw new Error('Parser: surplus tokens');
   return node;
 }
 
@@ -129,12 +129,12 @@ export function findConsensusIssues(node: PolicyNode, path: PolicyNode[] = []): 
   const here = [...path, node];
   if (node.type === 'after' || node.type === 'older') {
     if (node.n == null || Number.isNaN(node.n!) || node.n! < 0 || node.n! > 0xffffffff) {
-      warnings.push({ level: 'red', text: `${node.type}(${node.n}): Wert ausserhalb des gueltigen Bereichs (0 … 2^32-1).` });
+      warnings.push({ level: 'red', text: `${node.type}(${node.n}): value outside the valid range (0 … 2^32-1).` });
     } else {
       const isHeight = node.n! < 500_000_000;
       warnings.push({
         level: 'amber',
-        text: `${node.type}(${node.n}) wird als ${isHeight ? 'Blockhoehe' : 'Unix-Zeitstempel'} interpretiert (Schwelle 500.000.000). Pruefen, ob das beabsichtigt ist.`,
+        text: `${node.type}(${node.n}) is interpreted as ${isHeight ? 'block height' : 'Unix timestamp'} (threshold 500,000,000). Check whether that is intended.`,
       });
     }
   }
@@ -150,7 +150,7 @@ export function findConsensusIssues(node: PolicyNode, path: PolicyNode[] = []): 
     if (hasAfter && hasOlder) {
       warnings.push({
         level: 'red',
-        text: 'Konflikt: after() (CLTV, absolut) und older() (CSV, relativ) im selben Ausgabepfad — die EVM des Bitcoin-Skripts (BIP-65/BIP-112/68) vertraegt den Mix nur in getrennten Zweigen.',
+        text: 'Conflict: after() (CLTV, absolute) and older() (CSV, relative) in the same spending path — the Bitcoin script semantics (BIP-65/BIP-112/68) tolerate the mix only in separate branches.',
       });
     }
     const heights = flats.filter((f) => (f.type === 'after' || f.type === 'older') && (f.n ?? 0) < 500_000_000);
@@ -158,7 +158,7 @@ export function findConsensusIssues(node: PolicyNode, path: PolicyNode[] = []): 
     if (heights.length && times.length) {
       warnings.push({
         level: 'red',
-        text: 'Zeiteinheiten-Mix im selben Pfad: Blockhoehen- und Unix-Zeit-Timelocks kombiniert — fuehrt in Classic-Skripten zu OP_VERIFY-XOR-Fehlern.',
+        text: 'Time-unit mix in the same path: block-height and Unix-time timelocks combined — leads to OP_VERIFY XOR errors in classic scripts.',
       });
     }
   }
@@ -173,10 +173,10 @@ export function findConsensusIssues(node: PolicyNode, path: PolicyNode[] = []): 
 export type VaultContext = 'wsh' | 'tr';
 
 const SIG_WSH = 73; // DER + Hashtype, konservativ
-const SIG_TR = 65; // 64B Schnorr + moegliches Sighash-Byte (Obergrenze)
+const SIG_TR = 65; // 64B Schnorr + possible sighash byte (upper bound)
 const PREIMAGE = 32;
 
-/** Liefert alle Zufriedenstellungs-Optionen als Liste von Witness-Item-Groessen (Bytes). */
+/** Returns all satisfaction options as a list of witness item sizes (bytes). */
 export function satisfactionOptions(node: PolicyNode, ctx: VaultContext): number[][] {
   const sig = ctx === 'wsh' ? SIG_WSH : SIG_TR;
   switch (node.type) {
@@ -216,7 +216,7 @@ export function satisfactionOptions(node: PolicyNode, ctx: VaultContext): number
       const results: number[][] = [];
       const choose = (start: number, need: number, acc: number[][]) => {
         if (need === 0) {
-          // Unzufriedenstellungen der restlichen Subausdruecke kosten je ~1 Byte (leerer Vektor)
+          // dissatisfactions of the remaining subexpressions cost ~1 byte each (empty vector)
           results.push([...acc.flat()]);
           return;
         }
@@ -229,14 +229,14 @@ export function satisfactionOptions(node: PolicyNode, ctx: VaultContext): number
         }
       };
       choose(0, k, []);
-      // zusaetzlich 1 Byte je NICHT gewaehltem Teilausdruck wird konservativ ignoriert (1-B-Ausreisser)
+      // additionally 1 byte per NOT-chosen subexpression is conservatively ignored (1 B outlier)
       return results.length ? results : [Array.from({ length: k }, () => sig)];
     }
   }
 }
 
 // ---------------------------------------------------------------------------
-// ASM -> Bytes (fuer Script-Groesse), Schluessel als 33-Byte-Platzhalter
+// ASM -> bytes (for script size), keys as 33-byte placeholders
 // ---------------------------------------------------------------------------
 
 const OPS: Record<string, number> = {
@@ -291,14 +291,14 @@ function pushLenBytes(len: number): number {
   return 3;
 }
 
-/** Wandelt bitcoinerlab-ASM (Tokens mit <hex>/Zahlen) in Script-Bytes um. */
+/** Converts bitcoinerlab ASM (tokens with <hex>/numbers) into script bytes. */
 export function asmToBytes(asm: string): Uint8Array {
   const bytes: number[] = [];
   const tokens = asm.trim().split(/\s+/);
   for (const t of tokens) {
     if (t.startsWith('<') && t.endsWith('>')) {
       const hex = t.slice(1, -1);
-      const data = hex.match(/^[0-9a-fA-F]+$/) && hex.length % 2 === 0 ? hexToNumArray(hex) : new Array(33).fill(0x02); // Schluessel-Platzhalter
+      const data = hex.match(/^[0-9a-fA-F]+$/) && hex.length % 2 === 0 ? hexToNumArray(hex) : new Array(33).fill(0x02); // key placeholder
       bytes.push(data.length);
       bytes.push(...data);
     } else if (/^-?\d+$/.test(t)) {
@@ -317,7 +317,7 @@ export function asmToBytes(asm: string): Uint8Array {
       const data = hexToNumArray(t);
       bytes.push(data.length, ...data);
     } else {
-      // Schluessel-Bezeichner (z. B. 'owner') → 33-Byte-Platzhalter
+      // key identifier (e.g. 'owner') → 33-byte placeholder
       bytes.push(33, ...new Array(33).fill(0x02));
     }
   }
@@ -369,37 +369,37 @@ export function pathWeight(items: number[], scriptBytes: number, ctx: VaultConte
 }
 
 export function taprootKeyPathWeight(): PathWeight {
-  // Witness: [64B-Schnorr-Sig]; kein Script, kein Control Block
+  // witness: [64B Schnorr sig]; no script, no control block
   const witnessWU = varintLen(1) + varintLen(64) + 64;
   const total = 164 + witnessWU;
   return { label: 'Taproot-Key-Path', items: [64], scriptBytes: 0, controlBlockBytes: 0, weightWU: total, vbytes: Math.round((total / 4) * 100) / 100 };
 }
 
 // ---------------------------------------------------------------------------
-// Fehler-Detektoren (Schutzmassnahmen)
+// error detectors (protective measures)
 // ---------------------------------------------------------------------------
 
 const SECRET_PATTERNS: { re: RegExp; label: string }[] = [
-  { re: /^(xprv|yprv|zprv|vprv|tprv|uprv)[1-9A-HJ-NP-Za-km-z]{20,}/, label: 'Privater Extended Key (*prv)' },
-  { re: /^[5KL][1-9A-HJ-NP-Za-km-z]{45,55}$/, label: 'WIF-Privatschluessel' },
-  { re: /^[0-9a-fA-F]{64}$/, label: '64 Hex-Zeichen (m. g. Privatschluessel)' },
+  { re: /^(xprv|yprv|zprv|vprv|tprv|uprv)[1-9A-HJ-NP-Za-km-z]{20,}/, label: 'private extended key (*prv)' },
+  { re: /^[5KL][1-9A-HJ-NP-Za-km-z]{45,55}$/, label: 'WIF private key' },
+  { re: /^[0-9a-fA-F]{64}$/, label: '64 hex characters (possibly a private key)' },
 ];
 
-/** Erkennt Seed-Phrasen oder Privatschluessel in Eingaben und blockiert sie. */
+/** Detects seed phrases or private keys in inputs and blocks them. */
 export function detectSecrets(input: string): string | null {
   const t = input.trim();
   for (const p of SECRET_PATTERNS) if (p.re.test(t)) return p.label;
   const words = t.toLowerCase().split(/\s+/);
   if (words.length === 12 || words.length === 24 || words.length === 15 || words.length === 18 || words.length === 21) {
     if (words.every((w) => /^[a-z]+$/.test(w))) {
-      return `Moegliche Seed-Phrase (${words.length} Woerter)`;
+      return `Possible seed phrase (${words.length} words)`;
     }
   }
   return null;
 }
 
 // ---------------------------------------------------------------------------
-// Gebuehren- / Dust-Analyse
+// fee / dust analysis
 // ---------------------------------------------------------------------------
 
 export interface UtxoRow {
@@ -411,11 +411,11 @@ export interface UtxoRow {
 export interface DustResult {
   utxo: UtxoRow;
   fee: number;
-  thirdDustLimit: number; // 3 * fee (Bitcoin-Core-Analogie, siehe unten)
-  crossedThird: boolean; // Wert <= 3x Gebuehr -> unter der 1/3-Klippe
-  totalLoss: boolean; // Gebuehr >= Wert
+  thirdDustLimit: number; // 3 * fee (Bitcoin Core analogy, see below)
+  crossedThird: boolean; // value <= 3x fee -> below the 1/3 cliff
+  totalLoss: boolean; // fee >= value
   netto: number;
-  pct: number; // Gebuehranteil %
+  pct: number; // fee share %
 }
 
 export function dustAnalysis(utxo: UtxoRow, vbytes: number, feerate: number): DustResult {
@@ -432,7 +432,7 @@ export function dustAnalysis(utxo: UtxoRow, vbytes: number, feerate: number): Du
   };
 }
 
-/** Multi-6stellige Fee-Heatmap-Grenzen: minimaler Wert je Rate, ueber dem Ausgabe oekonomisch ist. */
+/** Multi-digit fee heatmap bounds: minimum value per rate above which spending is economical. */
 export function heatmapThresholds(pathVbytes: number[]): { rate: number; dustLimit: number; lossLimit: number }[] {
   const worst = Math.max(...pathVbytes);
   const rates = [1, 2, 3, 5, 8, 12, 20, 35, 60, 100, 175, 300, 500, 750, 1000];

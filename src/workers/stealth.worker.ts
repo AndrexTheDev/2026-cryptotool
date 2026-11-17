@@ -1,8 +1,8 @@
-// StealthAudit-Worker: EIP-5564 (Schema 1) elliptische-Kurven-Scan-Schleifen.
-// Krypto: @noble/curves secp256k1 + @noble/hashes keccak (deterministisch).
+// StealthAudit worker: EIP-5564 (scheme 1) elliptic-curve scan loops.
+// Crypto: @noble/curves secp256k1 + @noble/hashes keccak (deterministic).
 import { secp256k1 } from '@noble/curves/secp256k1.js';
 
-// secp256k1 Gruppenordnung (Curve25519-Konstante n) - hart kodiert fuer Worker-Nutzung
+// secp256k1 group order (curve constant n) — hard-coded for worker use
 const CURVE_N = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n;
 import { keccak_256 } from '@noble/hashes/sha3.js';
 
@@ -24,7 +24,7 @@ export interface StealthHit {
   blockNumber: number;
   txHash?: string | undefined;
   caller?: string | undefined;
-  sharedSecretHash: string; // Zuordnungsnachweis (kein Viewing Key!)
+  sharedSecretHash: string; // attribution proof (no viewing key!)
 }
 
 const hex = (s: string) => {
@@ -93,14 +93,14 @@ export function scanAnnouncements(
       });
     }
     if (Date.now() - t0 > 500) {
-      // Dem Event-Loop Luft lassen (Fortschritt) — Chunks ohnehin klein gehalten
+      // give the event loop room (progress) — chunks are kept small anyway
     }
   }
   return { hits, checked, tagFiltered };
 }
 
-/** Demo-Generator: baut synthetische Announcements mit echter EIP-5564-Mathe. */
-/** Deterministischer, gueltiger Skalar aus Bytes: Reduktion mod n, Retry bei 0. */
+/** Demo generator: builds synthetic announcements with real EIP-5564 math. */
+/** Deterministic valid scalar from bytes: reduction mod n, retry on 0. */
 function scalarFromBytes(seed: Uint8Array): bigint {
   let counter = 0n;
   for (;;) {
@@ -115,7 +115,7 @@ function scalarFromBytes(seed: Uint8Array): bigint {
 
 export function genDemo(viewingPrivHex: string, spendingPubHex: string, count = 8, hitsWanted = 3): RawAnnouncement[] {
   const vPriv = BigInt(viewingPrivHex);
-  if (!secp256k1.utils.isValidSecretKey(hex(viewingPrivHex))) throw new Error('Ungueltiger Viewing Key (nur Viewing Key, nie Spending Key).');
+  if (!secp256k1.utils.isValidSecretKey(hex(viewingPrivHex))) throw new Error('Invalid viewing key (viewing key only, never a spending key).');
   const P_spend = secp256k1.Point.fromBytes(hex(spendingPubHex));
   const out: RawAnnouncement[] = [];
   let hits = 0;
@@ -157,7 +157,7 @@ if (gself) (gself as Worker).onmessage = (e: MessageEvent) => {
     | { type: 'scan'; viewingPrivHex: string; spendingPubHex: string; announcements: RawAnnouncement[]; minBlock?: number; maxBlock?: number }
     | { type: 'demo' };
   if (msg.type === 'demo') {
-    // Demo-Schluessel: oeffentlich bekannte Testwerte (viewing 0x02, spending 0x03)
+    // demo keys: publicly known test values (viewing 0x02, spending 0x03)
     const viewingPrivHex = '0x' + '0'.repeat(63) + '2';
     const spendingPub = secp256k1.Point.BASE.multiply(2n).toBytes(false); // spending unkomprimiert abgeleitet aus 0x03? -> wir nutzen priv 0x03:
     void spendingPub;

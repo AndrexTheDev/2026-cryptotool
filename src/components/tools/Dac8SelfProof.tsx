@@ -45,7 +45,7 @@ interface Cert {
   costBasisHint?: string | undefined;
   challengeMessage: string;
   signature?: { scheme: string; signer: string; signature: string };
-  verification?: { scheme: string; result: 'gueltig' | 'ungueltig' | 'nicht geprueft'; detail?: string | undefined };
+  verification?: { scheme: string; result: 'valid' | 'invalid' | 'not checked'; detail?: string | undefined };
   createdAt: string;
 }
 
@@ -54,24 +54,24 @@ const DEMO = {
   btcTxid: '9f2c45ab12cd8f07b3a1c4d5e6f70819203a4b5c6d7e8f9012a3b4c5d6e7f809',
   manualBlock: '00000000000000000001b0f23d0a4c9d3e2b1c985f6e7d4c3b2a1908f7e6d5c4',
   manualTime: '2026-10-14T09:32:00Z',
-  targetEvm: '0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf', // Adresse des oeffentlich bekannten Testkeys 0x01 (Demo!)
+  targetEvm: '0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf', // address of the publicly known test key 0x01 (demo!)
   demoPriv:
     '0000000000000000000000000000000000000000000000000000000000000001',
 };
 
 function buildChallenge(f: TxFacts, targetAddress: string, note: string): string {
   const lines = [
-    'AndrexTheDev DAC8-SelfProof — kryptografischer Eigenuebertrag-Nachweis',
+    'AndrexTheDev DAC8-SelfProof — cryptographic self-transfer proof',
     '',
-    'Zweck: Self-Custody Verification / Eigenuebertrag',
-    `Asset-Klasse: ${f.asset === 'btc' ? 'Bitcoin' : 'EVM'}`,
-    `Transaktion (TXID): ${f.txid}`,
-    `Blockhash: ${f.blockHash ?? '(manuell, nicht abgerufen)'}`,
-    `Blockzeit (UTC): ${f.timestamp ? new Date(f.timestamp * 1000).toISOString() : '(manuell)'}`,
-    `Zieladresse (Beansprucht): ${targetAddress}`,
+    'Purpose: self-custody verification / self-transfer',
+    `Asset class: ${f.asset === 'btc' ? 'Bitcoin' : 'EVM'}`,
+    `Transaction (TXID): ${f.txid}`,
+    `Block hash: ${f.blockHash ?? '(manual, not fetched)'}`,
+    `Block time (UTC): ${f.timestamp ? new Date(f.timestamp * 1000).toISOString() : '(manual)'}`,
+    `Target address (claimed): ${targetAddress}`,
   ];
-  if (note.trim()) lines.push(`Notiz/Einstand: ${note.trim()}`);
-  lines.push('', 'Ich bestaetige mit dieser Signatur die kryptografische Verfuegungsmacht ueber die Zieladresse zum Blockzeitpunkt.');
+  if (note.trim()) lines.push(`Note/cost basis: ${note.trim()}`);
+  lines.push('', 'With this signature I confirm cryptographic control over the target address at the block time.');
   return lines.join('\n');
 }
 
@@ -98,7 +98,7 @@ async function fetchBtcTx(txid: string): Promise<TxFacts> {
         blockHeight: j.status?.block_height,
         timestamp: j.status?.block_time,
         confirmed: j.status?.confirmed,
-        amountLabel: `${(total / 1e8).toLocaleString('de-DE', { maximumFractionDigits: 8 })} BTC gesamt`,
+        amountLabel: `${(total / 1e8).toLocaleString('en-GB', { maximumFractionDigits: 8 })} BTC total`,
         fromLabel: j.vin?.[0]?.prevout?.scriptpubkey_address ?? '',
         toLabel: vouts.map((o) => o.scriptpubkey_address).filter(Boolean).join(', '),
         source: 'online',
@@ -107,12 +107,12 @@ async function fetchBtcTx(txid: string): Promise<TxFacts> {
       lastErr = (e as Error).message;
     }
   }
-  throw new Error(`Bitcoin-Transaktionsdaten nicht abrufbar (${lastErr}). Nutzen Sie die manuellen Felder.` as string);
+  throw new Error(`Bitcoin transaction data not retrievable (${lastErr}). Use the manual fields.` as string);
 }
 
 async function fetchEvmTx(chainId: number, txid: string): Promise<TxFacts> {
   const tx = await getTx(chainId, txid);
-  if (!tx.data) throw new Error('Transaktion nicht gefunden (anderes Netzwerk waehlen oder manuell eingeben).');
+  if (!tx.data) throw new Error('Transaction not found (select a different network or enter manually).');
   const rec = await getTxReceipt(chainId, txid);
   const blockHash = String(tx.data.blockHash ?? '');
   let timestamp: number | undefined;
@@ -133,7 +133,7 @@ async function fetchEvmTx(chainId: number, txid: string): Promise<TxFacts> {
     blockHeight: height,
     timestamp,
     confirmed: !!rec.data && String((rec.data as Record<string, unknown>).status ?? '0x1') === '0x1',
-    amountLabel: `${(Number(valueWei) / 1e18).toLocaleString('de-DE', { maximumFractionDigits: 6 })} ${sym}`,
+    amountLabel: `${(Number(valueWei) / 1e18).toLocaleString('en-GB', { maximumFractionDigits: 6 })} ${sym}`,
     fromLabel: String(tx.data.from ?? ''),
     toLabel: String(tx.data.to ?? ''),
     source: 'online',
@@ -161,14 +161,14 @@ export default function Dac8SelfProof() {
   const [walletMsg, setWalletMsg] = useState('');
   const [cert, setCert] = useState<Cert | null>(null);
 
-  // URL-Hash-Verifikation: #verify=<base64url(JSON)>
+  // URL hash verification: #verify=<base64url(JSON)>
   useEffect(() => {
     const h = window.location.hash;
     const m = h.match(/verify=([A-Za-z0-9\-_]+)/);
     if (m) {
       try {
         const b64 = m[1];
-        if (b64 === undefined) throw new Error('PDF417-Payload-Feld fehlt');
+        if (b64 === undefined) throw new Error('verify payload field missing');
         const json = JSON.parse(new TextDecoder().decode(base64UrlDecode(b64))) as Cert;
         setAsset(json.asset);
         setTxid(json.txid);
@@ -185,7 +185,7 @@ export default function Dac8SelfProof() {
         });
         setError('');
       } catch {
-        /* kaputter Link ignorieren */
+        /* ignore broken link */
       }
     }
   }, []);
@@ -195,9 +195,9 @@ export default function Dac8SelfProof() {
     setTxid(DEMO.btcTxid);
     setManualBlock(DEMO.manualBlock);
     setManualTime(DEMO.manualTime);
-    setManualAmount('0,38400000 BTC');
-    setCsvRow('2026-10-14;WITHDRAWAL;0.384;BTC;Auszahlung an Eigenwallet (Belegrow aus Boersenexport)');
-    setNote('Einstandspreis 2023: 24.800 EUR/BTC (laut Boersenexport)');
+    setManualAmount('0.38400000 BTC');
+    setCsvRow('2026-10-14;WITHDRAWAL;0.384;BTC;withdrawal to own wallet (record row from exchange export)');
+    setNote('Cost basis 2023: EUR 24,800/BTC (per exchange export)');
     setError('');
   };
 
@@ -208,7 +208,7 @@ export default function Dac8SelfProof() {
     setSigInput('');
     setChallenge('');
     if (!isHexAddress(target) && !(asset === 'btc' && target.length > 20)) {
-      // BTC-Adressen ohne volle Pruefung zulassen, EVM strikt
+      // allow BTC addresses without full validation, EVM strict
     }
     setBusy(true);
     try {
@@ -225,20 +225,20 @@ export default function Dac8SelfProof() {
           confirmed: undefined,
           source: 'manual',
         };
-        if (asset === 'btc' && txid.trim() && !isBitcoinTxid(txid.trim())) throw new Error('Bitcoin-TXID: 64 Hex-Zeichen erwartet.');
-        if (asset === 'evm' && txid.trim() && !isTxHash(txid.trim())) throw new Error('EVM-Transaktionshash: 0x + 64 Hex erwartet.');
+        if (asset === 'btc' && txid.trim() && !isBitcoinTxid(txid.trim())) throw new Error('Bitcoin TXID: 64 hex characters expected.');
+        if (asset === 'evm' && txid.trim() && !isTxHash(txid.trim())) throw new Error('EVM transaction hash: 0x + 64 hex expected.');
       } else {
         if (asset === 'btc') {
-          if (!isBitcoinTxid(txid.trim())) throw new Error('Bitcoin-TXID: 64 Hex-Zeichen erwartet.');
+          if (!isBitcoinTxid(txid.trim())) throw new Error('Bitcoin TXID: 64 hex characters expected.');
           f = await fetchBtcTx(txid.trim());
         } else {
-          if (!isTxHash(txid.trim())) throw new Error('EVM-Transaktionshash: 0x + 64 Hex erwartet.');
+          if (!isTxHash(txid.trim())) throw new Error('EVM transaction hash: 0x + 64 hex expected.');
           f = await fetchEvmTx(chainId, txid.trim());
         }
       }
-      // CSV-Zeile als Beleg-Anhang (kein Upload, nur angezeigt)
+      // CSV row as record attachment (no upload, display only)
       if (csvRow.trim()) {
-        f.amountLabel = (f.amountLabel ? f.amountLabel + ' · ' : '') + 'Boersenzeile: ' + csvRow.trim().slice(0, 120);
+        f.amountLabel = (f.amountLabel ? f.amountLabel + ' · ' : '') + 'Exchange row: ' + csvRow.trim().slice(0, 120);
       }
       setFacts(f);
       setChallenge(buildChallenge(f, target.trim(), note));
@@ -254,21 +254,21 @@ export default function Dac8SelfProof() {
     try {
       const wallets = await discoverWallets();
       if (wallets.length === 0) {
-        setWalletMsg('Keine Wallet gefunden. Challenge kopieren und in Ihrer Wallet-Software (Message Signing) signieren.');
+        setWalletMsg('No wallet found. Copy the challenge and sign it in your wallet software (message signing).');
         return;
       }
       const providerEntry = wallets[0];
-      if (!providerEntry) { setWalletMsg('Kein Wallet-Provider gefunden.'); return; }
+      if (!providerEntry) { setWalletMsg('No wallet provider found.'); return; }
       const provider: Eip1193Provider = providerEntry.provider;
       const accounts = await provider.request<string[]>({ method: 'eth_requestAccounts' });
       const account = accounts[0];
-      if (!account) { setWalletMsg('Wallet hat keine Adresse freigegeben.'); return; }
+      if (!account) { setWalletMsg('The wallet did not share an address.'); return; }
       const sig = await personalSign(provider, account, challenge);
       setSigInput(sig);
       setTarget((t) => t || account);
-      setWalletMsg(`Signatur von ${shortHex(account)} erzeugt (${sig.slice(0, 18)}…). Jetzt unten verifizieren.`);
+      setWalletMsg(`Signature created by ${shortHex(account)} (${sig.slice(0, 18)}…). Now verify below.`);
     } catch (e) {
-      setWalletMsg('Signatur abgebrochen: ' + (e as Error).message);
+      setWalletMsg('Signing aborted: ' + (e as Error).message);
     }
   };
 
@@ -280,7 +280,7 @@ export default function Dac8SelfProof() {
       const { address, signatureBase64 } = await signBip322P2tr(priv, challenge);
       setTarget(address);
       setSigInput(signatureBase64);
-      setWalletMsg(`Demo-Signatur (BIP-322 P2TR, oeffentlich bekannter Testschluessel) fuer ${shortHex(address, 16, 8)} erzeugt.`);
+      setWalletMsg(`Demo signature (BIP-322 P2TR, publicly known test key) created for ${shortHex(address, 16, 8)}.`);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -291,7 +291,7 @@ export default function Dac8SelfProof() {
   const verify = async () => {
     setError('');
     if (!challenge || !sigInput.trim() || !target.trim()) {
-      setError('Challenge, Zieladresse und Signatur werden fuer die Verifikation benoetigt.');
+      setError('Challenge, target address and signature are required for verification.');
       return;
     }
     setBusy(true);
@@ -303,22 +303,22 @@ export default function Dac8SelfProof() {
         const r = await verifyBip322(target.trim(), challenge, sigInput.trim());
         scheme =
           r.variant === 'pof'
-            ? 'BIP-322 Proof-of-Funds (finalisiertes PSBT)'
+            ? 'BIP-322 proof of funds (finalized PSBT)'
             : r.variant === 'full'
               ? 'BIP-322 (full)'
               : r.variant === 'simple-prefixed'
-                ? 'BIP-322 (simple, smp-Praefix)'
-                : 'BIP-322 (simple, Legacy)';
+                ? 'BIP-322 (simple, smp prefix)'
+                : 'BIP-322 (simple, legacy)';
         ok = r.ok;
         detail = r.detail;
       } else if (target.trim().length === 42) {
-        // EOA: EIP-191 lokal verifizieren
+        // EOA: verify EIP-191 locally
         const v = await import('viem');
         scheme = 'EIP-191 personal_sign';
         ok = await v.verifyMessage({ address: target.trim() as `0x${string}`, message: challenge, signature: sigInput.trim() as `0x${string}` });
-        detail = ok ? 'Signatur korrespondiert zur Adresse (ECDSA-Recovery).' : 'Wiederhergestellte Adresse weicht ab.';
+        detail = ok ? 'Signature corresponds to the address (ECDSA recovery).' : 'Recovered address differs.';
         if (!ok && isHexAddress(target.trim())) {
-          // ERC-1271-Fallback fuer Smart Accounts (isValidSignature)
+          // ERC-1271 fallback for smart accounts (isValidSignature)
           try {
             const digest = v.hashMessage(challenge);
             const data = v.encodeFunctionData({
@@ -341,22 +341,22 @@ export default function Dac8SelfProof() {
             if (String(res.data).toLowerCase().startsWith('0x1626ba7e')) {
               scheme = 'ERC-1271 (isValidSignature)';
               ok = true;
-              detail = 'Smart-Account bestaetigt die Signatur (magic value 0x1626ba7e).';
+              detail = 'Smart account confirms the signature (magic value 0x1626ba7e).';
             }
           } catch {
-            /* bleibt ungueltig */
+            /* remains invalid */
           }
         }
       } else {
-        throw new Error('EVM-Zieladresse muss 0x-Adresse (40 Hex) sein.');
+        throw new Error('EVM target address must be a 0x address (40 hex).');
       }
-      const headline = ok ? `Signatur gültig (${scheme})` : `Signatur UNGÜLTIG (${scheme})`;
+      const headline = ok ? `Signature valid (${scheme})` : `Signature INVALID (${scheme})`;
       const lvl: StatusLevel = ok ? 'green' : 'red';
       setVerifyResult({ level: lvl, headline, detail });
 
       const c: Cert = {
         standard: 'AndrexTheDev/DAC8-SelfProof@1',
-        purpose: 'Self-Custody Verification / Eigenuebertrag',
+        purpose: 'Self-custody verification / self-transfer',
         asset,
         txid: txid.trim(),
         blockHash: facts?.blockHash,
@@ -367,7 +367,7 @@ export default function Dac8SelfProof() {
         costBasisHint: csvRow.trim() || undefined,
         challengeMessage: challenge,
         signature: { scheme, signer: target.trim(), signature: sigInput.trim() },
-        verification: { scheme, result: ok ? 'gueltig' : 'ungueltig', detail },
+        verification: { scheme, result: ok ? 'valid' : 'invalid', detail },
         createdAt: new Date().toISOString(),
       };
       setCert(c);
@@ -390,8 +390,8 @@ export default function Dac8SelfProof() {
     <div className="space-y-5">
       <StepSection
         n={1}
-        title="Transaktion & Zieladresse festlegen"
-        hint="Die Suite erzeugt eine deterministische Ownership-Challenge aus TXID, Blockhash und Zeitstempel. Keine vollstaendige Historie verlaesst Ihren Browser."
+        title="Set transaction & target address"
+        hint="The suite builds a deterministic ownership challenge from TXID, block hash and timestamp. No complete history leaves your browser."
       >
         <div className="flex flex-wrap gap-2 items-center">
           <div className="flex gap-2">
@@ -408,12 +408,12 @@ export default function Dac8SelfProof() {
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="label" htmlFor="d8-tx">{asset === 'btc' ? 'Bitcoin-TXID' : 'EVM-Transaktionshash'}</label>
-            <input id="d8-tx" className="input mono" placeholder={asset === 'btc' ? '64 Hex-Zeichen' : '0x…'} value={txid} onChange={(e) => setTxid(e.target.value)} />
+            <label className="label" htmlFor="d8-tx">{asset === 'btc' ? 'Bitcoin TXID' : 'EVM transaction hash'}</label>
+            <input id="d8-tx" className="input mono" placeholder={asset === 'btc' ? '64 hex characters' : '0x…'} value={txid} onChange={(e) => setTxid(e.target.value)} />
           </div>
           {asset === 'evm' && (
             <div>
-              <label className="label" htmlFor="d8-net">Netzwerk</label>
+              <label className="label" htmlFor="d8-net">Network</label>
               <select id="d8-net" className="select" value={chainId} onChange={(e) => setChainId(Number(e.target.value))}>
                 {CHAINS.map((c) => (
                   <option key={c.chainId} value={c.chainId}>
@@ -425,62 +425,62 @@ export default function Dac8SelfProof() {
           )}
         </div>
         <div>
-          <label className="label" htmlFor="d8-target">Zieladresse der Eigenuebertrag (beanspruchte Self-Custody-Adresse)</label>
+          <label className="label" htmlFor="d8-target">Target address of the self-transfer (claimed self-custody address)</label>
           <input id="d8-target" className="input mono" placeholder={asset === 'btc' ? 'bc1…' : '0x…'} value={target} onChange={(e) => setTarget(e.target.value)} />
         </div>
         <details className="acc">
-          <summary>Offline-Felder (Blockzeit, Blockhash, Betrag, Boersen-Zeile, Einstandspreis)</summary>
+          <summary>Offline fields (block time, block hash, amount, exchange row, cost basis)</summary>
           <div className="acc-body grid sm:grid-cols-2 gap-4">
             <div>
-              <label className="label" htmlFor="d8-mb">Blockhash (manuell)</label>
+              <label className="label" htmlFor="d8-mb">Block hash (manual)</label>
               <input id="d8-mb" className="input mono" value={manualBlock} onChange={(e) => setManualBlock(e.target.value)} placeholder="00000000…" />
             </div>
             <div>
-              <label className="label" htmlFor="d8-mt">Blockzeit (ISO, manuell)</label>
+              <label className="label" htmlFor="d8-mt">Block time (ISO, manual)</label>
               <input id="d8-mt" className="input mono" value={manualTime} onChange={(e) => setManualTime(e.target.value)} placeholder="2026-10-14T09:32:00Z" />
             </div>
             <div>
-              <label className="label" htmlFor="d8-ma">Betrag (manuell)</label>
-              <input id="d8-ma" className="input" value={manualAmount} onChange={(e) => setManualAmount(e.target.value)} placeholder="0,384 BTC" />
+              <label className="label" htmlFor="d8-ma">Amount (manual)</label>
+              <input id="d8-ma" className="input" value={manualAmount} onChange={(e) => setManualAmount(e.target.value)} placeholder="0.384 BTC" />
             </div>
             <div>
-              <label className="label" htmlFor="d8-note">Einstandspreis / Notiz (optional)</label>
-              <input id="d8-note" className="input" value={note} onChange={(e) => setNote(e.target.value)} placeholder="z. B. Einstand 2023" />
+              <label className="label" htmlFor="d8-note">Cost basis / note (optional)</label>
+              <input id="d8-note" className="input" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. cost basis 2023" />
             </div>
             <div className="sm:col-span-2">
-              <label className="label" htmlFor="d8-csv">Boersen-CSV-Zeile (optional, eine Zeile)</label>
-              <input id="d8-csv" className="input mono" value={csvRow} onChange={(e) => setCsvRow(e.target.value)} placeholder="Datum;Typ;Menge;Asset;Kommentar" />
+              <label className="label" htmlFor="d8-csv">Exchange CSV row (optional, one line)</label>
+              <input id="d8-csv" className="input mono" value={csvRow} onChange={(e) => setCsvRow(e.target.value)} placeholder="Date;Type;Amount;Asset;Comment" />
             </div>
           </div>
         </details>
       </StepSection>
 
-      <StepSection n={2} title="Challenge erzeugen & signieren">
+      <StepSection n={2} title="Generate & sign the challenge">
         <p className="text-sm">
-          Die Challenge wird deterministisch aus TXID, Blockhash, Zeitstempel und Zweckstring gebaut. Signaturwege:
-          EVM-Wallet (EIP-191) direkt hier, oder Signatur in Ihrer (Hardware-)Wallet erzeugen und unten einfuegen
-          (Bitcoin: BIP-322; EVM: EIP-191/EIP-712/ERC-1271). BIP-322 ist seit 04/2026 auf Status „Complete" (v1.0.0): moderne Signer
-          versehen Signaturen mit dem Praefix smp/ful/pof — alle Varianten werden erkannt; Proof-of-Funds (pof = finalisiertes PSBT mit
-          eingebetteter Challenge) wird format-geprueft, der UTXO-Ausgabestatus erfordert zusaetzlich Node/Explorer. Aeltere Signaturen ohne
-          Praefix gelten weiterhin als simple.
+          The challenge is built deterministically from TXID, block hash, timestamp and purpose string. Signing paths:
+          EVM wallet (EIP-191) directly here, or create the signature in your (hardware) wallet and paste it below
+          (Bitcoin: BIP-322; EVM: EIP-191/EIP-712/ERC-1271). BIP-322 has been at status "Complete" (v1.0.0) since 04/2026: modern signers
+          prefix signatures with smp/ful/pof — all variants are recognized; proof of funds (pof = finalized PSBT with
+          embedded challenge) is format-checked, the UTXO spend status additionally requires a node/explorer. Older signatures without
+          a prefix continue to count as simple.
         </p>
         <button className="btn btn-primary w-full sm:w-auto" onClick={() => void prepare()} disabled={busy}>
-          {busy ? 'Lade Daten…' : 'Challenge erzeugen'}
+          {busy ? 'Loading data…' : 'Generate challenge'}
         </button>
         {challenge && (
           <>
-            <label className="label mt-2">Challenge-Nachricht (deterministisch)</label>
+            <label className="label mt-2">Challenge message (deterministic)</label>
             <pre className="mono text-xs whitespace-pre-wrap break-all rounded-lg border border-line bg-obsidian p-3">{challenge}</pre>
             <div className="flex flex-wrap gap-2">
-              <CopyButton text={challenge} label="Challenge kopieren" compact />
+              <CopyButton text={challenge} label="Copy challenge" compact />
               {asset === 'evm' && (
                 <button className="btn btn-outline-amber btn-sm" onClick={() => void signWithWallet()}>
-                  Mit verbundener EVM-Wallet signieren (EIP-191)
+                  Sign with connected EVM wallet (EIP-191)
                 </button>
               )}
               {asset === 'btc' && challenge.includes(DEMO.btcTxid) && (
                 <button className="btn btn-outline-amber btn-sm" onClick={() => void demoSignBtc()}>
-                  Demo: BIP-322-Signatur erzeugen (Testschluessel)
+                  Demo: create BIP-322 signature (test key)
                 </button>
               )}
             </div>
@@ -491,80 +491,80 @@ export default function Dac8SelfProof() {
       </StepSection>
 
       {challenge && (
-        <StepSection n={3} title="Lokal verifizieren & Dossier exportieren">
+        <StepSection n={3} title="Verify locally & export the dossier">
           <div>
-            <label className="label" htmlFor="d8-sig">Signatur (BIP-322 base64, EIP-191/712 hex, ERC-1271 bytes)</label>
-            <textarea id="d8-sig" className="textarea mono" value={sigInput} onChange={(e) => setSigInput(e.target.value)} placeholder="Signatur hier einfuegen …" />
+            <label className="label" htmlFor="d8-sig">Signature (BIP-322 base64, EIP-191/712 hex, ERC-1271 bytes)</label>
+            <textarea id="d8-sig" className="textarea mono" value={sigInput} onChange={(e) => setSigInput(e.target.value)} placeholder="Paste signature here …" />
           </div>
           <button className="btn btn-primary" onClick={() => void verify()} disabled={busy}>
-            {busy ? 'Verifiziere…' : 'Verifizieren'}
+            {busy ? 'Verifying…' : 'Verify'}
           </button>
           {verifyResult && <StatusTile level={verifyResult.level} headline={verifyResult.headline} detail={verifyResult.detail} />}
           {facts && (
             <KpiGrid>
               <Kpi label="Asset" value={asset.toUpperCase()} />
-              <Kpi label="Blockzeit (UTC)" value={facts.timestamp ? new Date(facts.timestamp * 1000).toLocaleString('de-DE') : 'manuell/offen'} />
-              <Kpi label="Betrag" value={facts.amountLabel ?? '—'} />
-              <Kpi label="Bestaetigt" value={facts.confirmed == null ? 'n/a' : facts.confirmed ? 'ja' : 'nein'} tone={facts.confirmed === false ? 'amber' : 'green'} />
+              <Kpi label="Block time (UTC)" value={facts.timestamp ? new Date(facts.timestamp * 1000).toLocaleString('en-GB') : 'manual/open'} />
+              <Kpi label="Amount" value={facts.amountLabel ?? '—'} />
+              <Kpi label="Confirmed" value={facts.confirmed == null ? 'n/a' : facts.confirmed ? 'yes' : 'no'} tone={facts.confirmed === false ? 'amber' : 'green'} />
             </KpiGrid>
           )}
           {overallLevel && cert && (
             <>
               <details className="acc">
-                <summary>Zertifikat (JSON) & Verifikations-Link</summary>
+                <summary>Certificate (JSON) & verification link</summary>
                 <div className="acc-body space-y-2">
                   <pre className="mono text-xs whitespace-pre-wrap break-all rounded-lg border border-line bg-obsidian p-3 max-h-56 overflow-y-auto">
                     {JSON.stringify(cert, null, 2)}
                   </pre>
                   <p className="text-xs text-dim">
-                    Der Link kodiert das Zertifikat vollstaendig im URL-Hash (kein Server):{' '}
+                    The link encodes the certificate completely in the URL hash (no server):{' '}
                     <code className="break-all">{shortHex(verifyLink, 46, 18)}</code>
                   </p>
-                  <CopyButton text={verifyLink} label="Verifikations-Link kopieren" compact />
+                  <CopyButton text={verifyLink} label="Copy verification link" compact />
                 </div>
               </details>
               <div className="status-tile status-amber">
                 <span aria-hidden="true">⚠</span>
                 <p className="text-sm">
-                  <strong>Rechtlicher Hinweis:</strong> Die Signatur dokumentiert kryptografische Verfuegungsmacht ueber
-                  die Zieladresse zum Blockzeitpunkt. Sie ersetzt keine nationale Steuerberatung und keine behoerdliche
-                  Einzelfallpruefung (z. B. DAC8-/TFR-Zuordnung, Einstandspreiswertermittlung). Zeitkontext (Stand 11/2026):
-                  DAC8 gilt seit 01.01.2026 — in Deutschland umgesetzt durch das Kryptowerte-Steuertransparenzgesetz
-                  (KStTG; Bundestag 06.11.2025, Bundesrat-Zustimmung 19.12.2025). Das erste Meldejahr
-                  (Kalenderjahr 2026) laeuft bereits: RCASPs erfassen laufend Daten; erste Uebermittlungen an die
-                  nationalen Stellen (DE: BZSt) werden 2027 faellig — EU/CARF-Baseline 31.01.2027, KStTG-Frist
-                  31.07.2027 —, der erste automatische EU-Austausch folgt bis 30.09.2027. Bestands-Accounts muessen
-                  per Selbstauskunft bis 01.01.2027 verifiziert sein; KStTG-Verstoesse sind mit bis zu 50.000 EUR
-                  je Fall bewehrt. Praxis-Falle: Boersen melden Veraeusserungserloese — bei zugewanderten Coins mit
-                  Einstandsbasis 0, die Beweislast traegt der Nutzer. CARF startet international 2027 in 58 Laendern
-                  — bewahren Sie Befunde vollstaendig auf.
+                  <strong>Legal note:</strong> The signature documents cryptographic control over
+                  the target address at the block time. It does not replace national tax advice or an official
+                  case-by-case review (e.g. DAC8/TFR attribution, cost-basis determination). Time context (as of 11/2026):
+                  DAC8 has applied since 01.01.2026 — transposed in Germany by the Crypto-Asset Tax Transparency Act
+                  (KStTG; Bundestag 06.11.2025, Bundesrat consent 19.12.2025). The first reporting year
+                  (calendar year 2026) is already running: RCASPs are continuously collecting data; first transmissions to the
+                  national authorities (DE: BZSt) become due in 2027 — EU/CARF baseline 31.01.2027, KStTG deadline
+                  31.07.2027 —, the first automatic EU exchange follows by 30.09.2027. Pre-existing accounts must be
+                  verified by self-certification by 01.01.2027; KStTG violations carry fines of up to EUR 50,000
+                  per case. Practical pitfall: exchanges report disposal proceeds — for accrued coins with
+                  cost basis 0, the burden of proof lies with the user. CARF launches internationally in 2027 across 58 countries
+                  — keep your findings complete.
                 </p>
               </div>
               <ExportBar
                 onJson={() => downloadJSON(cert, `dac8-selfproof-${txid.slice(0, 10)}.json`)}
                 onPrint={() =>
                   openPrintableReport({
-                    title: 'DAC8-SelfProof Pruefdossier',
-                    subtitle: `Eigenuebertrag-Nachweis · ${asset.toUpperCase()} · ${new Date().toLocaleString('de-DE')}`,
+                    title: 'DAC8-SelfProof Review Dossier',
+                    subtitle: `Self-transfer proof · ${asset.toUpperCase()} · ${new Date().toLocaleString('en-GB')}`,
                     status: { level: verifyResult!.level, headline: verifyResult!.headline, detail: verifyResult!.detail },
                     sections: [
                       {
-                        heading: 'Transaktions-Fakten',
-                        body: `<pre>TXID:        ${txid}\nBlockhash:   ${facts?.blockHash ?? '-'}\nBlockzeit:   ${facts?.timestamp ? new Date(facts.timestamp * 1000).toISOString() : '-'}\nZieladresse: ${target}\nBetrag:      ${facts?.amountLabel ?? '-'}</pre>`,
+                        heading: 'Transaction facts',
+                        body: `<pre>TXID:        ${txid}\nBlock hash:  ${facts?.blockHash ?? '-'}\nBlock time:  ${facts?.timestamp ? new Date(facts.timestamp * 1000).toISOString() : '-'}\nTarget:      ${target}\nAmount:      ${facts?.amountLabel ?? '-'}</pre>`,
                       },
-                      { heading: 'Challenge-Nachricht', body: `<pre>${challenge}</pre>` },
+                      { heading: 'Challenge message', body: `<pre>${challenge}</pre>` },
                       {
-                        heading: 'Signatur & Verifikation',
-                        body: `<pre>Schema:  ${cert.signature?.scheme}\nSigner:  ${cert.signature?.signer}\nSignatur: ${cert.signature?.signature}\nErgebnis: ${cert.verification?.result} — ${cert.verification?.detail ?? ''}</pre>`,
+                        heading: 'Signature & verification',
+                        body: `<pre>Scheme:    ${cert.signature?.scheme}\nSigner:    ${cert.signature?.signer}\nSignature: ${cert.signature?.signature}\nResult:    ${cert.verification?.result} — ${cert.verification?.detail ?? ''}</pre>`,
                       },
                       {
-                        heading: 'Rechtlicher Hinweis',
-                        body: '<p>Kryptografischer Verfuegungsmacht-Nachweis. Keine Anlage-, Finanz-, Rechts- oder Steuerberatung; Anerkennung durch Behoerden ist eine Einzelfallfrage.</p>',
+                        heading: 'Legal note',
+                        body: '<p>Cryptographic proof of control. No investment, financial, legal or tax advice; recognition by authorities is a case-by-case matter.</p>',
                       },
                     ],
                   })
                 }
-                extra={<CopyButton text={verifyLink} label="Link kopieren" compact />}
+                extra={<CopyButton text={verifyLink} label="Copy link" compact />}
               />
             </>
           )}
@@ -588,5 +588,5 @@ function base64UrlDecode(s: string): Uint8Array {
   return out;
 }
 
-// Re-Export fuer Spaeter: rpcCall wird indirekt ueber Wrapper genutzt
+// re-export for later: rpcCall is used indirectly via wrappers
 void rpcCall;

@@ -2,20 +2,20 @@
 import { TOOLS, CATEGORY_LABEL, type Category } from '../config/site';
 
 const filters: { id: Category | 'all'; label: string }[] = [
-  { id: 'all', label: 'Alle 10 Werkzeuge' },
+  { id: 'all', label: 'All 10 tools' },
   { id: 'smart-account', label: CATEGORY_LABEL['smart-account'] },
   { id: 'bitcoin-compliance', label: CATEGORY_LABEL['bitcoin-compliance'] },
   { id: 'agents-intents-privacy', label: CATEGORY_LABEL['agents-intents-privacy'] },
 ];
 
 function href(slug: string) {
-  // Basis-sensitiv, damit lokale Builds und Unterverzeichnis-Deployments stimmen.
+  // base-aware, so local builds and subdirectory deployments resolve correctly.
   const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
   return `${base}tools/${slug}`;
 }
 ---
 
-<div class="flex flex-wrap gap-2 mb-8 mt-4" role="tablist" aria-label="Kategorien filtern">
+<div class="flex flex-wrap gap-2 mb-8 mt-4" role="tablist" aria-label="Filter categories">
   {filters.map((f, i) => (
     <button
       class={`filter-btn btn btn-sm ${i === 0 ? 'btn-primary' : 'btn-ghost'}`}
@@ -23,7 +23,7 @@ function href(slug: string) {
       role="tab"
       aria-selected={i === 0 ? 'true' : 'false'}
     >
-      <span data-i18n-de={f.label} data-i18n-en={f.labelEn}>{f.label}</span>
+      {f.label}
     </button>
   ))}
 </div>
@@ -43,7 +43,7 @@ function href(slug: string) {
         <span class="mono">{t.timeSaved}</span>
       </div>
       <span class="inline-flex items-center gap-1 text-prime-hi text-sm mt-3 font-medium">
-        Öffnen <span aria-hidden="true">→</span>
+        Open <span aria-hidden="true">→</span>
       </span>
     </a>
   ))}

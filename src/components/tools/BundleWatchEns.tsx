@@ -18,7 +18,7 @@ import { shortHex } from '../../lib/format';
 
 interface LiveAsset {
   url: string;
-  hash?: string; // sha256 vom Bookmarklet berechnet
+  hash?: string; // sha256 computed by the bookmarklet
   kind?: string;
 }
 
@@ -37,7 +37,7 @@ interface Compare {
   newAddresses: string[];
 }
 
-// Konsolen-Snippet (im Live-Tab der dApp ausfuehren). Nutzt crypto.subtle im Seitenkontext — HTTPS erforderlich.
+// console snippet (run in the live tab of the dApp). Uses crypto.subtle in the page context — HTTPS required.
 const BOOKMARKLET = `(async()=>{const u=[];const h=async t=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};for(const s of document.querySelectorAll('script[src]')){try{const r=await fetch(s.src,{cache:'no-store'});const t=await r.text();u.push({url:s.src,hash:await h(t),kind:'script'})}catch(e){u.push({url:s.src,kind:'script',error:'fetch-failed'})}}for(const l of document.querySelectorAll('link[rel=stylesheet]')){try{const r=await fetch(l.href,{cache:'no-store'});const t=await r.text();u.push({url:l.href,hash:await h(t),kind:'css'})}catch(e){u.push({url:l.href,kind:'css',error:'fetch-failed'})}}const blob=new Blob([JSON.stringify({origin:location.origin,ts:new Date().toISOString(),assets:u},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='live-bundle-'+location.hostname+'.json';a.click()})()`;
 
 const DEMO_LIVE = JSON.stringify(
@@ -56,7 +56,7 @@ const DEMO_LIVE = JSON.stringify(
 
 const DEMO_REF = JSON.stringify(
   {
-    note: 'Referenz-Manifest (aus Release-Archiv oder IPFS-Stand)',
+    note: 'reference manifest (from release archive or IPFS state)',
     files: [
       { path: 'assets/index-8f2ca1.js', sha256: 'aa00'.repeat(8), size: 512345 },
       { path: 'assets/index-8f2ca1.css', sha256: 'ff11'.repeat(8), size: 42310 },
@@ -118,7 +118,7 @@ export default function BundleWatchEns() {
       let contenthash = manualCh.trim();
       if (!contenthash) {
         if (!/^[a-z0-9-]+(\.[a-z0-9-]+)*\.eth$/i.test(ensName.trim())) {
-          throw new Error('ENS-Namen angeben (name.eth) oder contenthash manuell einfuegen (Offline-Modus).');
+          throw new Error('Provide an ENS name (name.eth) or paste the contenthash manually (offline mode).');
         }
         const r = await resolveEns(ensName.trim());
         setEns(r);
@@ -139,13 +139,13 @@ export default function BundleWatchEns() {
         setCid(decoded);
       }
 
-      // 2) Referenz-Stand: hochgeladenes Archiv oder Manifest oder IPFS
+      // 2) reference state: uploaded archive or manifest or IPFS
       let refs: RefAsset[] = [];
       const manifest = refManifest.trim();
       if (manifest) {
         const j = JSON.parse(manifest) as { files?: RefAsset[] };
         refs = (j.files ?? []).map((f) => ({ path: f.path, sha256: f.sha256.toLowerCase(), size: Number(f.size ?? 0) }));
-        setRefNote('Referenz: manuell eingefuegtes Manifest.');
+        setRefNote('Reference: manually pasted manifest.');
       } else if (decoded && decoded.kind === 'ipfs') {
         try {
           const res = await fetch(ipfsGatewayUrl(decoded.cid), { cache: 'no-store' });
@@ -153,18 +153,18 @@ export default function BundleWatchEns() {
             const text = await res.text();
             const entry: RefAsset = { path: 'index.html', sha256: await sha256Hex(text), size: new TextEncoder().encode(text).length, text };
             refs = [entry];
-            setRefNote('Referenz: IPFS-Index direkt aus dem Browser geladen.');
+            setRefNote('Reference: IPFS index loaded directly from the browser.');
           } else {
-            setRefNote(`IPFS-Abruf HTTP ${res.status} — bitte Release-Archiv oder Manifest manuell einfuegen.`);
+            setRefNote(`IPFS fetch HTTP ${res.status} — please paste the release archive or manifest manually.`);
           }
         } catch {
-          setRefNote('IPFS-Abruf blockiert/gedrosselt — bitte Release-Archiv oder Manifest manuell einfuegen.');
+          setRefNote('IPFS fetch blocked/throttled — please paste the release archive or manifest manually.');
         }
       } else if (ghRepo.trim()) {
-        setRefNote('Repository-Abgleich ist quellensensibel: bitte Release-Archiv lokal herunterladen und als Manifest/ZIP einfuegen (die Suite laedt nichts hoch).');
+        setRefNote('Repository comparison is source-sensitive: please download the release archive locally and paste it as manifest/ZIP (the suite uploads nothing).');
       }
 
-      // 3) Live-Bundle parsen
+      // 3) parse the live bundle
       let live: LiveAsset[] = [];
       const lv = liveData.trim();
       if (lv) {
@@ -172,15 +172,15 @@ export default function BundleWatchEns() {
           const j = JSON.parse(lv) as { assets?: LiveAsset[] };
           live = j.assets ?? [];
         } catch {
-          // HAR-Format?
+          // HAR format?
           const j = JSON.parse(lv) as { log?: { entries?: { request: { url: string } }[] } };
           live = (j.log?.entries ?? []).map((e) => ({ url: e.request.url, kind: e.request.url.match(/\.js(\?|$)/) ? 'script' : e.request.url.match(/\.css(\?|$)/) ? 'css' : 'other' }));
         }
       }
-      if (live.length === 0) throw new Error('Keine Live-Assets: Bookmarklet-JSON, HAR oder manuelle Liste einfuegen.');
-      if (refs.length === 0) throw new Error('Keine Referenz-Assets: Manifest/Archiv einfuegen oder ENS/IPFS-Bezug angeben.' + (refNote ? ` (${refNote})` : ''));
+      if (live.length === 0) throw new Error('No live assets: paste bookmarklet JSON, HAR or a manual list.');
+      if (refs.length === 0) throw new Error('No reference assets: paste a manifest/archive or provide an ENS/IPFS reference.' + (refNote ? ` (${refNote})` : ''));
 
-      // 4) Abgleich: Hash-Matching per Basename
+      // 4) reconciliation: hash matching per basename
       const base = (u: string) => {
         try {
           return new URL(u).pathname.split('/').pop() ?? u;
@@ -203,7 +203,7 @@ export default function BundleWatchEns() {
       const newInLive = live.filter((a) => !refs.some((r) => base(r.path) === base(a.url))).map((a) => a.url);
       const missingInLive = refs.filter((r) => ![...refUsed].includes(r.path)).map((r) => r.path);
 
-      // Domain- und Adress-Diff
+      // domain and address diff
       const refText = refs.map((r) => r.text ?? '').join('\n') + ' ' + refs.map((r) => r.path).join(' ');
       const liveText = live.map((l) => l.url).join('\n');
       const refDomains = new Set(extractDomains(refText + ' ' + refManifest));
@@ -214,7 +214,7 @@ export default function BundleWatchEns() {
       setRefAssets(refs);
       setCompare({ matched, newInLive, missingInLive, newDomains, newAddresses });
     } catch (e) {
-      setError((e as Error).message + ' — Offline-Pfade: contenthash manuell einfuegen, Referenz-Manifest hochladen.');
+      setError((e as Error).message + ' — offline paths: paste the contenthash manually, upload a reference manifest.');
     } finally {
       setBusy(false);
     }
@@ -232,7 +232,7 @@ export default function BundleWatchEns() {
 
   return (
     <div className="space-y-5">
-      <StepSection n={1} title="ENS-Name & Live-Daten" hint="ENS-Name Aufloesung (contenthash, EIP-1577) online — oder contenthash im Offline-Modus manuell einfuegen. Live-Daten via Bookmarklet, HAR oder manueller Liste.">
+      <StepSection n={1} title="ENS name & live data" hint="ENS name resolution (contenthash, EIP-1577) online — or paste the contenthash manually in offline mode. Live data via bookmarklet, HAR or a manual list.">
         <div className="flex flex-wrap gap-2 items-center">
           <DemoButton onClick={demo} />
           <button
@@ -245,92 +245,92 @@ export default function BundleWatchEns() {
               }
             }}
           >
-            📋 Bookmarklet kopieren
+            📋 Copy bookmarklet
           </button>
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="label" htmlFor="bw-ens">ENS-Name</label>
-            <input id="bw-ens" className="input mono" placeholder="app.beispiel.eth" value={ensName} onChange={(e) => setEnsName(e.target.value)} />
+            <label className="label" htmlFor="bw-ens">ENS name</label>
+            <input id="bw-ens" className="input mono" placeholder="app.example.eth" value={ensName} onChange={(e) => setEnsName(e.target.value)} />
           </div>
           <div>
-            <label className="label" htmlFor="bw-ch">contenthash (offline, optional Override)</label>
+            <label className="label" htmlFor="bw-ch">contenthash (offline, optional override)</label>
             <input id="bw-ch" className="input mono" placeholder="0xe30101…" value={manualCh} onChange={(e) => setManualCh(e.target.value)} />
           </div>
         </div>
         <div>
-          <label className="label" htmlFor="bw-live">Live-Bundle-Daten (Bookmarklet-JSON / HAR / Liste)</label>
+          <label className="label" htmlFor="bw-live">Live bundle data (bookmarklet JSON / HAR / list)</label>
           <textarea id="bw-live" className="textarea mono" rows={6} value={liveData} onChange={(e) => setLiveData(e.target.value)} placeholder='{"origin":"https://app…","assets":[{"url":"…","hash":"sha256…"}]}' />
-          <FileDrop label="Bookmarklet-JSON oder HAR ablegen" accept=".json,.har" onFile={(c) => setLiveData(c)} />
+          <FileDrop label="Drop bookmarklet JSON or HAR" accept=".json,.har" onFile={(c) => setLiveData(c)} />
         </div>
         <div>
-          <label className="label" htmlFor="bw-ref">Referenz-Manifest (JSON, files: path/sha256) oder Release-Archiv-Notizen</label>
+          <label className="label" htmlFor="bw-ref">Reference manifest (JSON, files: path/sha256) or release archive notes</label>
           <textarea id="bw-ref" className="textarea mono" rows={5} value={refManifest} onChange={(e) => setRefManifest(e.target.value)} placeholder='{"files":[{"path":"assets/index-ab12cd.js","sha256":"…","size":12345}]}' />
         </div>
         <div>
-          <label className="label" htmlFor="bw-gh">Repository (owner/repo, optional — Hinweis: lokaler Download erwartet)</label>
-          <input id="bw-gh" className="input mono" placeholder="orga/projekt" value={ghRepo} onChange={(e) => setGhRepo(e.target.value)} />
+          <label className="label" htmlFor="bw-gh">Repository (owner/repo, optional — note: local download expected)</label>
+          <input id="bw-gh" className="input mono" placeholder="org/project" value={ghRepo} onChange={(e) => setGhRepo(e.target.value)} />
         </div>
       </StepSection>
 
-      <StepSection n={2} title="Integritätsprüfung starten">
+      <StepSection n={2} title="Start integrity check">
         <p className="text-sm">
-          Liest ENS-Owner + contenthash (EIP-1577), dekodiert IPFS/IPNS-Referenz, berechnet SHA-256-Vergleiche und
-          hebt neue Domains oder Vertragsadressen im Live-Bundle hervor.
+          Reads the ENS owner + contenthash (EIP-1577), decodes the IPFS/IPNS reference, computes SHA-256 comparisons
+          and highlights new domains or contract addresses in the live bundle.
         </p>
         <button className="btn btn-primary w-full sm:w-auto" onClick={() => void run()} disabled={busy}>
-          {busy ? 'Pruefe…' : 'Prüfen'}
+          {busy ? 'Checking…' : 'Check'}
         </button>
         {error && <ErrorNote message={error} />}
       </StepSection>
 
       {compare && (
-        <StepSection n={3} title="Externer Integritätsbericht">
+        <StepSection n={3} title="External integrity report">
           <StatusTile
             level={level!}
             headline={
               level === 'red'
-                ? 'Live-Bundle weicht von Referenz ab'
+                ? 'Live bundle deviates from the reference'
                 : level === 'amber'
-                  ? 'Hashes konsistent — aber ENS-Governance kritisch'
-                  : 'Live-Bundle entspricht der Referenz'
+                  ? 'Hashes consistent — but ENS governance is critical'
+                  : 'Live bundle matches the reference'
             }
             detail={
               mismatchCount > 0
-                ? `${mismatchCount} Datei(en) mit abweichendem Hash. ${compare.newInLive.length} Datei(en) ohne Referenzpendant.`
+                ? `${mismatchCount} file(s) with a diverging hash. ${compare.newInLive.length} file(s) without a reference counterpart.`
                 : gov?.kind === 'eoa'
-                  ? 'Alle Hashes stimmen ueberein; jedoch kontrolliert ein einzelner EOA den ENS-Namen (UEbernahme-Risiko).'
-                  : 'Hash- und Domain-Abgleich ohne Befund.'
+                  ? 'All hashes match; however, a single EOA controls the ENS name (takeover risk).'
+                  : 'Hash and domain comparison without findings.'
             }
           />
           <KpiGrid>
-            <Kpi label="Abgeglichene Dateien" value={compare.matched.filter((m) => m.ref).length} />
-            <Kpi label="Hash-Abweichungen" value={mismatchCount} tone={mismatchCount ? 'red' : 'green'} />
-            <Kpi label="Neue Dateien live" value={compare.newInLive.length} tone={compare.newInLive.length ? 'amber' : 'green'} />
-            <Kpi label="Neue Domains live" value={compare.newDomains.length} tone={compare.newDomains.length ? 'red' : 'green'} />
+            <Kpi label="Reconciled files" value={compare.matched.filter((m) => m.ref).length} />
+            <Kpi label="Hash deviations" value={mismatchCount} tone={mismatchCount ? 'red' : 'green'} />
+            <Kpi label="New files live" value={compare.newInLive.length} tone={compare.newInLive.length ? 'amber' : 'green'} />
+            <Kpi label="New domains live" value={compare.newDomains.length} tone={compare.newDomains.length ? 'red' : 'green'} />
           </KpiGrid>
 
           {gov && (
             <details className="acc" open>
-              <summary>Governance-Ampel (ENS-Kontrolle)</summary>
+              <summary>Governance traffic light (ENS control)</summary>
               <div className="acc-body space-y-2">
                 <p className="text-xs text-dim">
-                  Hinweis ENSv2: Die Aufloesung laeuft ueber den DAO-eigenen Universal-Resolver-Proxy
-                  (0xeEeEEEeE…E144EeEe) — die ENS-DAO migriert unter ENSv2 schrittweise Registries
-                  (Sepolia seit 08/2026, Mainnet bei Aktivierung); die Abfrage bleibt kompatibel, weil der
-                  Proxy vom DAO aktualisiert wird.
+                  ENSv2 note: resolution runs via the DAO-owned universal resolver proxy
+                  (0xeEeEEEeE…E144EeEe) — the ENS DAO is migrating registries step by step under ENSv2
+                  (Sepolia since 08/2026, mainnet upon activation); the query stays compatible because the
+                  proxy is updated by the DAO.
                 </p>
                 <p>
                   Owner: <code className="mono text-xs break-all">{gov.owner}</code>{' '}
                   <span className={`badge ${gov.kind === 'multisig-contract' ? 'badge-green' : gov.kind === 'eoa' ? 'badge-red' : 'badge-amber'}`}>
-                    {gov.kind === 'multisig-contract' ? `Multisig (${gov.ownerCount} Owner)` : gov.kind === 'eoa' ? 'Einzelner EOA' : gov.kind}
+                    {gov.kind === 'multisig-contract' ? `Multisig (${gov.ownerCount} owners)` : gov.kind === 'eoa' ? 'Single EOA' : gov.kind}
                   </span>
                 </p>
                 <p className="text-sm">{gov.detail}</p>
                 {cid && (
                   <p className="text-sm">
                     contenthash: <span className="mono text-xs">{cid.kind}</span> → <code className="mono text-xs break-all">{cid.cid}</code>
-                    {cid.kind === 'ipns' && <span className="badge badge-amber ml-2">IPNS: veraenderbar — besondere Vorsicht</span>}
+                    {cid.kind === 'ipns' && <span className="badge badge-amber ml-2">IPNS: mutable — extra caution</span>}
                   </p>
                 )}
                 {ens?.resolverAddress && <p className="text-xs text-dim">Resolver: <code className="mono">{ens.resolverAddress}</code></p>}
@@ -339,13 +339,13 @@ export default function BundleWatchEns() {
           )}
 
           <details className="acc" open>
-            <summary>Skript-Hash-Abgleich</summary>
+            <summary>Script hash comparison</summary>
             <div className="acc-body overflow-x-auto">
               <table className="table-x">
                 <thead>
                   <tr>
-                    <th>Live-Asset</th>
-                    <th>Referenz</th>
+                    <th>Live asset</th>
+                    <th>Reference</th>
                     <th>Status</th>
                   </tr>
                 </thead>
@@ -353,21 +353,21 @@ export default function BundleWatchEns() {
                   {compare.matched.map((m, i) => (
                     <tr key={i}>
                       <td className="mono text-xs break-all">{shortHex(m.url, 52, 14)}</td>
-                      <td className="mono text-xs">{m.ref || <span className="badge badge-amber">keine Referenz</span>}</td>
-                      <td>{m.ref ? (m.ok ? <span className="badge badge-green">identisch</span> : <span className="badge badge-red">Hash weicht ab</span>) : <span className="badge badge-amber">neu live</span>}</td>
+                      <td className="mono text-xs">{m.ref || <span className="badge badge-amber">no reference</span>}</td>
+                      <td>{m.ref ? (m.ok ? <span className="badge badge-green">identical</span> : <span className="badge badge-red">hash diverges</span>) : <span className="badge badge-amber">new live</span>}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
               {compare.missingInLive.length > 0 && (
-                <p className="text-xs text-dim mt-2">In Referenz, aber nicht live gefunden: {compare.missingInLive.join(', ')}</p>
+                <p className="text-xs text-dim mt-2">In the reference but not found live: {compare.missingInLive.join(', ')}</p>
               )}
             </div>
           </details>
 
           {(compare.newDomains.length > 0 || compare.newAddresses.length > 0) && (
             <details className="acc" open>
-              <summary>Neue Domains / Adressen im Live-Bundle</summary>
+              <summary>New domains / addresses in the live bundle</summary>
               <div className="acc-body">
                 {compare.newDomains.length > 0 && (
                   <p className="text-sm">
@@ -379,7 +379,7 @@ export default function BundleWatchEns() {
                 )}
                 {compare.newAddresses.length > 0 && (
                   <p className="text-sm mt-2">
-                    <span className="badge badge-amber">Vertrags-Adressen</span>{' '}
+                    <span className="badge badge-amber">Contract addresses</span>{' '}
                     {compare.newAddresses.map((d) => (
                       <code key={d} className="mono text-xs mr-2">{shortHex(d, 10, 6)}</code>
                     ))}
@@ -395,21 +395,21 @@ export default function BundleWatchEns() {
             onJson={() =>
               downloadJSON(
                 { tool: 'bundlewatch-ens', generatedAt: new Date().toISOString(), ens, gov, cid, referenceAssets: refAssets.map((r) => ({ ...r, text: undefined })), compare },
-                'bundlewatch-ens-bericht.json',
+                'bundlewatch-ens-report.json',
               )
             }
             onPrint={() =>
               openPrintableReport({
-                title: 'BundleWatch-ENS Integritätsbericht',
-                subtitle: `${ensName || manualCh.slice(0, 18) + '…'} · ${new Date().toLocaleString('de-DE')}`,
-                status: { level: level!, headline: level === 'red' ? 'Abweichungen gefunden' : level === 'amber' ? 'Governance-Risiko' : 'Integritaet bestaetigt', detail: gov?.detail },
+                title: 'BundleWatch-ENS integrity report',
+                subtitle: `${ensName || manualCh.slice(0, 18) + '…'} · ${new Date().toLocaleString('en-GB')}`,
+                status: { level: level!, headline: level === 'red' ? 'Deviations found' : level === 'amber' ? 'Governance risk' : 'Integrity confirmed', detail: gov?.detail },
                 sections: [
                   { heading: 'Governance', body: `<pre>Owner: ${gov?.owner ?? '-'}\nTyp: ${gov?.kind ?? '-'}\ncontenthash: ${cid ? cid.kind + ' ' + cid.cid : '-'}</pre>` },
                   {
-                    heading: 'Hash-Abgleich',
-                    body: '<table border="1" cellspacing="0" cellpadding="6">' + compare.matched.map((m) => `<tr><td>${m.url}</td><td>${m.ref || '—'}</td><td>${m.ref ? (m.ok ? 'identisch' : 'ABWEICHUNG') : 'neu live'}</td></tr>`).join('') + '</table>',
+                    heading: 'Hash comparison',
+                    body: '<table border="1" cellspacing="0" cellpadding="6">' + compare.matched.map((m) => `<tr><td>${m.url}</td><td>${m.ref || '—'}</td><td>${m.ref ? (m.ok ? 'identical' : 'DEVIATION') : 'new live'}</td></tr>`).join('') + '</table>',
                   },
-                  { heading: 'Neue Domains', body: '<p>' + (compare.newDomains.join(', ') || 'keine') + '</p>' },
+                  { heading: 'New domains', body: '<p>' + (compare.newDomains.join(', ') || 'none') + '</p>' },
                 ],
               })
             }
@@ -418,11 +418,11 @@ export default function BundleWatchEns() {
       )}
 
       <details className="acc">
-        <summary>Konsolen-Snippet (im Ziel-Tab ausführen, sammelt Skript-Hashes)</summary>
+        <summary>Console snippet (run in the target tab, collects script hashes)</summary>
         <div className="acc-body">
-          <p className="text-sm text-dim">Diese Zeile in die Konsole des Live-Tabs der dApp kopieren — sie hasht alle geladenen Skripte lokal und laedt ein JSON herunter:</p>
+          <p className="text-sm text-dim">Copy this line into the console of the dApp's live tab — it hashes all loaded scripts locally and downloads a JSON file:</p>
           <pre className="mono text-xs bg-obsidian border border-line rounded-lg p-3 overflow-x-auto whitespace-pre-wrap break-all">{BOOKMARKLET}</pre>
-          <CopyButton text={BOOKMARKLET} label="Snippet kopieren" compact />
+          <CopyButton text={BOOKMARKLET} label="Copy snippet" compact />
         </div>
       </details>
     </div>

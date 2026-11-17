@@ -35,7 +35,7 @@ interface Analysis {
   policySource: string;
   descriptorKind: 'policy' | 'wsh' | 'tr' | 'unknown';
   issane?: boolean | undefined;
-  usedCompiler: 'miniscript-policies' | 'interner Parser';
+  usedCompiler: 'miniscript-policies' | 'internal parser';
   paths: PathWeight[];
   warnings: { level: 'amber' | 'red'; text: string }[];
   utxos: (DustResult & { rate: number })[];
@@ -73,7 +73,7 @@ function parseUtxos(text: string): UtxoRow[] {
   }
 }
 
-/** Extrahiert Kontext & Miniscript/Policy-Text aus Deskriptor oder nackter Policy. */
+/** Extracts context & miniscript/policy text from a descriptor or bare policy. */
 function extractScript(input: string): { ctx: VaultContext; inner: string; kind: Analysis['descriptorKind'] } {
   const t = input.trim().replace(/\s/g, '');
   const wsh = t.match(/^wsh\((.*)\)(?:#[0-9a-z]+)?$/i);
@@ -87,36 +87,36 @@ function buildHeirDrillHtml(a: Analysis): string {
   const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const worst = [...a.paths].sort((x, y) => y.vbytes - x.vbytes)[0];
   return `<!doctype html>
-<html lang="de"><head><meta charset="utf-8"><title>Erben-Uebungsdatei (heir-drill)</title>
+<html lang="en"><head><meta charset="utf-8"><title>Heir practice file (heir drill)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>body{font-family:ui-sans-serif,system-ui,sans-serif;background:#07090d;color:#cbd5e1;max-width:44rem;margin:2rem auto;padding:0 1rem;line-height:1.7}
 h1,h2{color:#f8fafc}code,pre{font-family:ui-monospace,Menlo,monospace;font-size:.85rem}
 pre{background:#0f141b;border:1px solid #1e293b;border-radius:.6rem;padding:.8rem;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
 .ok{color:#34d399}.warn{color:#facc15}li{margin:.35rem 0}</style></head><body>
-<h1>🧭 Erben-Uebung: Tresor-Wiederherstellung proben</h1>
-<p>Diese Datei ist vollstaendig <strong>offline</strong> ausfuehrbar. Sie enthaelt keine Schluessel — nur das oeffentliche
-Ausgabemodell und eine Schritt-fuer-Schritt-Uebung mit Testwerten.</p>
-<h2>1. Ausgabemodell</h2>
-<pre>Kontext:      ${esc(a.context === 'tr' ? 'Taproot (tr)' : 'SegWit v0 (wsh)')}
+<h1>🧭 Heir drill: rehearsing vault recovery</h1>
+<p>This file runs fully <strong>offline</strong>. It contains no keys — only the public
+spending model and a step-by-step drill with test values.</p>
+<h2>1. Spending model</h2>
+<pre>Context:      ${esc(a.context === 'tr' ? 'Taproot (tr)' : 'SegWit v0 (wsh)')}
 Definition:   ${esc(a.policySource)}
 Compiler:     ${esc(a.usedCompiler)}${a.issane != null ? `, sane=${a.issane}` : ''}
-Pfad-Gewichte:${a.paths.map((p) => `\n  - ${esc(p.label)}: ${p.vbytes} vB (Script ${p.scriptBytes} B${p.controlBlockBytes ? `, Control Block ${p.controlBlockBytes} B` : ''})`).join('')}</pre>
-<h2>2. Uebungsablauf (trocken, keine echten UTXOs)</h2>
+Path weights: ${a.paths.map((p) => `\n  - ${esc(p.label)}: ${p.vbytes} vB (script ${p.scriptBytes} B${p.controlBlockBytes ? `, control block ${p.controlBlockBytes} B` : ''})`).join('')}</pre>
+<h2>2. Drill procedure (dry run, no real UTXOs)</h2>
 <ol>
-<li><strong>Wiederherstellung installieren:</strong> Wallet-Software der Wahl auf einem Offline-Geraet oeffnen, Deskriptor/Policy importieren (Watch-Only). Pruefen: abgeleitete Adressen stimmen mit den Berechtigungsunterlagen ueberein.</li>
-<li><strong>Test-PSBT bauen:</strong> Eine Uebungs-Transaktion mit einem fiktiven UTXO (z. B. 100.000 sats) und dem <em>heaviest</em> Ausgabepfad (${worst ? esc(worst.label) + ', ' + worst.vbytes + ' vB' : 'siehe oben'}) erstellen; Gebuehrensatz 5 sat/vB → kalkulatorische Gebuehr: ${worst ? num(Math.ceil(worst.vbytes * 5)) : '—'} sats.</li>
-<li><strong>Signatur-Weg proben:</strong> Die Kombination der benoetigten Schluessel/Hardware-Devices einmal komplett durchspielen (Reihenfolge, PINs, Passphrasen dokumentieren).</li>
-<li><strong>Timelock-Logik pruefen:</strong> Falls der Pfad <code>after()</code> enthaelt: die notwendige Blockhoehe notieren und verifizieren, dass nLockTime korrekt gesetzt wird, damit der Pfad ueberhaupt gueltig ist.</li>
-<li><strong>Notieren &amp; archivieren:</strong> Die Uebungs-PSBT hexadezimal archivieren; Ergebnis dieser Datei beilegen.</li>
+<li><strong>Set up recovery:</strong> open the wallet software of choice on an offline device, import the descriptor/policy (watch-only). Check: the derived addresses match the entitlement documents.</li>
+<li><strong>Build a test PSBT:</strong> create a practice transaction with a fictitious UTXO (e.g. 100,000 sats) and the <em>heaviest</em> spending path (${worst ? esc(worst.label) + ', ' + worst.vbytes + ' vB' : 'see above'}); fee rate 5 sat/vB → calculated fee: ${worst ? num(Math.ceil(worst.vbytes * 5)) : '—'} sats.</li>
+<li><strong>Rehearse the signing path:</strong> walk through the required combination of keys/hardware devices once end to end (document order, PINs, passphrases).</li>
+<li><strong>Check timelock logic:</strong> if the path contains <code>after()</code>: note the required block height and verify that nLockTime is set correctly so the path is valid at all.</li>
+<li><strong>Record &amp; archive:</strong> archive the practice PSBT in hex; attach the result to this file.</li>
 </ol>
-<h2>3. Checkliste fuer den Ernstfall</h2>
+<h2>3. Emergency checklist</h2>
 <ul>
-<li>Steuer-/Erbfall-Doku: DAC8-SelfProof-Export des letzten bekannten UTXO-Stands beilegen.</li>
-<li>Gebuehrenpuffer: UTXOs unterhalb der 1/3-Dust-Klippe rechtzeitig konsolidieren (siehe BitVault-Stress-Bericht).</li>
-<li>Mehrfachausfertigung: Diese Datei an mindestens zwei getrennten Orten lagern.</li>
+<li>Tax/inheritance docs: attach a DAC8-SelfProof export of the last known UTXO state.</li>
+<li>Fee buffer: consolidate UTXOs below the 1/3 dust cliff in good time (see the BitVault Stress report).</li>
+<li>Multiple copies: store this file in at least two separate locations.</li>
 </ul>
-<p class="warn">Sicherheit: Niemals Seed-Woerter oder private Schluessel in digitale Uebungsdateien schreiben.</p>
-<p style="color:#64748b;font-size:.8rem">Erzeugt lokal durch AndrexTheDev BitVault-Stress. Kein Netzwerkzugriff, keine Schluessel.</p>
+<p class="warn">Security: never write seed words or private keys into digital practice files.</p>
+<p style="color:#64748b;font-size:.8rem">Generated locally by AndrexTheDev BitVault Stress. No network access, no keys.</p>
 </body></html>`;
 }
 
@@ -145,7 +145,7 @@ export default function BitVaultStress() {
     setError('');
     try {
       const addr = fetchAddress.trim();
-      if (!addr) throw new Error('Bitte eine Bitcoin-Adresse fuer den Abruf angeben (oder UTXOs manuell einfuegen).');
+      if (!addr) throw new Error('Please provide a Bitcoin address to fetch (or paste UTXOs manually).');
       let lastErr = '';
       for (const api of BTC_APIS) {
         try {
@@ -164,7 +164,7 @@ export default function BitVaultStress() {
           lastErr = (e as Error).message;
         }
       }
-      throw new Error(`UTXO-Abruf fehlgeschlagen (${lastErr}). Bitte UTXOs manuell als CSV/JSON einfuegen.`);
+      throw new Error(`UTXO fetch failed (${lastErr}). Please paste UTXOs manually as CSV/JSON.`);
     } catch (e) {
       setError((e as Error).message);
       setBusy(false);
@@ -177,24 +177,24 @@ export default function BitVaultStress() {
     const secret = detectSecrets(input) || detectSecrets(utxoText);
     if (secret) {
       setBlocked(
-        `Eingabe blockiert: ${secret} erkannt. Dieses Werkzeug akzeptiert ausschliesslich xpubs, Deskriptoren, Policies und oeffentliche Daten. Geben Sie NIEMALS Seed-Phrasen oder Privatschluessel ein.`,
+        `Input blocked: ${secret} detected. This tool accepts only xpubs, descriptors, policies and public data. NEVER enter seed phrases or private keys.`,
       );
       return;
     }
     if (!input.trim()) {
-      setError('Bitte eine Policy (z. B. ' + DEMO_POLICY + ') oder einen Deskriptor (wsh/tr) eingeben.');
+      setError('Please enter a policy (e.g. ' + DEMO_POLICY + ') or a descriptor (wsh/tr).');
       return;
     }
     setBusy(true);
     try {
       const { ctx, inner, kind } = extractScript(input);
       let node: PolicyNode;
-      let usedCompiler: Analysis['usedCompiler'] = 'interner Parser';
+      let usedCompiler: Analysis['usedCompiler'] = 'internal parser';
       let issane: boolean | undefined;
       let scriptBytes = 0;
       let controlLeafs = 1;
 
-      // 1) Compiler versuchen (sane-Check + kanonisches ASM)
+      // 1) try the compiler (sane check + canonical ASM)
       try {
         const MP = await import('@bitcoinerlab/miniscript-policies');
         if (MP.ready) await MP.ready;
@@ -206,17 +206,17 @@ export default function BitVaultStress() {
         } else {
           const c = MP.compilePolicyTaproot(inner);
           issane = !!c.issane;
-          // Beim Taproot-Compiler: Anzahl Blaetter aus Top-Level-or-Struktur schaetzen
+          // with the Taproot compiler: estimate leaf count from the top-level or-structure
           const topOr = inner.startsWith('or(') ? 2 : 1;
           controlLeafs = topOr;
           usedCompiler = 'miniscript-policies';
-          // Script-Bytes ebenfalls ueber Policy->ASM (Segwit-Kontext liefert die gleiche Logik-Sequenz)
+          // script bytes likewise via policy->ASM (SegWit context yields the same logic sequence)
           const c2 = MP.compilePolicy(inner);
           scriptBytes = asmToBytes(String(c2.asm)).length;
         }
         node = parsePolicy(inner);
       } catch {
-        // 2) Fallback: interner Parser, Script-Groesse heuristisch = ASM des internen Baums
+        // 2) fallback: internal parser, script size heuristic = ASM of the internal tree
         node = parsePolicy(inner);
         const estAsm = policyToApproxAsm(node);
         scriptBytes = asmToBytes(estAsm).length;
@@ -228,7 +228,7 @@ export default function BitVaultStress() {
       const cb = 33 + 32 * depth;
       const paths: PathWeight[] = options.map((items, i) => {
         const w = pathWeight(items, scriptBytes, ctx, cb);
-        w.label = (ctx === 'tr' ? 'Skriptpfad' : 'P2WSH-Pfad') + ' ' + String.fromCharCode(65 + i) + ' — ' + items.length + ' Witness-Items (' + items.join('+') + ' B)';
+        w.label = (ctx === 'tr' ? 'Script path' : 'P2WSH path') + ' ' + String.fromCharCode(65 + i) + ' — ' + items.length + ' witness items (' + items.join('+') + ' B)';
         return w;
       });
       if (ctx === 'tr') paths.unshift(taprootKeyPathWeight());
@@ -257,7 +257,7 @@ export default function BitVaultStress() {
         address: fetchAddress.trim() || undefined,
       });
     } catch (e) {
-      setError('Analyse fehlgeschlagen: ' + (e as Error).message + ' — Syntax pruefen (policy/deskriptor).');
+      setError('Analysis failed: ' + (e as Error).message + ' — check the syntax (policy/descriptor).');
     } finally {
       setBusy(false);
     }
@@ -275,16 +275,16 @@ export default function BitVaultStress() {
     const parts: string[] = [];
     if (lost.length)
       parts.push(
-        `${lost.length} UTXO(s) sind bei ${analysis.rate} sat/vB oekonomisch unausgebbar (Gebuehr ≥ Wert). Gesamtblockiert: ${num(lost.reduce((s, r) => s + r.utxo.sats, 0))} sats.`,
+        `${lost.length} UTXO(s) are economically unspendable at ${analysis.rate} sat/vB (fee ≥ value). Total locked: ${num(lost.reduce((s, r) => s + r.utxo.sats, 0))} sats.`,
       );
     if (risky.length)
       parts.push(
-        `${risky.length} UTXO(s) liegen unter der 1/3-Dust-Klippe (zusammen ${num(sumRisky)} sats). Empfehlung: bei niedriger Gebuehr (≤ ${Math.max(
+        `${risky.length} UTXO(s) sit below the 1/3 dust cliff (totalling ${num(sumRisky)} sats). Recommendation: consolidate into a larger UTXO at a low fee (≤ ${Math.max(
           1,
           Math.floor(sumRisky / Math.max(1, Math.ceil(worstPath))),
-        )} sat/vB) zu einem groesseren UTXO konsolidieren.`,
+        )} sat/vB).`,
       );
-    if (!risky.length && !lost.length) return 'Alle UTXOs sind beim gewaehlten Gebuehrensatz oekonomisch ausgebbar.';
+    if (!risky.length && !lost.length) return 'All UTXOs are economically spendable at the chosen fee rate.';
     return parts.join(' ');
   }, [analysis, worstPath]);
 
@@ -300,19 +300,19 @@ export default function BitVaultStress() {
     <div className="space-y-5">
       <StepSection
         n={1}
-        title="Policy / Deskriptor & UTXOs eingeben"
-        hint="Strikt nur oeffentliche Daten: Policy, Deskriptor mit xpubs/Fingerprints, UTXO-Liste. Seed-Phrasen und Privatschluessel werden aktiv erkannt und blockiert."
+        title="Enter policy / descriptor & UTXOs"
+        hint="Strictly public data only: policy, descriptor with xpubs/fingerprints, UTXO list. Seed phrases and private keys are actively detected and blocked."
       >
         <div className="flex flex-wrap gap-2 items-center">
           <DemoButton onClick={demo} />
-          <span className="text-xs text-dim">Demo: Erbschafts-Policy mit Timelock-Pfad</span>
+          <span className="text-xs text-dim">Demo: inheritance policy with timelock path</span>
         </div>
         <div>
-          <label className="label" htmlFor="bv-policy">Miniscript-Policy oder Output-Deskriptor (wsh/tr)</label>
+          <label className="label" htmlFor="bv-policy">Miniscript policy or output descriptor (wsh/tr)</label>
           <textarea
             id="bv-policy"
             className="textarea mono"
-            placeholder={DEMO_POLICY + ' oder wsh(and_v(v:pk(…),after(…))) / tr(xpub…,{…})'}
+            placeholder={DEMO_POLICY + ' or wsh(and_v(v:pk(…),after(…))) / tr(xpub…,{…})'}
             value={input}
             onChange={(e) => {
               setInput(e.target.value);
@@ -323,15 +323,15 @@ export default function BitVaultStress() {
         </div>
         <div className="grid sm:grid-cols-[1fr_auto] gap-3 items-end">
           <div>
-            <label className="label" htmlFor="bv-addr">UTXOs per Adresse abrufen (optional)</label>
+            <label className="label" htmlFor="bv-addr">Fetch UTXOs by address (optional)</label>
             <input id="bv-addr" className="input mono" placeholder="bc1q…/bc1p…" value={fetchAddress} onChange={(e) => setFetchAddress(e.target.value)} />
           </div>
           <button className="btn btn-ghost" onClick={() => void fetchUtxos()} disabled={busy}>
-            Abrufen
+            Fetch
           </button>
         </div>
         <div>
-          <label className="label" htmlFor="bv-utxo">UTXO-Liste (CSV „txid;vout;sats" oder JSON)</label>
+          <label className="label" htmlFor="bv-utxo">UTXO list (CSV "txid;vout;sats" or JSON)</label>
           <textarea id="bv-utxo" className="textarea mono" rows={5} value={utxoText} onChange={(e) => setUtxoText(e.target.value)} placeholder={'txid;vout;sats\n… '} />
         </div>
         {blocked && (
@@ -342,11 +342,11 @@ export default function BitVaultStress() {
         )}
       </StepSection>
 
-      <StepSection n={2} title="Stress-Test starten">
+      <StepSection n={2} title="Start the stress test">
         <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-end">
           <div>
             <label className="label" htmlFor="bv-rate">
-              Gebuehrensatz: <span className="text-gold-hi mono">{rate} sat/vB</span>
+              Fee rate: <span className="text-gold-hi mono">{rate} sat/vB</span>
             </label>
             <input
               id="bv-rate"
@@ -366,35 +366,35 @@ export default function BitVaultStress() {
             </div>
           </div>
           <button className="btn btn-primary" onClick={() => void analyze()} disabled={busy}>
-            {busy ? 'Analysiere…' : 'Analysieren'}
+            {busy ? 'Analyzing…' : 'Analyze'}
           </button>
         </div>
         <p className="text-sm">
-          Berechnet exakte vByte-Gewichte je Ausgabepfad und prueft jeden UTXO gegen die 1/3-Dust-Klippe
-          (Bitcoin-Core: oekonomisch kritisch bei Gebuehr &gt; Wert/3) und den 100-%-Totalverlust-Punkt.
+          Computes exact vByte weights per spending path and checks each UTXO against the 1/3 dust cliff
+          (Bitcoin Core: economically critical at fee &gt; value/3) and the 100 % total-loss point.
         </p>
         {error && <ErrorNote message={error} />}
       </StepSection>
 
       {analysis && (
-        <StepSection n={3} title="Stress-Bericht">
+        <StepSection n={3} title="Stress report">
           <StatusTile
             level={overallLevel!}
             headline={
               overallLevel === 'red'
-                ? 'Kritisch: unausgabbbare Pfade oder Konsens-Konflikte'
+                ? 'Critical: unspendable paths or consensus conflicts'
                 : overallLevel === 'amber'
-                  ? 'Vorsicht: Dust-Klippe erreicht oder Konsens-Annahmen pruefen'
-                  : 'Tresor bezueglich Dust & Pfade belastbar'
+                  ? 'Caution: dust cliff reached or check consensus assumptions'
+                  : 'Vault resilient regarding dust & paths'
             }
             detail={consolidationAdvice}
           />
           <KpiGrid>
-            <Kpi label="Leichtester Pfad" value={bestPath + ' vB'} tone="green" />
-            <Kpi label="Schwerster Pfad" value={worstPath + ' vB'} tone={worstPath > 300 ? 'amber' : 'default'} />
-            <Kpi label="Dust-Limit @Rate" value={satsFmt(Math.ceil(worstPath * analysis.rate) * 3)} tone="amber" />
+            <Kpi label="Lightest path" value={bestPath + ' vB'} tone="green" />
+            <Kpi label="Heaviest path" value={worstPath + ' vB'} tone={worstPath > 300 ? 'amber' : 'default'} />
+            <Kpi label="Dust limit @rate" value={satsFmt(Math.ceil(worstPath * analysis.rate) * 3)} tone="amber" />
             <Kpi
-              label="UTXOs unter 1/3-Klippe"
+              label="UTXOs below 1/3 cliff"
               value={`${analysis.utxos.filter((r) => r.crossedThird).length}/${analysis.utxos.length}`}
               tone={analysis.utxos.some((r) => r.crossedThird) ? 'red' : 'green'}
             />
@@ -407,49 +407,49 @@ export default function BitVaultStress() {
           </div>
 
           <details className="acc">
-            <summary>Gebühren-Bumping-Landschaft 2026 (pre-signierte Recovery-TXs)</summary>
+            <summary>Fee-bumping landscape 2026 (pre-signed recovery TXs)</summary>
             <div className="acc-body space-y-2 text-sm">
               <p>
-                Pre-signierte Tresor-Transaktionen tragen eine <strong>fixe Fee</strong> — ob sie bei Broadcast
-                konkurrenzfaehig ist, haengt von der Netz-Relais-Policy ab:
+                Pre-signed vault transactions carry a <strong>fixed fee</strong> — whether it is competitive
+                at broadcast depends on the network relay policy:
               </p>
               <ul className="list-disc list-inside space-y-1">
                 <li>
-                  <strong>Full-RBF ist Standard:</strong> seit Bitcoin Core 28.0 (10/2024) default eingeschaltet, seit
-                  29.0 (04/2025) verpflichtend — jede unbestaetigte Transaktion ist ersetzbar, egal ob sie BIP-125-signalisiert.
-                  Ein Recovery-TX kann also nachtraeglich gebumped werden, solange eine signierte Ersatz-Fee-Stufe existiert.
+                  <strong>Full-RBF is standard:</strong> on by default since Bitcoin Core 28.0 (10/2024), mandatory since
+                  29.0 (04/2025) — every unconfirmed transaction is replaceable, whether or not it signals BIP-125.
+                  A recovery TX can therefore be fee-bumped later, as long as a signed replacement fee tier exists.
                 </li>
                 <li>
-                  <strong>CPFP ueber Ephemeral Anchors (P2A):</strong> seit Core 28.0 standard-relay-faehig
-                  (<code>OP_1 0x4e73</code>, dust-frei, jeder darf ausgeben). Damit laesst sich die Gebuehr komplett
-                  zum Broadcast-Zeitpunkt bestimmen — geeignet fuer Zero-Fee-Commitment-Transaktionen in Vault-Designs.
+                  <strong>CPFP via ephemeral anchors (P2A):</strong> standard-relayable since Core 28.0
+                  (<code>OP_1 0x4e73</code>, dust-free, anyone can spend). This lets the fee be set entirely
+                  at broadcast time — suitable for zero-fee commitment transactions in vault designs.
                 </li>
                 <li>
-                  <strong>TRUC (v3-Transaktionen):</strong> begrenzen Pinning-Risiko (Groessenlimit 10.000 vB, eine
-                  unbestaetigte Vorfahre pro Package, incentiven-kompatible Ersetzungen) und werden seit Core 28.0 relayt.
+                  <strong>TRUC (v3 transactions):</strong> limit pinning risk (size limit 10,000 vB, one
+                  unconfirmed ancestor per package, incentive-compatible replacements) and have been relayed since Core 28.0.
                 </li>
                 <li>
-                  <strong>1p1c-Package-Relay:</strong> ein unterbezahlter Parent kann mit einem gut bezahlten Child als
-                  Paket eingereicht werden (Core 28.0+) — praktikabler Rettungsweg fuer zu knapp bepreiste pre-signierte TXs.
+                  <strong>1p1c package relay:</strong> an underpaid parent can be submitted as a package with a
+                  well-paid child (Core 28.0+) — a practical rescue path for too tightly priced pre-signed TXs.
                 </li>
               </ul>
               <p className="text-dim text-xs">
-                Fazit: Dust-/Fee-Analyse oben bleibt worst-case-orientiert (fixe Stufen!). Ob Ihre Vault-Policy von
-                Anchor-Ausgaeben/TRUC profitiert, entscheidet die Konstruktion (Liana-artige Designs setzen z. T. auf TRUC).
+                Bottom line: the dust/fee analysis above stays worst-case oriented (fixed tiers!). Whether your vault policy
+                benefits from anchor outputs/TRUC depends on the construction (Liana-style designs partly rely on TRUC).
               </p>
             </div>
           </details>
 
           <details className="acc" open>
-            <summary>Pfad-Gewichtstabelle</summary>
+            <summary>Path weight table</summary>
             <div className="acc-body">
               <table className="table-x">
                 <thead>
                   <tr>
-                    <th>Ausgabepfad</th>
+                    <th>Spending path</th>
                     <th>Script</th>
                     <th>Control Block</th>
-                    <th>Gewicht</th>
+                    <th>Weight</th>
                     <th>vBytes</th>
                   </tr>
                 </thead>
@@ -470,7 +470,7 @@ export default function BitVaultStress() {
 
           {analysis.warnings.length > 0 && (
             <details className="acc" open>
-              <summary>Bitcoin-Konsens-Fallen ({analysis.warnings.length})</summary>
+              <summary>Bitcoin consensus pitfalls ({analysis.warnings.length})</summary>
               <div className="acc-body">
                 <ul className="space-y-2">
                   {analysis.warnings.map((w, i) => (
@@ -484,15 +484,15 @@ export default function BitVaultStress() {
           )}
 
           <details className="acc" open>
-            <summary>Gebuehren-Heatmap (schwerster Pfad: {worstPath} vB)</summary>
+            <summary>Fee heatmap (heaviest path: {worstPath} vB)</summary>
             <div className="acc-body overflow-x-auto">
               <table className="table-x">
                 <thead>
                   <tr>
                     <th>sats/vB</th>
-                    <th>Gebuehr (sats)</th>
-                    <th>1/3-Dust-Limit</th>
-                    <th>100-%-Verlust bei ≤</th>
+                    <th>Fee (sats)</th>
+                    <th>1/3 dust limit</th>
+                    <th>100% loss at ≤</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -511,16 +511,16 @@ export default function BitVaultStress() {
 
           {analysis.utxos.length > 0 && (
             <details className="acc" open>
-              <summary>UTXO-Bewertung @ {analysis.rate} sat/vB</summary>
+              <summary>UTXO assessment @ {analysis.rate} sat/vB</summary>
               <div className="acc-body overflow-x-auto">
                 <table className="table-x">
                   <thead>
                     <tr>
                       <th>UTXO</th>
-                      <th>Wert</th>
-                      <th>Gebuehr</th>
-                      <th>Anteil</th>
-                      <th>Ampel</th>
+                      <th>Value</th>
+                      <th>Fee</th>
+                      <th>Share</th>
+                      <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -532,7 +532,7 @@ export default function BitVaultStress() {
                         <td className="mono">{r.pct.toFixed(1)} %</td>
                         <td>
                           <span className={`badge ${r.totalLoss ? 'badge-red' : r.crossedThird ? 'badge-amber' : 'badge-green'}`}>
-                            {r.totalLoss ? 'Totalverlust' : r.crossedThird ? '1/3-Klippe' : 'ok'}
+                            {r.totalLoss ? 'total loss' : r.crossedThird ? '1/3 cliff' : 'ok'}
                           </span>
                         </td>
                       </tr>
@@ -544,7 +544,7 @@ export default function BitVaultStress() {
           )}
 
           <ExportBar
-            onJson={() => downloadJSON({ tool: 'bitvault-stress', generatedAt: new Date().toISOString(), analysis }, 'bitvault-stress-bericht.json')}
+            onJson={() => downloadJSON({ tool: 'bitvault-stress', generatedAt: new Date().toISOString(), analysis }, 'bitvault-stress-report.json')}
             onCsv={() =>
               downloadCSV(
                 analysis.utxos.map((r) => ({
@@ -553,9 +553,9 @@ export default function BitVaultStress() {
                   sats: r.utxo.sats,
                   rate_sat_vb: r.rate,
                   fee_sats: r.fee,
-                  fee_pct: r.pct.toFixed(2).replace('.', ','),
-                  third_dust: r.crossedThird ? 'ja' : 'nein',
-                  total_loss: r.totalLoss ? 'ja' : 'nein',
+                  fee_pct: r.pct.toFixed(2),
+                  third_dust: r.crossedThird ? 'yes' : 'no',
+                  total_loss: r.totalLoss ? 'yes' : 'no',
                 })),
                 'bitvault-stress-utxos.csv',
               )
@@ -568,7 +568,7 @@ export default function BitVaultStress() {
   );
 }
 
-/** Approximiertes ASM aus dem internen Policy-Baum (nur Script-Groessen-Schaetzung). */
+/** Approximate ASM from the internal policy tree (script size estimation only). */
 function policyToApproxAsm(node: PolicyNode): string {
   switch (node.type) {
     case 'pk':

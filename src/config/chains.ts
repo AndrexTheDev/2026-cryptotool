@@ -1,6 +1,6 @@
-// Multi-Chain-Konfiguration fuer den globalen RPC-Manager.
-// Hinweis: Die hier hinterlegten oeffentlichen Fallback-Endpunkte werden der
-// Nutzeroberflaeche niemals namentlich gezeigt (siehe Pflichtvorgabe 2.2/5).
+// Multi-chain configuration for the global RPC manager.
+// Note: the public fallback endpoints configured here are never
+// shown by name in the user interface (see specification 2.2/5).
 
 export interface ChainDef {
   chainId: number;
@@ -83,7 +83,7 @@ export const CHAINS: ChainDef[] = [
 
 export const chainById = (id: number): ChainDef | undefined => CHAINS.find((c) => c.chainId === id);
 
-// ERC-4337 EntryPoint-Adressen (kanonisch, chain-uebergreifend identisch)
+// ERC-4337 EntryPoint addresses (canonical, identical across chains)
 export const ENTRYPOINT_V06 = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789' as const;
 export const ENTRYPOINT_V07 = '0x0000000071727De22E5E9d8BAf0edAc6f37da032' as const;
 

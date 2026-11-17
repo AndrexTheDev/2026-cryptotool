@@ -38,7 +38,7 @@ export async function authorizationDigest(chainId: number, address: string, nonc
 const ZERO_ADDR = '0x0000000000000000000000000000000000000000';
 export { ZERO_ADDR };
 
-/** Extrahiert das Delegate aus EIP-7702-Delegations-Bytecode (0xef0100 || addr). */
+/** Extracts the delegate from EIP-7702 delegation bytecode (0xef0100 || addr). */
 export function extract7702Delegate(code: string): string | null {
   const c = code.toLowerCase();
   if (!c.startsWith('0xef0100')) return null;
@@ -52,7 +52,7 @@ export interface StorageEntry {
   value: string;
 }
 
-/** Parst manuelle Storage-Dumps: eine Zeile pro Eintrag "slot value" (hex bevorzugt) oder JSON. */
+/** Parses manual storage dumps: one line per entry "slot value" (hex preferred) or JSON. */
 export function parseStorageDump(text: string): StorageEntry[] {
   const t = text.trim();
   if (!t) return [];
@@ -74,7 +74,7 @@ export function parseStorageDump(text: string): StorageEntry[] {
   }
 }
 
-/** Statischer Bytecode-Risikoscan: SKIP PUSH-Daten und suche kritische Opcodes. */
+/** Static bytecode risk scan: skip PUSH data and search for critical opcodes. */
 export function scanBytecodePatterns(code: string): { opcode: string; label: string; count: number }[] {
   const bytes = (code.startsWith('0x') ? code.slice(2) : code).toLowerCase();
   const found: { f4: number; ff: number; f0: number } = { f4: 0, ff: 0, f0: 0 };
@@ -82,7 +82,7 @@ export function scanBytecodePatterns(code: string): { opcode: string; label: str
   while (i < bytes.length / 2) {
     const b = parseInt(bytes.slice(i * 2, i * 2 + 2), 16);
     if (b >= 0x60 && b <= 0x7f) {
-      i += 1 + (b - 0x5f); // PUSHn ueberspringen
+      i += 1 + (b - 0x5f); // skip PUSHn
       continue;
     }
     if (b === 0xf4) found.f4 += 1; // DELEGATECALL

@@ -23,7 +23,7 @@ import {
   type DecodedOrder,
 } from '../../lib/intents';
 
-// Demo: GaslessCrossChainOrder (EIP-712-JSON, Across-aehnliches orderData-Schema)
+// demo: GaslessCrossChainOrder (EIP-712 JSON, Across-like orderData schema)
 const DEMO_JSON = {
   "message": {
     "originSettler": "0x5c1ed95e70c9CF4b1f0Ae0e0c000000000000000",
@@ -75,37 +75,37 @@ export default function IntentLens7683() {
       let o: DecodedOrder | null = null;
       if (mode === 'json') {
         o = await parseOrderJsonFull(json);
-        if (!o) throw new Error('JSON nicht als GaslessCrossChainOrder interpretierbar.');
+        if (!o) throw new Error('JSON not interpretable as a GaslessCrossChainOrder.');
       } else if (mode === 'calldata') {
-        if (!/^0x[0-9a-fA-F]+$/.test(calldata.trim())) throw new Error('Roh-Calldata als Hex (0x…) einfuegen.');
+        if (!/^0x[0-9a-fA-F]+$/.test(calldata.trim())) throw new Error('Paste raw calldata as hex (0x…).');
         o = await decodeOpenCalldata(calldata);
       } else {
-        if (!isTxHash(txhash.trim())) throw new Error('Gueltigen Ursprungs-Transaktionshash angeben (0x + 64 Hex).');
+        if (!isTxHash(txhash.trim())) throw new Error('Provide a valid origin transaction hash (0x + 64 hex).');
         const tx = await getTx(chainId, txhash.trim());
-        if (!tx.data) throw new Error('Transaktion nicht gefunden (anderes Ursprungs-Netzwerk waehlen?).');
+        if (!tx.data) throw new Error('Transaction not found (choose a different origin network?).');
         o = await decodeOpenCalldata(String(tx.data.input));
         o.originSettler = o.originSettler ?? String((tx.data as Record<string, unknown>).to ?? '');
       }
       setOrder(o);
 
-      // Zeitstatus: Header der Ziel-Chain oder manuell
+      // time status: destination chain header or manual
       if (manualNow.trim()) {
         setNowTs(Math.floor(Date.parse(manualNow.trim()) / 1000));
-        setChainNote('Zeitbasis: manuell.');
+        setChainNote('Time base: manual.');
       } else {
         try {
           const blk = await getBlockByNumber(destChainId, 'latest');
           if (blk.data) {
             setNowTs(Number(BigInt(String(blk.data.timestamp))));
-            setChainNote(`Zeitbasis: letzter Block der Ziel-Chain ${destChainId}.`);
+            setChainNote(`Time base: latest block of destination chain ${destChainId}.`);
           }
         } catch {
           setNowTs(Math.floor(Date.now() / 1000));
-          setChainNote('Zeitbasis: lokale Uhr (Ziel-Chain nicht erreichbar — Annahme markieren).');
+          setChainNote('Time base: local clock (destination chain unreachable — mark as assumption).');
         }
       }
 
-      // Refund-Calldata (nur moeglich bei vollstaendiger Order)
+      // refund calldata (only possible with a fully decoded order)
       if (o.originSettler && o.user && o.nonce != null && o.originChainId != null && o.openDeadline != null && o.fillDeadline != null && o.orderDataType && o.orderData) {
         const cd = await encodeResolveFor({
           originSettler: o.originSettler,
@@ -150,17 +150,17 @@ export default function IntentLens7683() {
         : 'green'
     : null;
 
-  const fmtDate = (ts: number) => new Date(ts * 1000).toLocaleString('de-DE');
+  const fmtDate = (ts: number) => new Date(ts * 1000).toLocaleString('en-GB');
 
   return (
     <div className="space-y-5">
-      <StepSection n={1} title="Order-Daten eingeben" hint="Signierte GaslessCrossChainOrder (EIP-712 JSON), Roh-Calldata von open()/openFor() oder Ursprungs-Transaktionshash + Chains.">
+      <StepSection n={1} title="Enter order data" hint="Signed GaslessCrossChainOrder (EIP-712 JSON), raw calldata of open()/openFor() or origin transaction hash + chains.">
         <div className="flex flex-wrap gap-2">
           {(
             [
               ['json', 'EIP-712 JSON'],
-              ['calldata', 'Roh-Calldata'],
-              ['txhash', 'TX-Hash (online)'],
+              ['calldata', 'Raw calldata'],
+              ['txhash', 'TX hash (online)'],
             ] as const
           ).map(([m, label]) => (
             <button key={m} className={`btn btn-sm ${mode === m ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setMode(m)}>
@@ -173,31 +173,31 @@ export default function IntentLens7683() {
         </div>
         {mode === 'json' && (
           <div>
-            <label className="label" htmlFor="il-json">Signierte GaslessCrossChainOrder (EIP-712 JSON)</label>
+            <label className="label" htmlFor="il-json">Signed GaslessCrossChainOrder (EIP-712 JSON)</label>
             <textarea id="il-json" className="textarea mono" rows={7} value={json} onChange={(e) => setJson(e.target.value)} placeholder='{"message":{"originSettler":"0x…","user":"0x…","nonce":"42","originChainId":"1", …}}' />
           </div>
         )}
         {mode === 'calldata' && (
           <div>
-            <label className="label" htmlFor="il-cd">Roh-Calldata (open / openFor)</label>
+            <label className="label" htmlFor="il-cd">Raw calldata (open / openFor)</label>
             <textarea id="il-cd" className="textarea mono" rows={6} value={calldata} onChange={(e) => setCalldata(e.target.value)} placeholder="0x5c4b72ef…" />
           </div>
         )}
         {mode === 'txhash' && (
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label className="label" htmlFor="il-tx">Ursprungs-Transaktionshash</label>
+              <label className="label" htmlFor="il-tx">Origin transaction hash</label>
               <input id="il-tx" className="input mono" placeholder="0x…" value={txhash} onChange={(e) => setTxhash(e.target.value)} />
             </div>
             <div>
-              <label className="label" htmlFor="il-oc">Ursprungs-Chain</label>
+              <label className="label" htmlFor="il-oc">Origin chain</label>
               <ChainSingleSelect value={chainId} onChange={setChainId} />
             </div>
           </div>
         )}
         <div className="grid sm:grid-cols-3 gap-4">
           <div>
-            <label className="label" htmlFor="il-dc">Ziel-Chain</label>
+            <label className="label" htmlFor="il-dc">Destination chain</label>
             <ChainSingleSelect value={destChainId} onChange={setDestChainId} />
           </div>
           <div>
@@ -210,44 +210,44 @@ export default function IntentLens7683() {
           </div>
         </div>
         <div>
-          <label className="label" htmlFor="il-mt">Manuelle Zeitbasis (offline, ISO, optional)</label>
+          <label className="label" htmlFor="il-mt">Manual time base (offline, ISO, optional)</label>
           <input id="il-mt" className="input mono" placeholder="2026-11-15T12:00:00Z" value={manualNow} onChange={(e) => setManualNow(e.target.value)} />
         </div>
       </StepSection>
 
-      <StepSection n={2} title="Intent dekodieren">
+      <StepSection n={2} title="Decode intent">
         <p className="text-sm">
-          Dekodiert OriginSettler, Deadlines, Betraege und gängige orderData-Schemata herstellerunabhaengig, berechnet
-          den maximalen impliziten Solver-Spread und prueft den Deadline-Status auf der Ziel-Chain.
+          Decodes originSettler, deadlines, amounts and common orderData schemas vendor-independently, computes
+          the maximum implicit solver spread and checks the deadline status on the destination chain.
         </p>
         <button className="btn btn-primary w-full sm:w-auto" onClick={() => void run()} disabled={busy}>
-          {busy ? 'Dekodiere…' : 'Dekodieren'}
+          {busy ? 'Decoding…' : 'Decode'}
         </button>
         {error && <ErrorNote message={error} />}
       </StepSection>
 
       {order && (
-        <StepSection n={3} title="Order-Anatomie">
+        <StepSection n={3} title="Order anatomy">
           <StatusTile
             level={level!}
             headline={
               deadline?.passed
-                ? 'Deadline abgelaufen — Fill pruefen, Refund vorbereiten'
+                ? 'Deadline expired — check fill, prepare refund'
                 : spread && spread.spreadPct > 3
-                  ? 'Hoher impliziter Solver-Spread'
-                  : 'Order dekodiert — Spread & Annahmen unten'
+                  ? 'High implicit solver spread'
+                  : 'Order decoded — spread & assumptions below'
             }
             detail={chainNote}
           />
           <KpiGrid>
-            <Kpi label="Dekodierung" value={order.decodeConfidence} tone={order.decodeConfidence === 'roh' ? 'red' : order.decodeConfidence === 'teilweise' ? 'amber' : 'green'} />
+            <Kpi label="Decoding" value={order.decodeConfidence} tone={order.decodeConfidence === 'raw' ? 'red' : order.decodeConfidence === 'partial' ? 'amber' : 'green'} />
             <Kpi label="Spread (implizit)" value={spread ? spread.spreadPct.toFixed(3) + ' %' : 'n/a'} tone={spread && spread.spreadPct > 3 ? 'amber' : 'default'} />
             <Kpi label="fillDeadline" value={order.fillDeadline ? fmtDate(order.fillDeadline) : '—'} />
-            <Kpi label="Deadline-Status (Ziel-Chain)" value={deadline ? (deadline.passed ? 'abgelaufen' : 'offen') : 'unbekannt'} tone={deadline?.passed ? 'amber' : 'green'} />
+            <Kpi label="Deadline status (dest. chain)" value={deadline ? (deadline.passed ? 'expired' : 'open') : 'unknown'} tone={deadline?.passed ? 'amber' : 'green'} />
           </KpiGrid>
 
           <details className="acc" open>
-            <summary>Dekodierte Felder</summary>
+            <summary>Decoded fields</summary>
             <div className="acc-body">
               <table className="table-x">
                 <tbody>
@@ -275,8 +275,8 @@ export default function IntentLens7683() {
                 <table className="table-x mt-3">
                   <thead>
                     <tr>
-                      <th>orderData-Feld</th>
-                      <th>Wert</th>
+                      <th>orderData field</th>
+                      <th>Value</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -296,14 +296,14 @@ export default function IntentLens7683() {
 
           {spread && (
             <details className="acc" open>
-              <summary>Spread-Rechner</summary>
+              <summary>Spread calculator</summary>
               <div className="acc-body space-y-1 text-sm">
                 <p>
-                  Input: <span className="mono text-ink">{spread.inputAmount.toString()}</span> · garantiertes minReceived:{' '}
+                  Input: <span className="mono text-ink">{spread.inputAmount.toString()}</span> · guaranteed minReceived:{' '}
                   <span className="mono text-ink">{spread.minReceived.toString()}</span>
                 </p>
                 <p>
-                  Maximaler impliziter Solver-Spread:{' '}
+                  Maximum implicit solver spread:{' '}
                   <span className={`mono font-bold ${spread.spreadPct > 3 ? 'text-gold-hi' : 'text-prime-hi'}`}>
                     {spread.spreadAbs.toString()} raw ({spread.spreadPct.toFixed(3)} %)
                   </span>
@@ -314,45 +314,45 @@ export default function IntentLens7683() {
           )}
 
           <details className="acc" open={!!deadline?.passed}>
-            <summary>Refund-Analyse (nach fillDeadline)</summary>
+            <summary>Refund analysis (after fillDeadline)</summary>
             <div className="acc-body space-y-3 text-sm">
               <p>
-                Empfaenger-Priorisierung (refundAddress → recipient → depositor):{' '}
-                <span className="mono text-ink break-all">{refundInfo.address ?? 'nicht aufloesbar'}</span>{' '}
+                Recipient prioritization (refundAddress → recipient → depositor):{' '}
+                <span className="mono text-ink break-all">{refundInfo.address ?? 'not resolvable'}</span>{' '}
                 <span className="badge badge-amber">{refundInfo.source}</span>
               </p>
               {deadline?.passed && refundCalldata ? (
                 <>
                   <p>
-                    Pruefbares Refund-Identifikations-Call (ERC-7683 <code>resolveFor</code>, view-only) an den OriginSettler — selbst absenden bzw. im Block-Explorer-Simulator ausfuehren:
+                    Verifiable refund identification call (ERC-7683 <code>resolveFor</code>, view-only) to the originSettler — submit it yourself or run it in a block explorer simulator:
                   </p>
                   <pre className="mono text-xs whitespace-pre-wrap break-all bg-obsidian border border-line rounded-lg p-3">{refundCalldata}</pre>
                   <div className="flex gap-2 flex-wrap">
-                    <CopyButton text={refundCalldata} label="Calldata kopieren" compact />
-                    <CopyButton text={order.originSettler ?? ''} label="OriginSettler-Adresse kopieren" compact />
+                    <CopyButton text={refundCalldata} label="Copy calldata" compact />
+                    <CopyButton text={order.originSettler ?? ''} label="Copy originSettler address" compact />
                   </div>
                   <p className="text-xs text-dim">
-                    Hinweis: Die tatsaechliche Rueckfuehrungs-Funktion ist settler-spezifisch (z. B. refundOnOrigin beim
-                    jeweiligen Protokoll). resolveFor liefert die normierte Order-Sicht mit refundAddress-Aufloesung.
+                    Note: the actual refund function is settler-specific (e.g. refundOnOrigin on the
+                    respective protocol). resolveFor provides the normalized order view with refundAddress resolution.
                   </p>
                 </>
               ) : (
-                <p>Refund-Calldata steht bereit, sobald die Deadline abgelaufen ist UND die Order vollstaendig dekodiert wurde (GaslessCrossChainOrder mit allen Feldern).</p>
+                <p>Refund calldata becomes available once the deadline has expired AND the order was fully decoded (GaslessCrossChainOrder with all fields).</p>
               )}
             </div>
           </details>
 
           <details className="acc">
-            <summary>Versteckte Ausfuehrungsannahmen</summary>
+            <summary>Hidden execution assumptions</summary>
             <div className="acc-body">
               <ul className="list-disc ml-5 text-sm space-y-1">
-                <li>Annahme: Der Solver nutzt das dekodierte Messaging/Calls-Schema der beteiligten Protokolle — Callbacks und Messaging-Trust sind aus den Rohdaten nicht beweisbar.</li>
-                <li>Annahme: Fill-Status auf der Ziel-Chain wurde zum Abfrage-Zeitpunkt korrekt gespiegelt ({chainNote}).</li>
-                <li>Annahme: Token-Dezimalstellen und Cross-Asset-Kurse sind bei Spread-Vergleichen extern zu bewerten.</li>
+                <li>Assumption: the solver uses the decoded messaging/calls schema of the protocols involved — callbacks and messaging trust are not provable from the raw data.</li>
+                <li>Assumption: the fill status on the destination chain was mirrored correctly at query time ({chainNote}).</li>
+                <li>Assumption: token decimals and cross-asset prices must be evaluated externally when comparing spreads.</li>
                 <li>
-                  Referenzrahmen (Oekosystem, finaler Standard): ERC-7683-kompatible Orders werden 2026 v. a. von den
-                  Filler-Netzwerken Across, Eco, LI.FI, UniswapX und Symbiosis settled — herstellerunabhaengiges
-                  Dee-Referenz-Dekodieren bleibt trotzdem Schema-heuristisch (keine Garantie auf Vollstaendigkeit).
+                  Reference frame (ecosystem, final standard): in 2026, ERC-7683-compatible orders are settled primarily by the
+                  filler networks Across, Eco, LI.FI, UniswapX and Symbiosis — vendor-independent
+                  reference decoding nevertheless remains schema-heuristic (no guarantee of completeness).
                 </li>
               </ul>
             </div>
@@ -367,13 +367,13 @@ export default function IntentLens7683() {
             }
             onPrint={() =>
               openPrintableReport({
-                title: 'IntentLens-7683 Order-Bericht',
-                subtitle: `${new Date().toLocaleString('de-DE')} · Ursprung Chain ${order.originChainId ?? '-'} → Ziel ${destChainId}`,
-                status: { level: level!, headline: deadline?.passed ? 'Deadline abgelaufen' : 'Order offen', detail: spread ? `Spread ${spread.spreadPct.toFixed(3)} %` : undefined },
+                title: 'IntentLens-7683 order report',
+                subtitle: `${new Date().toLocaleString('en-GB')} · origin chain ${order.originChainId ?? '-'} → destination ${destChainId}`,
+                status: { level: level!, headline: deadline?.passed ? 'Deadline expired' : 'Order open', detail: spread ? `Spread ${spread.spreadPct.toFixed(3)} %` : undefined },
                 sections: [
-                  { heading: 'Felder', body: '<pre>' + JSON.stringify({ originSettler: order.originSettler, user: order.user, nonce: order.nonce, originChainId: order.originChainId, openDeadline: order.openDeadline, fillDeadline: order.fillDeadline, orderDataType: order.orderDataType }, null, 2) + '</pre>' },
+                  { heading: 'Fields', body: '<pre>' + JSON.stringify({ originSettler: order.originSettler, user: order.user, nonce: order.nonce, originChainId: order.originChainId, openDeadline: order.openDeadline, fillDeadline: order.fillDeadline, orderDataType: order.orderDataType }, null, 2) + '</pre>' },
                   { heading: 'Spread', body: spread ? `<p>${spread.spreadAbs.toString()} raw (${spread.spreadPct.toFixed(3)} %)</p>` : '<p>n/a</p>' },
-                  { heading: 'Refund-Empfaenger', body: `<p>${refundInfo.address ?? '-'} (${refundInfo.source})</p>` },
+                  { heading: 'Refund recipient', body: `<p>${refundInfo.address ?? '-'} (${refundInfo.source})</p>` },
                 ],
               })
             }

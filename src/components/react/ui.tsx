@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { CHAINS } from '../../config/chains';
 
-/** Einheitliches 3-Schritt-Layout-Geruest aller Suite-Module. */
+/** Uniform 3-step layout scaffold of all suite modules. */
 
 export function StepSection({
   n,
@@ -126,7 +126,7 @@ export function ChainMultiSelect({ selected, onChange }: { selected: number[]; o
   const toggle = (id: number) =>
     onChange(selected.includes(id) ? selected.filter((c) => c !== id) : [...selected, id]);
   return (
-    <div className="flex flex-wrap gap-2" role="group" aria-label="Netzwerk-Auswahl">
+    <div className="flex flex-wrap gap-2" role="group" aria-label="Network selection">
       {CHAINS.map((c) => {
         const on = selected.includes(c.chainId);
         return (
@@ -147,7 +147,7 @@ export function ChainMultiSelect({ selected, onChange }: { selected: number[]; o
 
 export function ChainSingleSelect({ value, onChange }: { value: number; onChange: (id: number) => void }) {
   return (
-    <select className="select" value={value} onChange={(e) => onChange(Number(e.target.value))} aria-label="Netzwerk">
+    <select className="select" value={value} onChange={(e) => onChange(Number(e.target.value))} aria-label="Network">
       {CHAINS.map((c) => (
         <option key={c.chainId} value={c.chainId}>
           {c.name}
@@ -206,7 +206,7 @@ export function FileDrop({
         ⇪
       </span>
       <p className="text-sm mt-1 text-ink font-semibold">{name || label}</p>
-      <p className="text-xs text-dim mt-1">Datei hier ablegen oder anklicken — Verarbeitung ausschließlich lokal.</p>
+      <p className="text-xs text-dim mt-1">Drop a file here or click — processing is exclusively local.</p>
     </label>
   );
 }
@@ -216,14 +216,14 @@ export function ErrorNote({ message }: { message: string }) {
     <div className="status-tile status-amber" role="alert">
       <span aria-hidden="true">⚠</span>
       <div>
-        <h3 className="font-bold text-sm">Hinweis</h3>
+        <h3 className="font-bold text-sm">Notice</h3>
         <p className="text-sm mt-1 whitespace-pre-wrap">{message}</p>
       </div>
     </div>
   );
 }
 
-export function DemoButton({ onClick, label = 'Demo-Szenario laden' }: { onClick: () => void; label?: string }) {
+export function DemoButton({ onClick, label = 'Load demo scenario' }: { onClick: () => void; label?: string }) {
   return (
     <button type="button" className="btn btn-outline-amber btn-sm" onClick={onClick}>
       ⚡ {label}
@@ -234,11 +234,11 @@ export function DemoButton({ onClick, label = 'Demo-Szenario laden' }: { onClick
 export function SourceBadge({ source }: { source?: 'user' | 'wallet' | 'public' | 'cache' | 'offline' | undefined }) {
   if (!source) return null;
   const map = {
-    user: ['badge-green', 'Eigener Endpunkt'],
-    wallet: ['badge-green', 'Wallet-Provider'],
-    public: ['badge-amber', 'Öffentlicher Endpunkt'],
-    cache: ['badge-green', 'Lokaler Cache'],
-    offline: ['badge-amber', 'Offline-Modus'],
+    user: ['badge-green', 'Custom endpoint'],
+    wallet: ['badge-green', 'Wallet provider'],
+    public: ['badge-amber', 'Public endpoint'],
+    cache: ['badge-green', 'Local cache'],
+    offline: ['badge-amber', 'Offline mode'],
   } as const;
   const [cls, text] = map[source];
   return <span className={`badge ${cls}`}>{text}</span>;

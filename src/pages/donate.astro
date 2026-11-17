@@ -6,29 +6,29 @@ import { SITE_URL } from '../config/site';
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebPage',
-  name: 'AndrexTheDev unterstützen',
+  name: 'Support AndrexTheDev',
   url: `${SITE_URL}/donate`,
-  description: 'Freiwillige On-Chain-Unterstützung der Suite: SOL, BTC oder EVM-Adresse. QR-Codes lokal generiert.',
+  description: 'Voluntary on-chain support for the suite: SOL, BTC or EVM address. QR codes generated locally.',
 };
 ---
 
 <BaseLayout
-  title="AndrexTheDev unterstützen — freiwillige On-Chain-Spenden"
-  description="Freiwillige On-Chain-Unterstützung: SOL-, BTC- und EVM-Adressen mit lokal generierten QR-Codes (BIP-21, Solana Pay, EIP-681). Ohne Gegenleistung."
+  title="Support AndrexTheDev — voluntary on-chain donations"
+  description="Voluntary on-chain support: SOL, BTC and EVM addresses with locally generated QR codes (BIP-21, Solana Pay, EIP-681). No consideration."
   path="/donate"
   jsonLd={jsonLd}
 >
   <div class="container-x py-12 max-w-3xl">
     <h1 class="text-2xl sm:text-3xl font-bold">Support AndrexTheDev</h1>
     <p class="text-dim mt-2 text-sm sm:text-base">
-      Die Suite wird durch freiwillige On-Chain-Unterstützung der Community getragen. Unabhängig, ohne Konto, ohne
-      Tracking. Kein Preis, keine Paywall — nur eine transparente Adressliste.
+      The suite is funded by voluntary on-chain support from the community. Independent, no account, no
+      tracking. No price, no paywall — just a transparent address list.
     </p>
     <div class="mt-6">
       <DonationPage client:only="react" />
     </div>
     <p class="text-xs text-dim mt-6">
-      Alternativ als Modal in jeder Werkzeug-Ansicht: <em>Support / Spenden</em> in der Kopfzeile.
+      Alternatively as a modal in every tool view: <em>Support / Donate</em> in the header.
     </p>
   </div>
 </BaseLayout>

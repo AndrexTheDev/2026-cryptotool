@@ -15,15 +15,15 @@ import { chainById } from '../../config/chains';
 import { downloadCSV, downloadJSON } from '../../lib/export';
 import { isTxHash, num, shortHex } from '../../lib/format';
 
-// UserOperationEvent ist ABI-kompatibel ueber v0.6/v0.7/v0.8/v0.9:
+// UserOperationEvent is ABI-compatible across v0.6/v0.7/v0.8/v0.9:
 // event UserOperationEvent(bytes32,address sender,address paymaster,uint256 nonce,bool success,uint256 actualGasCost,uint256 actualGasUsed)
 const USEROP_EVENT_TOPIC = '0x49628fd1471006c1482da88028e9ce4dbb080b815c9b0344d39e5a8e6ec1419f';
 const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
-// v0.9: IgnoredInitCode(bytes32 userOpHash, address sender) — initCode wird still ignoriert,
-// wenn der Sender schon existiert (observability neuer Codepfad).
+// v0.9: IgnoredInitCode(bytes32 userOpHash, address sender) — initCode is silently ignored
+// when the sender already exists (observability of the new code path).
 const IGNORED_INITCODE_TOPIC = '0xd80b2cbd5dc420e00122d9f598731e3834f5d98a280dd183b5a3801dc1f2e967'; // keccak256("IgnoredInitCode(bytes32,address)")
 
-// Kanonische EntryPoint-Singletons (eth-infinitism, multi-chain identisch)
+// Canonical EntryPoint singletons (eth-infinitism, identical across chains)
 const ENTRYPOINTS: Record<string, string> = {
   '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789': 'v0.6',
   '0x0000000071727de22e5e9d8baf0edac6f37da032': 'v0.7',
@@ -121,7 +121,7 @@ function parseReceipt(hash: string, r: Record<string, unknown>): TxAutopsy {
   const unitMarkup = gasUsed === 0n ? 0 : Number(((sumGasUsed - gasUsed) * 10_000n) / gasUsed) / 100;
   const impliedPrice = sumGasUsed === 0n ? 0n : sumGasCost / sumGasUsed;
   const priceMarkup = effPrice === 0n ? 0 : Number(((impliedPrice - effPrice) * 10_000n) / effPrice) / 100;
-  // Nur Paymaster-bezogene Token-Transfers behalten
+  // keep only paymaster-related token transfers
   const relevant = tokenCharges.filter((t) => paymasters.has(t.to.toLowerCase()) || paymasters.has(t.from.toLowerCase()));
   return {
     hash,
@@ -152,7 +152,7 @@ export default function UseropAutopsy() {
   const [txInput, setTxInput] = useState('');
   const [mode, setMode] = useState<'online' | 'offline'>('online');
   const [receiptJson, setReceiptJson] = useState('');
-  const [refPrice, setRefPrice] = useState(''); // ETH/EUR oder Token-Referenz (manuell)
+  const [refPrice, setRefPrice] = useState(''); // ETH/EUR or token reference (manual)
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [results, setResults] = useState<TxAutopsy[]>([]);
@@ -194,7 +194,7 @@ export default function UseropAutopsy() {
             effectiveGasPrice: '0x17d7840',
             logs: [
               {
-                // v0.9-Bundle: UserOperationEvent auf dem v0.9-EntryPoint-Singleton
+                // v0.9 bundle: UserOperationEvent on the v0.9 EntryPoint singleton
                 address: '0x433709009B8330FDa32311DF1C2AFA402eD8D009',
                 topics: [
                   USEROP_EVENT_TOPIC,
@@ -210,7 +210,7 @@ export default function UseropAutopsy() {
                   (0x2e1a0n * 103n / 100n).toString(16).padStart(64, '0'),
               },
               {
-                // v0.9 neu: IgnoredInitCode — initCode still ignoriert (Sender existiert bereits)
+                // v0.9 new: IgnoredInitCode — initCode silently ignored (sender already exists)
                 address: '0x433709009B8330FDa32311DF1C2AFA402eD8D009',
                 topics: [IGNORED_INITCODE_TOPIC, '0x11aa22bb33cc44dd55ee66ff7788009900112233445566778899a001122334aabbdd', '0x000000000000000000000000bb32c2c8cb3c82b33bf0234567891bcdef123455aa'],
                 data: '0x',
@@ -244,12 +244,12 @@ export default function UseropAutopsy() {
         for (const r of list) out.push(parseReceipt(String(r.transactionHash ?? '0x'), r));
       } else {
         const hashes = extractHashes();
-        if (hashes.length === 0) throw new Error('Keine Transaktionshashes erkannt (bis zu 25, eine pro Zeile oder Explorer-CSV).');
+        if (hashes.length === 0) throw new Error('No transaction hashes recognized (up to 25, one per line or explorer CSV).');
         for (const h of hashes) {
           try {
             const rec = await getTxReceipt(chainId, h);
             if (!rec.data) {
-              out.push({ ...emptyTx(h), error: 'Receipt nicht gefunden (anderes Netzwerk? noch nicht bestaetigt?).' });
+              out.push({ ...emptyTx(h), error: 'Receipt not found (different network? not yet confirmed?).' });
               continue;
             }
             out.push(parseReceipt(h, rec.data));
@@ -260,7 +260,7 @@ export default function UseropAutopsy() {
       }
       setResults(out);
     } catch (e) {
-      setError((e as Error).message + (mode === 'offline' ? ' — Receipt-JSON pruefen (Objekt oder Array).' : ''));
+      setError((e as Error).message + (mode === 'offline' ? ' — check the receipt JSON (object or array).' : ''));
     } finally {
       setBusy(false);
     }
@@ -277,17 +277,17 @@ export default function UseropAutopsy() {
 
   const level: StatusLevel | null = results.length === 0 ? null : stats.avgPct > 15 ? 'amber' : 'green';
 
-  const fmtEth = (wei: bigint) => (Number(wei) / 1e18).toLocaleString('de-DE', { maximumFractionDigits: 6 });
+  const fmtEth = (wei: bigint) => (Number(wei) / 1e18).toLocaleString('en-GB', { maximumFractionDigits: 6 });
 
   return (
     <div className="space-y-5">
-      <StepSection n={1} title="Bundle-Transaktion(en) eingeben" hint="Bis zu 25 Transaktionshashes (eine pro Zeile) oder Explorer-CSV. UserOperation-Hashes bitte ueber die zugehoerige Bundle-TX abbilden; alternativ Receipt-JSON offline einfuegen.">
+      <StepSection n={1} title="Enter bundle transaction(s)" hint="Up to 25 transaction hashes (one per line) or explorer CSV. Map UserOperation hashes via their containing bundle TX; alternatively paste receipt JSON offline.">
         <div className="flex flex-wrap gap-2">
           <button className={`btn btn-sm ${mode === 'online' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setMode('online')}>
             Online
           </button>
           <button className={`btn btn-sm ${mode === 'offline' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setMode('offline')}>
-            Offline (Receipt-JSON)
+            Offline (receipt JSON)
           </button>
           <span className="ml-auto">
             <DemoButton onClick={demo} />
@@ -296,64 +296,64 @@ export default function UseropAutopsy() {
         {mode === 'online' ? (
           <div className="grid sm:grid-cols-[1fr_16rem] gap-4">
             <div>
-              <label className="label" htmlFor="uo-in">Transaktionshashes / Explorer-CSV</label>
+              <label className="label" htmlFor="uo-in">Transaction hashes / explorer CSV</label>
               <textarea id="uo-in" className="textarea mono" rows={6} value={txInput} onChange={(e) => setTxInput(e.target.value)} />
             </div>
             <div>
-              <label className="label" htmlFor="uo-net">Netzwerk</label>
+              <label className="label" htmlFor="uo-net">Network</label>
               <ChainSingleSelect value={chainId} onChange={setChainId} />
-              <label className="label mt-4" htmlFor="uo-price">Referenzkurs (optional, EUR je ETH/Token)</label>
-              <input id="uo-price" className="input" inputMode="decimal" placeholder="z. B. 2450,00" value={refPrice} onChange={(e) => setRefPrice(e.target.value)} />
+              <label className="label mt-4" htmlFor="uo-price">Reference rate (optional, EUR per ETH/token)</label>
+              <input id="uo-price" className="input" inputMode="decimal" placeholder="e.g. 2450.00" value={refPrice} onChange={(e) => setRefPrice(e.target.value)} />
             </div>
           </div>
         ) : (
           <div>
-            <label className="label" htmlFor="uo-json">Transaktions-Receipt (JSON, Objekt oder Array)</label>
+            <label className="label" htmlFor="uo-json">Transaction receipt (JSON, object or array)</label>
             <textarea id="uo-json" className="textarea mono" rows={8} value={receiptJson} onChange={(e) => setReceiptJson(e.target.value)} placeholder='{"gasUsed":"0x…","effectiveGasPrice":"0x…","logs":[…]}' />
           </div>
         )}
       </StepSection>
 
-      <StepSection n={2} title="Autopsy durchführen">
+      <StepSection n={2} title="Perform the autopsy">
         <p className="text-sm">
-          Zerlegt Bundler-Marge in Gaseinheiten-Aufschlag (%) und Gaspreis-Aufschlag (%), netto in WEI bzw. %, und
-          erkennt ERC-20-Paymaster-Buchungen (Transfer-Logs) inklusive effektivem Spread gegen den Referenzkurs.
+          Splits the bundler margin into gas-unit markup (%) and gas-price markup (%), net in wei and %, and
+          detects ERC-20 paymaster bookings (transfer logs) including the effective spread against the reference rate.
         </p>
         <button className="btn btn-primary w-full sm:w-auto" onClick={() => void run()} disabled={busy}>
-          {busy ? 'Analysiere…' : 'Analysieren'}
+          {busy ? 'Analyzing…' : 'Analyze'}
         </button>
         {error && <ErrorNote message={error} />}
       </StepSection>
 
       {results.length > 0 && (
-        <StepSection n={3} title="Gebühren-Forensik">
+        <StepSection n={3} title="Fee forensics">
           <StatusTile
             level={level!}
             headline={
               stats.ok === 0
-                ? 'Keine UserOperationEvents in den Receipts gefunden'
+                ? 'No UserOperationEvents found in the receipts'
                 : stats.avgPct > 15
-                  ? 'Ueberdurchschnittliche Bundler-Aufschlaegge'
-                  : 'Bundler-Margen im ueblichen Korridor'
+                  ? 'Above-average bundler markups'
+                  : 'Bundler margins within the usual corridor'
             }
             detail={
               stats.ok === 0
-                ? 'Pruefen Sie, ob die Hashes EntryPoint-Bundles enthalten (v0.6–v0.9, identisches Event-Format) und das richtige Netzwerk gewaehlt ist.'
-                : `Durchschnittlicher Netto-Aufschlag ${stats.avgPct.toFixed(2)} % ueber ${stats.ok} Transaktion(en).`
+                ? 'Check whether the hashes contain EntryPoint bundles (v0.6–v0.9, identical event format) and the correct network is selected.'
+                : `Average net markup ${stats.avgPct.toFixed(2)} % across ${stats.ok} transaction(s).`
             }
           />
           <KpiGrid>
-            <Kpi label="Analysiert (mit UserOps)" value={`${stats.ok}/${stats.total}`} />
-            <Kpi label="Ø Netto-Aufschlag" value={stats.avgPct.toFixed(2) + ' %'} tone={stats.avgPct > 15 ? 'amber' : 'green'} />
-            <Kpi label="Σ Marge" value={fmtEth(stats.sumMargin) + ' ' + (chainById(chainId)?.nativeSymbol ?? 'ETH')} tone={stats.sumMargin > 0n ? 'amber' : 'default'} />
-            <Kpi label="Paymaster-Token" value={stats.tokens.size} tone={stats.tokens.size ? 'amber' : 'default'} />
+            <Kpi label="Analyzed (with UserOps)" value={`${stats.ok}/${stats.total}`} />
+            <Kpi label="Avg net markup" value={stats.avgPct.toFixed(2) + ' %'} tone={stats.avgPct > 15 ? 'amber' : 'green'} />
+            <Kpi label="Σ margin" value={fmtEth(stats.sumMargin) + ' ' + (chainById(chainId)?.nativeSymbol ?? 'ETH')} tone={stats.sumMargin > 0n ? 'amber' : 'default'} />
+            <Kpi label="Paymaster tokens" value={stats.tokens.size} tone={stats.tokens.size ? 'amber' : 'default'} />
           </KpiGrid>
 
           {results.map((r) => (
             <details key={r.hash} className="acc" open={results.length === 1}>
               <summary>
                 <span className="mono text-xs">{shortHex(r.hash, 14, 10)}</span>
-                {r.error ? <span className="badge badge-red">Fehler</span> : <span className={r.marginPct > 15 ? 'badge badge-amber' : 'badge badge-green'}>{r.marginPct.toFixed(2)} %</span>}
+                {r.error ? <span className="badge badge-red">Error</span> : <span className={r.marginPct > 15 ? 'badge badge-amber' : 'badge badge-green'}>{r.marginPct.toFixed(2)} %</span>}
               </summary>
               <div className="acc-body space-y-2">
                 {r.error && <p className="text-gold-hi text-sm">{r.error}</p>}
@@ -375,7 +375,7 @@ export default function UseropAutopsy() {
                             {r.entryPointVersion ? (
                               <span className="badge badge-green">{r.entryPointVersion}</span>
                             ) : (
-                              <span className="badge badge-amber">unbestimmt</span>
+                              <span className="badge badge-amber">undetermined</span>
                             )}
                           </td>
                         </tr>
@@ -383,12 +383,12 @@ export default function UseropAutopsy() {
                           <tr>
                             <td>IgnoredInitCode (v0.9)</td>
                             <td className="text-gold-hi">
-                              {r.ignoredInitCode} × — initCode ignoriert, da Sender bereits existiert (häufige Fehldiagnose-Quelle, siehe v0.9-Release-Notes)
+                              {r.ignoredInitCode} × — initCode ignored because the sender already exists (common misdiagnosis source, see v0.9 release notes)
                             </td>
                           </tr>
                         )}
                         <tr>
-                          <td>TX-GasUsed × eff. Gaspreis</td>
+                          <td>TX gasUsed × eff. gas price</td>
                           <td className="mono">
                             {num(Number(r.txGasUsed))} × {num(Number(r.effGasPrice))} wei = {fmtEth(r.txCostWei)} ETH
                           </td>
@@ -397,29 +397,29 @@ export default function UseropAutopsy() {
                           <td>Σ actualGasUsed (UserOps)</td>
                           <td className="mono">
                             {num(Number(r.sumGasUsed))} ({r.gasUnitMarkupPct >= 0 ? '+' : ''}
-                            {r.gasUnitMarkupPct.toFixed(2)} % Gaseinheiten-Aufschlag)
+                            {r.gasUnitMarkupPct.toFixed(2)} % gas-unit markup)
                           </td>
                         </tr>
                         <tr>
-                          <td>Σ actualGasCost (EntryPoint-Ereignisse)</td>
+                          <td>Σ actualGasCost (EntryPoint events)</td>
                           <td className="mono">{fmtEth(r.sumGasCost)} ETH</td>
                         </tr>
                         <tr>
-                          <td>Impliziter Gaspreis (Σcost/Σused)</td>
+                          <td>Implied gas price (Σcost/Σused)</td>
                           <td className="mono">
                             {r.sumGasUsed === 0n ? '—' : num(Number(r.sumGasCost / r.sumGasUsed)) + ' wei'} ({r.gasPriceMarkupPct >= 0 ? '+' : ''}
-                            {r.gasPriceMarkupPct.toFixed(2)} % Gaspreis-Aufschlag)
+                            {r.gasPriceMarkupPct.toFixed(2)} % gas-price markup)
                           </td>
                         </tr>
                         <tr>
-                          <td className="font-bold text-ink">Netto-Marge</td>
+                          <td className="font-bold text-ink">Net margin</td>
                           <td className={`mono font-bold ${r.netMarginWei > 0n ? 'text-gold-hi' : 'text-prime-hi'}`}>
                             {r.netMarginWei >= 0n ? '+' : ''}
                             {fmtEth(r.netMarginWei)} ETH ({r.marginPct.toFixed(2)} %)
                             {refPrice && Number(refPrice.replace(',', '.')) > 0 && (
                               <span className="text-body">
                                 {' '}
-                                ≈ {(Number(r.netMarginWei) / 1e18 * Number(refPrice.replace(',', '.'))).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
+                                ≈ {(Number(r.netMarginWei) / 1e18 * Number(refPrice.replace(',', '.'))).toLocaleString('en-GB', { style: 'currency', currency: 'EUR' })}
                               </span>
                             )}
                           </td>
@@ -452,14 +452,14 @@ export default function UseropAutopsy() {
                     )}
                     {r.tokenCharges.length > 0 && (
                       <div>
-                        <p className="text-xs text-dim mb-1">Token-Abbuchungen durch Paymaster (ERC-20):</p>
+                        <p className="text-xs text-dim mb-1">Token debits by paymasters (ERC-20):</p>
                         <table className="table-x">
                           <thead>
                             <tr>
                               <th>Token</th>
-                              <th>Von</th>
-                              <th>An</th>
-                              <th>Menge (raw)</th>
+                              <th>From</th>
+                              <th>To</th>
+                              <th>Amount (raw)</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -474,7 +474,7 @@ export default function UseropAutopsy() {
                           </tbody>
                         </table>
                         <p className="text-xs text-dim mt-1">
-                          Effektiver Paymaster-Spread = (Token-Gegenwert zum Referenzkurs − netto ETH-Kosten) / netto ETH-Kosten. Token-Dezimalstellen je Contract beachten.
+                          Effective paymaster spread = (token value at the reference rate − net ETH costs) / net ETH costs. Mind per-contract token decimals.
                         </p>
                       </div>
                     )}
@@ -496,11 +496,11 @@ export default function UseropAutopsy() {
                   tx_cost_wei: r.txCostWei.toString(),
                   sum_gas_cost_wei: r.sumGasCost.toString(),
                   margin_wei: r.netMarginWei.toString(),
-                  margin_pct: r.marginPct.toFixed(2).replace('.', ','),
-                  gas_unit_markup_pct: r.gasUnitMarkupPct.toFixed(2).replace('.', ','),
-                  gas_price_markup_pct: r.gasPriceMarkupPct.toFixed(2).replace('.', ','),
+                  margin_pct: r.marginPct.toFixed(2),
+                  gas_unit_markup_pct: r.gasUnitMarkupPct.toFixed(2),
+                  gas_price_markup_pct: r.gasPriceMarkupPct.toFixed(2),
                   userops: r.userOps.length,
-                  fehler: r.error ?? '',
+                  error: r.error ?? '',
                 })),
                 'userop-autopsy.csv',
               )

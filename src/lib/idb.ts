@@ -1,5 +1,5 @@
 // Minimaler IndexedDB-Wrapper ohne externe Abhaengigkeiten.
-// Stores werden bei Bedarf angelegt (Schema-Versionierung ueber Map).
+// Stores are created on demand (schema versioning via map).
 
 const DB_NAME = 'web3suite.local';
 const DB_VERSION = 1;
@@ -18,7 +18,7 @@ function openDb(): Promise<IDBDatabase> {
       }
     };
     req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error ?? new Error('IndexedDB nicht verfuegbar'));
+    req.onerror = () => reject(req.error ?? new Error('IndexedDB not available'));
   });
   return dbPromise;
 }
@@ -47,7 +47,7 @@ export async function idbSet<T>(store: (typeof STORES)[number], key: string, val
       tx.onerror = () => reject(tx.error);
     });
   } catch {
-    /* Cache ist optional - still ignorieren */
+    /* cache is optional — ignore silently */
   }
 }
 
@@ -65,7 +65,7 @@ export async function idbDelete(store: (typeof STORES)[number], key: string): Pr
   }
 }
 
-/** Loescht saemtliche lokalen Suite-Daten (Ein-Klick-Datenschutz-Reset). */
+/** Deletes all local suite data (one-click privacy reset). */
 export async function wipeLocalData(): Promise<void> {
   try {
     const db = await openDb();

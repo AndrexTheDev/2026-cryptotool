@@ -1,4 +1,4 @@
-// Leichtgewichtige Wallet-Erkennung nach EIP-6963 (RDN-basiert, kein SDK).
+// Lightweight wallet discovery per EIP-6963 (RDN-based, no SDK).
 import { useEffect, useState } from 'react';
 
 export interface Eip6963ProviderInfo {

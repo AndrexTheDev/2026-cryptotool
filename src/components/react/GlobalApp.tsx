@@ -6,9 +6,9 @@ import RpcPanel, { RPC_EVENT } from './RpcPanel';
 type Modal = 'none' | 'palette' | 'donate' | 'rpc';
 
 /**
- * Einmal pro Seite montierte, leichtgewichtige Island:
- * Cmd/Ctrl+K-Navigator, Spenden-Modal, Netzwerk-Panel.
- * (Keine schweren Krypto-Abhaengigkeiten - laedt auf jeder Route.)
+ * Lightweight island mounted once per page:
+ * Cmd/Ctrl+K navigator, donation modal, network panel.
+ * (No heavy crypto dependencies — loads on every route.)
  */
 export default function GlobalApp() {
   const [modal, setModal] = useState<Modal>('none');
@@ -23,8 +23,8 @@ export default function GlobalApp() {
     const onPal = () => setModal('palette');
     const onDon = () => setModal('donate');
     const onRpc = () => setModal('rpc');
-    // TopNav referenziert /donate als <a> (progressive Enhancement): auf dieser
-    // interaktiven Shell fangen wir den Klick ab und oeffnen das Modal statt zu navigieren.
+    // TopNav references /donate as an <a> (progressive enhancement): on this
+    // interactive shell we intercept the click and open the modal instead of navigating.
     const onDonateLink = (e: MouseEvent) => {
       const el = (e.target as HTMLElement).closest('a[data-donate-link]');
       if (el) {
