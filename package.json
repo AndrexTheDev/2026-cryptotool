@@ -4,7 +4,7 @@
   "version": "1.2.0",
   "type": "module",
   "engines": {
-    "node": ">=22.22.0"
+    "node": ">=22.23.4"
   },
   "description": "StackAutopsy — Web3 Security & Forensics Suite: 10 client-side Web3/Bitcoin/compliance tools, fully local in the browser",
   "scripts": {

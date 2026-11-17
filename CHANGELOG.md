@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-17 — Wave 30: Astro 7.4.12 via Dependabot (blocker resolved)
+
+- **astro 7.4.1 → 7.4.12** (PR #14, Dependabot prod-minor-patch group): the wave-26/29 follow-up landed through the designed path — the CI runner (Node 22 → 22.23.x) satisfies the ≥ 22.23.4 engine floor and verified the full pipeline (typecheck, build, audit-dist, 132/132). Clears **GHSA-mh32-jxcr-mh9f** (XSS via dynamic tag names, low — fixed in 7.4.5) and **GHSA-r3h5-4585-7x3w** (@astrojs/node image endpoint, medium — fixed in 7.4.7); both were unreachable in this deployment (static output, no adapter, no dynamic tags).
+- **Consistency companion:** `engines.node` raised to `>=22.23.4`, `.nvmrc` → `22.23.4`. Consequence documented in ROADMAP: sandboxes on Node 22.22.x can no longer build locally — CI is the verification path.
+- **typescript 7.0.2 (PR #15):** deliberately not merged — TS7 is the native Go port; assessment candidate stays open per the wave-9/14 decision (no security urgency, CI on the PR is green as a signal).
+- **picomatch** unchanged: 4.0.7 is still the newest release, no fix published (GHSA-fc5q; not exploitable here — build-time globs only).
+
 ## 2026-11-17 — Wave 29: Dependabot (dependency-currency automation)
 
 - `.github/dependabot.yml` added: weekly (Mondays) grouped minor/patch PRs for npm (production and development groups) and GitHub Actions; majors arrive as individual PRs for deliberate review.
