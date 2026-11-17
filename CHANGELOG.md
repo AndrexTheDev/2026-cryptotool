@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-17 — Wave 33: TypeScript 7 adopted + brand-asset audit lock
+
+- **typescript 5.9.3 → 7.0.2** (PR #15, owner decision): the Wave-31 assessment had deferred to 7.1; on owner direction we re-verified and adopted. Local proof on the sandbox (Node 22.22.3): tsc 7.0.2 (native) reports **0 errors in both modes** (standard + noUncheckedIndexedAccess/exactOptionalPropertyTypes), identical to 5.9.3 on this codebase. CI on the PR was already green with the full pipeline. Note: no stable programmatic compiler API until 7.1 — only relevant if `astro check`/lint tooling is adopted later.
+- **Brand-asset lock** (PR #19): `favicon.svg`, `og-image.svg`, `logo.png` are now mandatory artifacts in `audit-dist.mjs` (a missing brand asset would previously have shipped silently).
+- Remaining open follow-ups: only the external picomatch blocker (no published fix; not exploitable here).
+
 ## 2026-11-17 — Wave 32: Glamsterdam schedule correction (Hoodi postponed)
 
 - **Stale schedule fixed** in `PasskeyContinuity.tsx` (fork-landscape block): the Hoodi testnet fork (planned 26.10.2026) was **postponed on 22.10.2026** with no new date (EF blog), so the floated December mainnet candidates (01./02./08./09.12.) lapsed — no mainnet date is fixed (EIP-7773 leaves the row blank; ethereum.org: "Q4 2026 · not confirmed"). The previous wording still had Hoodi on track for late October.
