@@ -24,15 +24,21 @@ jobs:
         run: npm ci
 
       - name: Typecheck
-        run: npx tsc --noEmit
+        run: ./node_modules/.bin/tsc --noEmit
 
       - name: Build
-        run: npx astro build
+        run: ./node_modules/.bin/astro build
         env:
           PUBLIC_SITE_URL: https://suite.andrexthe.dev
 
       - name: Policy-Audit (dist)
         run: node scripts/audit-dist.mjs
 
-      - name: Demo-Regression (65 Checks)
+      - name: Dependency audit (prod, critical)
+        run: npm run audit:deps
+
+      - name: Dependency audit (full, all severities) — informational
+        run: npm audit --audit-level=high || true
+
+      - name: Demo-Regression (132 Checks)
         run: node --experimental-strip-types scripts/verify-demos.mjs
