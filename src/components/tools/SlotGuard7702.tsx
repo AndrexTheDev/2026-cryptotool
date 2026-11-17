@@ -132,7 +132,7 @@ Signiert:            ${pack.signed ? 'yes (r/s/yParity in the encrypted part)' :
 <li>Send a type-4 transaction (EIP-7702) with the contained authorization from your account (e.g.&nbsp;via a wallet or an open-source CLI with 7702 support).</li>
 <li>Success check: the account bytecode must be empty afterwards (<code>eth_getCode</code> = <code>0x</code>).</li>
 </ol>
-<p class="small">Generated locally by AndrexTheDev 7702 SlotGuard. No server transfer. No substitute for backups or legal advice.</p>
+<p class="small">Generated locally by StackAutopsy 7702 SlotGuard. No server transfer. No substitute for backups or legal advice.</p>
 </body></html>`;
 }
 

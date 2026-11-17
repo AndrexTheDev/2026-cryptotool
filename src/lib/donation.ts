@@ -15,12 +15,12 @@ export function donationUri(chain: DonationChain, amount?: string, rawAddressOnl
   if (rawAddressOnly) return entry.address;
   switch (chain) {
     case 'btc': {
-      const params = new URLSearchParams({ label: 'AndrexTheDev' });
+      const params = new URLSearchParams({ label: 'StackAutopsy' });
       if (amt) params.set('amount', amt);
       return `bitcoin:${entry.address}?${params.toString()}`;
     }
     case 'sol': {
-      const params = new URLSearchParams({ label: 'AndrexTheDev' });
+      const params = new URLSearchParams({ label: 'StackAutopsy' });
       if (amt) params.set('amount', amt);
       return `solana:${entry.address}?${params.toString()}`;
     }

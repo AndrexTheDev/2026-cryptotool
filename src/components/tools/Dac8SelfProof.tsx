@@ -33,7 +33,7 @@ interface TxFacts {
 }
 
 interface Cert {
-  standard: 'AndrexTheDev/DAC8-SelfProof@1';
+  standard: 'StackAutopsy/DAC8-SelfProof@1';
   purpose: string;
   asset: AssetType;
   txid: string;
@@ -61,7 +61,7 @@ const DEMO = {
 
 function buildChallenge(f: TxFacts, targetAddress: string, note: string): string {
   const lines = [
-    'AndrexTheDev DAC8-SelfProof — cryptographic self-transfer proof',
+    'StackAutopsy DAC8-SelfProof — cryptographic self-transfer proof',
     '',
     'Purpose: self-custody verification / self-transfer',
     `Asset class: ${f.asset === 'btc' ? 'Bitcoin' : 'EVM'}`,
@@ -355,7 +355,7 @@ export default function Dac8SelfProof() {
       setVerifyResult({ level: lvl, headline, detail });
 
       const c: Cert = {
-        standard: 'AndrexTheDev/DAC8-SelfProof@1',
+        standard: 'StackAutopsy/DAC8-SelfProof@1',
         purpose: 'Self-custody verification / self-transfer',
         asset,
         txid: txid.trim(),

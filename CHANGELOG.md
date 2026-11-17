@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-17 — Wave 27: Rebrand to StackAutopsy
+
+- **New product brand:** the suite is now **StackAutopsy** — Web3 Security & Forensics Suite. The former "A" monogram was replaced by a new mark: a three-layer stack (emerald) with the middle layer in gold — the "dissected layer", the forensic signature of the brand.
+- **Scope of the rename (product brand):** `BRAND` constant in `src/config/site.ts` (drives nav, footer, layouts, llms.txt), package name (`stackautopsy`, version 1.2.0, description finally English), og-image wordmark + embedded mark, donation payment labels (BTC BIP-21 / SOL Pay), DAC8 certificate `standard` string + demo message, export footer (`export.ts`) and per-tool generator footers, donate page + donation modal headings, legal page titles/descriptions, AGB product naming + brand clause (§ 6), disclaimer/datenschutz titles, JSON-LD `WebSite`/`SoftwareApplication` names, README H1, design-system comment.
+- **New assets:** `public/favicon.svg` redrawn (stack mark), `public/og-image.svg` (wordmark + mark), `public/logo.png` (generated brand logo, referenced from README + apple-touch-icon).
+- **Deliberately unchanged (author/infrastructure, not brand):** LICENSE copyright (`© 2026 AndrexTheDev`), JSON-LD `Person` author entries, legal operator/controller identity in AGB § 1 / disclaimer / datenschutz § 7, GitHub repo URLs in security.txt, deployment domain `suite.andrexthe.dev` (infrastructure; a domain move is a separate operator decision — one line in `astro.config.mjs` / `PUBLIC_SITE_URL`).
+- **Lock-ins synced:** `audit-dist.mjs` llms.txt brand check → `StackAutopsy`; `verify-demos.mjs` donation-label asserts (×3) + DAC8 demo message → `StackAutopsy`; LICENSE hygiene check intentionally still asserts `AndrexTheDev` (author).
+- Pipeline: tsc (both strictness flags) 0 errors; `npm run verify` green (build 15 pages, audit-dist passed, 132/132 demo checks).
+
 ## 2026-11-17 — Wave 26: Post-i18n dependency audit (documented assessment)
 
 - **Trigger:** after the i18n merge a full `npm audit` (all severities, incl. dev) reports **12 high-severity findings**, all transitive — none reachable in this deployment.

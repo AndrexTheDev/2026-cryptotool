@@ -5,7 +5,7 @@ export const SITE_URL = (
   (import.meta.env.PUBLIC_SITE_URL as string | undefined) ?? 'https://suite.andrexthe.dev'
 ).replace(/\/$/, '');
 
-export const BRAND = 'AndrexTheDev';
+export const BRAND = 'StackAutopsy';
 export const CONTACT_EMAIL = 'hippie.highho@gmail.com';
 export const SUITE_NAME = 'Web3 Security & Forensics Suite';
 

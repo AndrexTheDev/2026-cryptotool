@@ -134,7 +134,7 @@ ok(`HTML structure: ${htmlFiles.length} pages (h1/IDs/JSON-LD/title duplicates)`
 // ---------------------------------------------------------------- 6) llms.txt content
 const llms = readFileSync(join(DIST, 'llms.txt'), 'utf8');
 if (!llms.includes('hippie.highho@gmail.com')) fail('llms.txt without contact email');
-if (!llms.includes('AndrexTheDev')) fail('llms.txt without brand');
+if (!llms.includes('StackAutopsy')) fail('llms.txt without brand');
 const TOOLSLUGS = ['7702-slotguard','stva-upgradediff','dac8-selfproof','bitvault-stress','passkey-continuity','userop-autopsy','x402-paywallguard','intentlens-7683','stealthaudit-5564','bundlewatch-ens'];
 for (const t of TOOLSLUGS) if (!llms.includes(t)) fail(`llms.txt does not mention ${t}`);
 ok('llms.txt: brand, contact, all 10 tools referenced');

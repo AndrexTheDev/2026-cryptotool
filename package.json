@@ -1,12 +1,12 @@
 {
-  "name": "web3-security-forensics-suite",
+  "name": "stackautopsy",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
   "engines": {
     "node": ">=22.22.0"
   },
-  "description": "AndrexTheDev Web3 Security & Forensics Suite - 10 clientseitige Web3/Bitcoin/Compliance-Werkzeuge",
+  "description": "StackAutopsy — Web3 Security & Forensics Suite: 10 client-side Web3/Bitcoin/compliance tools, fully local in the browser",
   "scripts": {
     "dev": "astro dev --host 0.0.0.0",
     "build": "astro build",
