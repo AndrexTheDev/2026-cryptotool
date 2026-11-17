@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { encode } from 'uqr';
 
-/** Zero-Dependency-SVG-QR (uqr), komplett im Browser gerendert. */
+/** Zero-dependency SVG QR (uqr), rendered entirely in the browser. */
 export default function QrCode({ value, size = 168 }: { value: string; size?: number }) {
   const { d, n } = useMemo(() => {
     try {
@@ -24,7 +24,7 @@ export default function QrCode({ value, size = 168 }: { value: string; size?: nu
         className="flex items-center justify-center rounded-lg border border-line bg-graphite-2 text-xs text-dim"
         style={{ width: size, height: size }}
       >
-        QR nicht erzeugbar
+        QR cannot be generated
       </div>
     );
   }

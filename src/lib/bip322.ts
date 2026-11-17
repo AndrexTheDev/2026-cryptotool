@@ -1,10 +1,10 @@
-// BIP-322-Minimalhelfer (P2TR/P2WPKH simple signatures).
+// BIP-322 minimal helpers (P2TR/P2WPKH simple signatures).
 //
-// Verifikation laeuft ueber bip322-js (lazy, mit dokumentiertem feross/buffer-
-// Shim). Zusaetzlich enthaelt dieses Modul einen eigenen deterministischen
-// P2TR-Signer (Noble secp256k1/schnorr) - ausschliesslich fuer das lokale
-// Demo-Szenario mit dem oeffentlich bekannten Testschluessel 0x01 gedacht.
-// NIEMALS echte private Schluessel hier eingeben.
+// Verification runs via bip322-js (lazy, with the documented feross/buffer
+// shim). Additionally this module contains its own deterministic
+// P2TR signer (Noble secp256k1/schnorr) — intended exclusively for the local
+// demo scenario with the publicly known test key 0x01.
+// NEVER enter real private keys here.
 
 const concat = (...a: Uint8Array[]): Uint8Array => {
   const n = a.reduce((s, b) => s + b.length, 0);
@@ -49,7 +49,7 @@ export async function bip322MessageHash(message: string): Promise<Uint8Array> {
   return taggedHash('BIP0322-signed-message', new TextEncoder().encode(message), sha2.sha256);
 }
 
-/** x-only-P2TR-Adresse (bech32m) aus internem Pubkey. */
+/** x-only P2TR address (bech32m) from the internal pubkey. */
 export async function p2trAddress(xOnlyPub: Uint8Array): Promise<string> {
   const { bech32m } = await import('@scure/base');
   return bech32m.encode('bc', [1, ...bech32m.toWords(xOnlyPub)]);
@@ -57,7 +57,7 @@ export async function p2trAddress(xOnlyPub: Uint8Array): Promise<string> {
 
 /**
  * Signiert eine Nachricht per BIP-322 simple (P2TR key-path, SIGHASH_DEFAULT).
- * NUR fuer Demo-/Testzwecke mit bekannten Testschluesseln.
+ * ONLY for demo/test purposes with known test keys.
  */
 export async function signBip322P2tr(privKey: Uint8Array, message: string): Promise<{ address: string; signatureBase64: string }> {
   const { curves, sha2 } = await noble();
@@ -105,7 +105,7 @@ export async function signBip322P2tr(privKey: Uint8Array, message: string): Prom
   const sig = await schnorr.sign(sighash, privKey);
   const witness = concat(vi(1), vi(sig.length), sig);
   const { base64 } = await import('@scure/base');
-  // BIP-322 Complete (v1.0.0, 04/2026): smp-Praefix ist Pflicht fuer Signer.
+  // BIP-322 Complete (v1.0.0, 04/2026): the smp prefix is mandatory for signers.
   return { address, signatureBase64: 'smp' + base64.encode(witness) };
 }
 
@@ -119,12 +119,12 @@ export async function ensureBufferShim(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// BIP-322 v1.0.0 (Complete, 15.04.2026): Signatur-Varianten mit Klartext-Praefix.
-// Signer MUESSEN 'smp' | 'ful' | 'pof' direkt vor das Base64 setzen (ohne
-// Trennzeichen); Verifier duerfen bei fehlendem Praefix 'simple' annehmen
-// (Backward-Compatibility-Klausel des BIP). Erkennung ist hier sicher, da
-// simple/full-Payloads ihrerseits stets mit kompaktem Zaehler- bzw.
-// Transaktionsversions-Byte beginnen (erster Base64-Lauf startet mit 'A'/'B').
+// BIP-322 v1.0.0 (Complete, 15.04.2026): signature variants with plain-text prefix.
+// Signers MUST put 'smp' | 'ful' | 'pof' directly in front of the base64 (no
+// separator); verifiers MAY assume 'simple' when the prefix is missing
+// (backward-compatibility clause of the BIP). Detection here is safe because
+// simple/full payloads themselves always start with a compact-count or
+// transaction-version byte (first base64 run starts with 'A'/'B').
 export type Bip322Variant = 'simple-prefixed' | 'simple-legacy' | 'full' | 'pof';
 
 export function classifyBip322Signature(signature: string): { variant: Bip322Variant; payload: string } {
@@ -142,11 +142,11 @@ export interface PofInspection {
 }
 
 /**
- * Liegt ein finalisiertes PSBT (BIP-174) vor: Proof-of-Funds-Variante der
- * finalen BIP-322-Spezifikation. Liest offline: Eingabe-Anzahl aus der
- * unsignedTx (Global-Key 0x00) und das optionale Message-Feld
+ * Is a finalized PSBT (BIP-174) present: the proof-of-funds variant of the
+ * final BIP-322 specification. Reads offline: input count from the
+ * unsignedTx (global key 0x00) and the optional message field
  * PSBT_GLOBAL_GENERIC_SIGNED_MESSAGE (0x09, UTF-8).
- * UTXO-Ausgabestatus ist offline nicht pruefbar — das meldet der Caller.
+ * The UTXO spend status is not verifiable offline — the caller reports that.
  */
 export function inspectPofPsbt(payloadBase64: string): PofInspection | null {
   try {
@@ -179,7 +179,7 @@ export function inspectPofPsbt(payloadBase64: string): PofInspection | null {
       out.keyTypes.push(keyType);
       if (keyType === 0x09) out.message = new TextDecoder().decode(value);
       if (keyType === 0x00) {
-        // unsigned tx: version(4) + [keine segwit-marker in PSBT] + vin-count
+        // unsigned tx: version(4) + [no segwit marker in PSBT] + vin-count
         const vinCount = value[4];
         out.inputs = value.length >= 5 && vinCount !== undefined ? vinCount : 0;
       }
@@ -197,7 +197,7 @@ export interface Bip322VerifyResult {
   pof?: PofInspection;
 }
 
-/** Verifiziert eine BIP-322-Signatur (simple/full; PoF wird format-inspektiert). */
+/** Verifies a BIP-322 signature (simple/full; PoF is format-inspected). */
 export async function verifyBip322(address: string, message: string, signature: string): Promise<Bip322VerifyResult> {
   await ensureBufferShim();
   const cls = classifyBip322Signature(signature);
@@ -207,27 +207,27 @@ export async function verifyBip322(address: string, message: string, signature: 
       return {
         ok: false,
         variant: 'pof',
-        detail: 'pof-Payload ist kein gueltiges Base64-PSBT (Magic psbt\xff fehlt oder Map korrupt).',
+        detail: 'pof payload is not a valid base64 PSBT (magic psbt\xff missing or map corrupt).',
       };
-    const msgHit = pof.message != null ? (pof.message === message ? 'eingebettete Nachricht stimmt mit der Challenge ueberein' : 'eingebettete Nachricht WEICHT von der Challenge ab') : 'kein PSBT_GLOBAL_GENERIC_SIGNED_MESSAGE (0x09) eingebettet';
+    const msgHit = pof.message != null ? (pof.message === message ? 'embedded message matches the challenge' : 'embedded message DIFFERS from the challenge') : 'no PSBT_GLOBAL_GENERIC_SIGNED_MESSAGE (0x09) embedded';
     return {
       ok: pof.message === message,
       variant: 'pof',
       pof,
-      detail: `Proof-of-Funds-PSBT (BIP-322 v1.0.0): ${pof.inputs} Eingabe(n), ${msgHit}. Hinweis: Unspent-Status der UTXOs ist offline nicht pruefbar — zusaetzlich im Explorer/Node verifizieren.`,
+      detail: `Proof-of-funds PSBT (BIP-322 v1.0.0): ${pof.inputs} input(s), ${msgHit}. Note: the unspent status of the UTXOs is not verifiable offline — additionally verify via explorer/node.`,
     };
   }
   try {
     const { Verifier } = await import('bip322-js');
-    // bip322-js 4.0.1 kennt die Praefixe nicht — Payload selbst abstreifen.
+    // bip322-js 4.0.1 does not know the prefixes — strip the payload ourselves.
     const ok = await Verifier.verifySignature(address, message, cls.payload);
-    const label = cls.variant === 'full' ? 'full' : cls.variant === 'simple-prefixed' ? 'simple (smp-Praefix, finale Spec)' : 'simple (Legacy ohne Praefix)';
+    const label = cls.variant === 'full' ? 'full' : cls.variant === 'simple-prefixed' ? 'simple (smp prefix, final spec)' : 'simple (legacy without prefix)';
     return {
       ok: !!ok,
       variant: cls.variant,
-      detail: ok ? `BIP-322 ${label} Signatur gueltig.` : `Signatur (Variante ${label}) mathematisch ungueltig fuer diese Adresse und Nachricht.`,
+      detail: ok ? `BIP-322 ${label} signature valid.` : `Signature (variant ${label}) mathematically invalid for this address and message.`,
     };
   } catch (e) {
-    return { ok: false, variant: cls.variant, detail: 'Pruefung nicht moeglich: ' + (e as Error).message };
+    return { ok: false, variant: cls.variant, detail: 'Verification not possible: ' + (e as Error).message };
   }
 }

@@ -25,8 +25,8 @@ export function donationUri(chain: DonationChain, amount?: string, rawAddressOnl
       return `solana:${entry.address}?${params.toString()}`;
     }
     case 'eth': {
-      // EIP-681: value in wei als Hex ist optional; Betrag in ETH als value-Param (ETH)
-      // -> Wir verwenden den schlichten Zahlungs-Payload (Adresse), Betrag via ?value in wei.
+      // EIP-681: value in wei as hex is optional; amount in ETH as value param
+      // -> we use the plain payment payload (address), amount via ?value in wei.
       if (amt) {
         try {
           const wei = BigInt(Math.round(Number(amt) * 1e6)) * 10n ** 12n;

@@ -36,7 +36,7 @@ function decodeAnnouncementLog(log: { topics: string[]; data: string; blockNumbe
     const topics = log.topics;
     const data = log.data.slice(2);
     const readWord = (i: number) => data.slice(i * 64, (i + 1) * 64);
-    const offE = Number(BigInt('0x' + readWord(0))); // ephemeral bytes offset (in 32B-Worten vom Datenanfang)
+    const offE = Number(BigInt('0x' + readWord(0))); // ephemeral bytes offset (in 32-byte words from the data start)
     const offM = Number(BigInt('0x' + readWord(1)));
     const lenE = Number(BigInt('0x' + '0' + data.slice(offE * 2, offE * 2 + 64)));
     const eph = '0x' + data.slice(offE * 2 + 64, offE * 2 + 64 + lenE * 2);
@@ -123,13 +123,13 @@ export default function StealthAudit5564() {
       const worker = new Worker(new URL('../../workers/stealth.worker.ts', import.meta.url), { type: 'module' });
       const t = setTimeout(() => {
         worker.terminate();
-        reject(new Error('Worker-Timeout (60s). Weniger Bloecke pro Runde scannen.'));
+        reject(new Error('Worker timeout (60s). Scan fewer blocks per round.'));
       }, 60000);
       worker.onmessage = (e) => {
         clearTimeout(t);
         worker.terminate();
         if (e.data.type === 'result') resolve(e.data);
-        else reject(new Error('Unerwartete Worker-Antwort'));
+        else reject(new Error('Unexpected worker response'));
       };
       worker.onerror = (e) => {
         clearTimeout(t);
@@ -144,15 +144,15 @@ export default function StealthAudit5564() {
     const vk = viewingKey.trim();
     const sp = spendingPub.trim();
     if (!/^0x[0-9a-fA-F]{64}$/.test(vk)) {
-      setError('Viewing Key: 0x + 64 Hex-Zeichen (32 Byte) erwartet.');
+      setError('Viewing key: expected 0x + 64 hex characters (32 bytes).');
       return null;
     }
     if (BigInt(vk) >= 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n || BigInt(vk) === 0n) {
-      setError('Viewing Key ausserhalb der secp256k1-Gruppenordnung.');
+      setError('Viewing key outside the secp256k1 group order.');
       return null;
     }
     if (!/^0x(04[0-9a-fA-F]{128}|0[23][0-9a-fA-F]{64})$/.test(sp)) {
-      setError('Spending Public Key: unkomprimiert (04 + 128 Hex) oder komprimiert (02/03 + 64 Hex) erwartet.');
+      setError('Spending public key: expected uncompressed (04 + 128 hex) or compressed (02/03 + 64 hex).');
       return null;
     }
     return { vk, sp };
@@ -162,7 +162,7 @@ export default function StealthAudit5564() {
     setError('');
     setWarning('');
     if (/spending/i.test(viewingKey) && viewingKey.trim().length > 66) {
-      // Detector: niemals Spending-Key hier
+      // detector: never a spending key here
     }
     const keys = validateKeys();
     if (!keys) return;
@@ -175,15 +175,15 @@ export default function StealthAudit5564() {
     try {
       const from = fromBlock.trim() ? Number(fromBlock) : 0;
       let to = toBlock.trim() ? Number(toBlock) : 0;
-      if (!Number.isFinite(from) || from < 0) throw new Error('Ungueltiger Start-Block.');
+      if (!Number.isFinite(from) || from < 0) throw new Error('Invalid start block.');
 
-      // Fortschritts-Key (niemals den Schluessel selbst speichern)
+      // progress key (never store the key itself)
       const { sha256 } = await import('@noble/hashes/sha2.js');
       const idbKey = 'stealth:' + Array.from(sha256(new TextEncoder().encode(keys.vk + ':' + chainId)), (b) => b.toString(16).padStart(2, '0')).join('');
       let announcements: RawAnnouncement[] = [];
 
       if (mode === 'offline') {
-        if (!logsJson.trim()) throw new Error('Announcement-Logs (JSON) einfuegen oder Demo laden.');
+        if (!logsJson.trim()) throw new Error('Paste announcement logs (JSON) or load the demo.');
         announcements = parseLogsJson(logsJson);
         if (!to) to = announcements.reduce((m, a) => Math.max(m, a.blockNumber), from);
       } else {
@@ -197,7 +197,7 @@ export default function StealthAudit5564() {
           if (cancelRef.current) {
             await idbSet('stealth-progress', idbKey, { block: cursor - 1 });
             setPaused({ chain: chainId, toContinue: cursor });
-            setProgress(`Pausiert bei Block ${num(cursor)} — Fortsetzung jederzeit moeglich.`);
+            setProgress(`Paused at block ${num(cursor)} — resumable at any time.`);
             setBusy(false);
             setScan({
               hits: allHits,
@@ -213,7 +213,7 @@ export default function StealthAudit5564() {
             return;
           }
           const end = Math.min(cursor + chunk - 1, to);
-          setProgress(`Hole Logs ${num(cursor)} – ${num(end)} von ${num(to)} …`);
+          setProgress(`Fetching logs ${num(cursor)} – ${num(end)} of ${num(to)} …`);
           try {
             const logs = await getLogs(chainId, {
               address: STEALTH_ANNOUNCER,
@@ -226,18 +226,18 @@ export default function StealthAudit5564() {
               if (d) announcements.push(d);
             }
           } catch (e) {
-            setWarning(`Blockbereich ${num(cursor)}–${num(end)} nicht abrufbar (${(e as Error).message}). Sprung zur naechsten Zone.`);
+            setWarning(`Block range ${num(cursor)}–${num(end)} not retrievable (${(e as Error).message}). Jumping to the next zone.`);
           }
           cursor = end + 1;
           await idbSet('stealth-progress', idbKey, { block: cursor - 1 });
-          await new Promise((r) => setTimeout(r, 250)); // Schonung der Endpunkte
+          await new Promise((r) => setTimeout(r, 250)); // be gentle with the endpoints
         }
         await idbDelete('stealth-progress', idbKey);
       }
 
-      setProgress('Kurve berechnen (View-Tag-Filter + Vollpruefung)…');
+      setProgress('Computing curve (view-tag filter + full check)…');
       const minW = minWei.trim() ? BigInt(Math.round(Number(minWei.replace(',', '.')) * 1)) : 0n;
-      void minW; // Mindestbetraege greifen auf Log-Ebene ueber value-Felder (Announcer liefert optional)
+      void minW; // minimum amounts apply at log level via value fields (announcer provides optionally)
       const res = await runWorker(announcements, keys.vk, keys.sp, from, to);
       allHits.push(...res.hits);
       checked += res.checked;
@@ -267,13 +267,13 @@ export default function StealthAudit5564() {
   const exportRows = useMemo(
     () =>
       (scan?.hits ?? []).map((h) => ({
-        stealth_adresse: h.stealthAddress,
+        stealth_address: h.stealthAddress,
         ephemeral_pubkey: h.ephemeralPubKey,
         view_tag: h.viewTag,
         block: h.blockNumber,
         tx_hash: h.txHash ?? '',
         caller: h.caller ?? '',
-        zuordnungsnachweis_shared_secret_hash: h.sharedSecretHash,
+        attribution_proof_shared_secret_hash: h.sharedSecretHash,
       })),
     [scan],
   );
@@ -283,19 +283,19 @@ export default function StealthAudit5564() {
       <div className="status-tile status-amber">
         <span aria-hidden="true">⚠</span>
         <p className="text-sm">
-          <strong>Niemals den Spending Key (privat) eingeben!</strong> Dieses Werkzeug benoetigt ausschliesslich den
-          <em> privaten Viewing Key</em> + den <em>oeffentlichen Spending Key</em>. Beide verbleiben lokal;
-          Exporte enthalten niemals den Viewing Key.
+          <strong>Never enter the (private) spending key!</strong> This tool requires only the
+          <em> private viewing key</em> + the <em>public spending key</em>. Both stay local;
+          exports never contain the viewing key.
         </p>
       </div>
 
-      <StepSection n={1} title="Schluessel, Zeitfenster & Quelle" hint="Viewing Key (0x + 64 Hex), oeffentlicher Spending Key, blockgenaues oder Datums-Fenster. Logs online vom Announcer oder als lokaler JSON-Export.">
+      <StepSection n={1} title="Keys, time window & source" hint="Viewing key (0x + 64 hex), public spending key, block-exact or date window. Logs online from the announcer or as a local JSON export.">
         <div className="flex flex-wrap gap-2">
           <button className={`btn btn-sm ${mode === 'online' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setMode('online')}>
-            Online (Announcer-Logs)
+            Online (announcer logs)
           </button>
           <button className={`btn btn-sm ${mode === 'offline' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setMode('offline')}>
-            Offline (JSON-Export)
+            Offline (JSON export)
           </button>
           <span className="ml-auto">
             <DemoButton onClick={() => void demo()} />
@@ -303,60 +303,60 @@ export default function StealthAudit5564() {
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="label" htmlFor="st-vk">Privater Viewing Key</label>
-            <input id="st-vk" type="password" className="input mono" autoComplete="off" placeholder="0x…64 Hex (bleibt lokal)" value={viewingKey} onChange={(e) => setViewingKey(e.target.value)} />
+            <label className="label" htmlFor="st-vk">Private viewing key</label>
+            <input id="st-vk" type="password" className="input mono" autoComplete="off" placeholder="0x…64 hex (stays local)" value={viewingKey} onChange={(e) => setViewingKey(e.target.value)} />
             <button type="button" className="text-xs text-prime-hi mt-1 underline underline-offset-2" onClick={(e) => {const inp=e.currentTarget.previousElementSibling as HTMLInputElement; inp.type = inp.type==='password'?'text':'password';}}>
-              Sichtbar umschalten
+              Toggle visibility
             </button>
           </div>
           <div>
-            <label className="label" htmlFor="st-sp">Oeffentlicher Spending Key</label>
-            <input id="st-sp" className="input mono" placeholder="0x04… (unkomprimiert) oder 0x02/03… (komprimiert)" value={spendingPub} onChange={(e) => setSpendingPub(e.target.value)} />
+            <label className="label" htmlFor="st-sp">Public spending key</label>
+            <input id="st-sp" className="input mono" placeholder="0x04… (uncompressed) or 0x02/03… (compressed)" value={spendingPub} onChange={(e) => setSpendingPub(e.target.value)} />
           </div>
           <div>
-            <label className="label" htmlFor="st-from">Start-Block</label>
-            <input id="st-from" className="input mono" placeholder="z. B. 21000000" value={fromBlock} onChange={(e) => setFromBlock(e.target.value)} />
+            <label className="label" htmlFor="st-from">Start block</label>
+            <input id="st-from" className="input mono" placeholder="e.g. 21000000" value={fromBlock} onChange={(e) => setFromBlock(e.target.value)} />
           </div>
           <div>
-            <label className="label" htmlFor="st-to">End-Block</label>
-            <input id="st-to" className="input mono" placeholder="leer = latest" value={toBlock} onChange={(e) => setToBlock(e.target.value)} />
+            <label className="label" htmlFor="st-to">End block</label>
+            <input id="st-to" className="input mono" placeholder="empty = latest" value={toBlock} onChange={(e) => setToBlock(e.target.value)} />
           </div>
           {mode === 'online' && (
             <div>
-              <label className="label" htmlFor="st-net">Netzwerk</label>
+              <label className="label" htmlFor="st-net">Network</label>
               <ChainSingleSelect value={chainId} onChange={setChainId} />
             </div>
           )}
           <div>
-            <label className="label" htmlFor="st-min">Mindestbetrag (optional, wei-Filter falls Log-Export Werte enthaelt)</label>
+            <label className="label" htmlFor="st-min">Minimum amount (optional, wei filter if the log export contains values)</label>
             <input id="st-min" className="input mono" placeholder="0" value={minWei} onChange={(e) => setMinWei(e.target.value)} />
           </div>
         </div>
         {mode === 'offline' && (
           <div>
-            <label className="label" htmlFor="st-logs">Announcement-Logs (JSON-Array)</label>
+            <label className="label" htmlFor="st-logs">Announcement logs (JSON array)</label>
             <textarea id="st-logs" className="textarea mono" rows={6} value={logsJson} onChange={(e) => setLogsJson(e.target.value)} placeholder='[{"schemeId":1,"stealthAddress":"0x…","ephemeralPubKey":"0x02…","metadata":"0x…", …}]' />
           </div>
         )}
       </StepSection>
 
-      <StepSection n={2} title="WebWorker-Scan starten">
+      <StepSection n={2} title="Start WebWorker scan">
         <p className="text-sm">
-          Schema 1: shared secret c = ephemeralPub × viewingKey, View-Tag = keccak256(c)[0]; Vollpruefung:
-          stealthAddr(SpendingPub + keccak256(c)·G). Fortschritt wird pausierbar in IndexedDB gehalten — ohne den Key.
+          Scheme 1: shared secret c = ephemeralPub × viewingKey, view tag = keccak256(c)[0]; full check:
+          stealthAddr(SpendingPub + keccak256(c)·G). Progress is held pausably in IndexedDB — without the key.
         </p>
         <div className="flex gap-2 flex-wrap">
           <button className="btn btn-primary" onClick={() => void runScan(false)} disabled={busy}>
-            {busy ? 'Scan laeuft…' : 'Scannen'}
+            {busy ? 'Scanning…' : 'Scan'}
           </button>
           {busy && (
             <button className="btn btn-outline-amber" onClick={() => (cancelRef.current = true)}>
-              Pausieren (Fortschritt speichern)
+              Pause (save progress)
             </button>
           )}
           {paused && !busy && (
             <button className="btn btn-primary" onClick={() => void runScan(true)}>
-              Fortsetzen ab Block {num(paused.toContinue)}
+              Resume from block {num(paused.toContinue)}
             </button>
           )}
         </div>
@@ -366,29 +366,29 @@ export default function StealthAudit5564() {
       </StepSection>
 
       {scan && (
-        <StepSection n={3} title="Scan-Ergebnis">
+        <StepSection n={3} title="Scan result">
           <StatusTile
             level={level!}
-            headline={scan.hits.length === 0 ? 'Keine Stealth-Eingaenge im Fenster' : `${scan.hits.length} Stealth-Eingang(-gaenge) gefunden`}
-            detail={`Geprueft: ${num(scan.checked)} Announcements · View-Tag-Vorfilter traf ${num(scan.tagFiltered)} · Dauer ${(scan.durationMs / 1000).toFixed(1)} s · Quelle: ${ { online: 'Announcer-Logs', offline: 'lokaler JSON-Export', demo: 'Demo (synthetisch)' }[scan.source] }. Export enthaelt niemals den Viewing Key.`}
+            headline={scan.hits.length === 0 ? 'No stealth inbound payments in the window' : `${scan.hits.length} stealth inbound payment(s) found`}
+            detail={`Checked: ${num(scan.checked)} announcements · view-tag prefilter hit ${num(scan.tagFiltered)} · duration ${(scan.durationMs / 1000).toFixed(1)} s · source: ${ { online: 'announcer logs', offline: 'local JSON export', demo: 'demo (synthetic)' }[scan.source] }. The export never contains the viewing key.`}
           />
           <KpiGrid>
-            <Kpi label="Treffer" value={num(scan.hits.length)} tone={scan.hits.length ? 'amber' : 'green'} />
-            <Kpi label="Announcements geprueft" value={num(scan.checked)} />
-            <Kpi label="View-Tag-Filter (vorab verworfen)" value={num(scan.tagFiltered)} />
-            <Kpi label="Blockfenster" value={`${num(scan.fromBlock)}–${num(scan.toBlock)}`} />
+            <Kpi label="Hits" value={num(scan.hits.length)} tone={scan.hits.length ? 'amber' : 'green'} />
+            <Kpi label="Announcements checked" value={num(scan.checked)} />
+            <Kpi label="View-tag filter (discarded early)" value={num(scan.tagFiltered)} />
+            <Kpi label="Block window" value={`${num(scan.fromBlock)}–${num(scan.toBlock)}`} />
           </KpiGrid>
 
           {scan.hits.length > 0 && (
             <details className="acc" open>
-              <summary>Gefundene Stealth-Eingaenge</summary>
+              <summary>Found stealth inbound payments</summary>
               <div className="acc-body overflow-x-auto">
                 <table className="table-x">
                   <thead>
                     <tr>
-                      <th>Stealth-Adresse</th>
+                      <th>Stealth address</th>
                       <th>Ephemeral PubKey</th>
-                      <th>View-Tag</th>
+                      <th>View tag</th>
                       <th>Block</th>
                       <th>TX</th>
                     </tr>
@@ -406,9 +406,9 @@ export default function StealthAudit5564() {
                   </tbody>
                 </table>
                 <p className="text-xs text-dim mt-2">
-                  Zuordnungsnachweis: Der Spalten-Export enthaelt je Treffer den shared-secret-Hash (keccak256 des
-                  komprimierten gemeinsamen Punktes). Damit kann ein Pruefer die Zuordnung nachvollziehen, ohne Ihren
-                  Viewing Key zu erhalten.
+                  Attribution proof: the column export contains the shared-secret hash per hit (keccak256 of the
+                  compressed shared point). This lets an auditor follow the attribution without receiving your
+                  viewing key.
                 </p>
               </div>
             </details>
@@ -423,29 +423,29 @@ export default function StealthAudit5564() {
                   window: { fromBlock: scan.fromBlock, toBlock: scan.toBlock, scannedTo: scan.scannedTo },
                   scheme: 'EIP-5564 scheme 1 (keccak256 view tag)',
                   hits: exportRows,
-                  note: 'Export enthaelt bewusst KEINEN Viewing Key und keine geheimen Schluessel.',
+                  note: 'The export deliberately contains NO viewing key and no secret keys.',
                 },
                 'stealthaudit-5564.json',
               )
             }
-            onCsv={() => downloadCSV(exportRows, 'stealthaudit-funde.csv')}
+            onCsv={() => downloadCSV(exportRows, 'stealthaudit-hits.csv')}
           />
         </StepSection>
       )}
 
       <details className="acc">
-        <summary>Referenzen & Einschränkungen</summary>
+        <summary>References & limitations</summary>
         <div className="acc-body space-y-2 text-sm text-dim">
           <p>
-            Gescannt wird der <strong className="text-ink">kanonische ERC-5564 Announcer</strong>{' '}
-            <code className="mono text-xs break-all">0x55649E01B5Df198D18D95b5cc5051630cfD45564</code> (identische
-            Singleton-Deployment auf mehreren Netzwerken, u. a. Mainnet/Polygon/Scroll). Die dazugehörige
-            ERC-6538 Meta-Address Registry liegt unter{' '}
+            The scan targets the <strong className="text-ink">canonical ERC-5564 announcer</strong>{' '}
+            <code className="mono text-xs break-all">0x55649E01B5Df198D18D95b5cc5051630cfD45564</code> (identical
+            singleton deployment on several networks, including mainnet/Polygon/Scroll). The associated
+            ERC-6538 meta-address registry lives at{' '}
             <code className="mono text-xs break-all">0x6538E6bf4B0eBd30A8Ea093027Ac2422ce5d6538</code>.
           </p>
           <p>
-            Der Scanner erkennt ausschließlich Schema 1 (secp256k1). Ankündigungen ohne View-Tag im Metadatenfeld
-            werden vollstaendig geprueft (langsamer), mit View-Tag dagegen ueber den billigen Vorfilter.
+            The scanner recognizes scheme 1 (secp256k1) only. Announcements without a view tag in the metadata field
+            are checked in full (slower); those with a view tag go through the cheap prefilter.
           </p>
         </div>
       </details>

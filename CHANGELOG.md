@@ -1,178 +1,188 @@
 # Changelog
 
-## 2026-11-16 — Wave 24: Fork-Landschaft 11/2026 (Glamsterdam/BPO-Nachlese)
+## 2026-11-17 — Wave 25: Internationalization (English-first)
 
-- Verifizierte Recherche zur Ethereum-Fork-Roadmap (mehrfach gedeckt: BlockEden 25.01.2026, iq.wiki, Metrika, Blofin 14.10.2026, weex 06.10.2026, kiln.fi):
-  - **Fusaka-Nachzuegler abgeschlossen**: BPO-1 (17.12.2025; target 6→10, max 9→15) und **BPO-2 (07.01.2026; →14/21)** — Blob-Kapazitaet seit Fusaka >3x, L2-Fees ~−60 % laut BlockEden-Nachlese.
-  - **Glamsterdam = naechster grosser Fork** (Gloas + Amsterdam): Headliner **EIP-7732 (ePBS)** und **EIP-7928 (Block-Level Access Lists)**, dazu Gas-Repricing (EIP-7904) und Gas-Limit-Ziel ~200 Mio.; seit **06.10.2026 auf Sepolia aktiv** (13:53:36 UTC, Epoch 353.024), Hoodi Ende 10/2026, **Mainnet-Ziel Anfang 12/2026 — noch nicht fixiert** (EIP-7773 laesst das Datum offen).
-- Punktueller Edit: Adoptions-Referenz-Block in `PasskeyContinuity.tsx` (einzige Fork-Kontext-Flaeche des Projekts) um die Fork-Landschaft 11/2026 ergaenzt; Hedging explizit („noch nicht fixiert"), damit der Text nach Termin-Fixierung nicht faelschlich veraltet wirkt.
-- Lock-in: **+1 Check (131 → 132)** — M04 assertiert Glamsterdam/06.10.2026/BPO-2/EIP-7732 im Quelltext; README-Drift synchron.
-- Zuvor: **PR #4 squash-gemergt** (Owner-Entscheidung, Commit d69aca5; DAC8-Live-Status jetzt in main). Branch `arena/bd2fa4fa` auf neuem main-Stand.
+- **Scope**: the entire repository is now English-first — UI shell (TopNav/Footer/ToolGrid/ToolPageHeader/layouts), all shared React components, all 10 tool components, lib/worker/hooks, scripts (verify-demos.mjs, audit-dist.mjs) and documentation (README/CHANGELOG/ROADMAP).
+- **Language toggle removed**: the DE|EN switcher in the TopNav (incl. its inline script and the `data-i18n-*` attribute mechanism) was dropped by owner decision — the suite is English-only; `lang="en"`, `og:locale en_GB`, `inLanguage: ['en']`.
+- **URL slugs unchanged by owner decision**: the legal pages keep their German routes `/agb`, `/disclaimer`, `/datenschutz`; their content is now English.
+- **Data formats consistently English**: CSV export column keys in English with dot decimals, locales switched from `de-DE` to `en-GB`, JSON export file names renamed `*-bericht.json` → `*-report.json`, DAC8 `verification.result` union = `valid`/`invalid`/`not checked`, intents `decodeConfidence` union = `full`/`partial`/`raw`, refund source strings English (`refundAddress (explicit)` etc.).
+- **Intentionally kept German**: the BANNED regex list in `scripts/audit-dist.mjs` (negative-keyword check targets legacy German marketing terms).
+- Lock-in: demo regression stays at **132 checks** — content assertions in verify-demos.mjs were synced with the translated component sources (`full`, `/fallback 2/`, `/ephemeral anchors/i`, `/ERC-8213/` + `/calldata-digest fallback/i`, DAC8 `as of 11/2026` / `EUR 50,000` / `58 countries`, README drift check case-insensitive).
+- Pipeline: tsc (both strictness flags) 0 errors; `npm run verify` green (build 15 pages, audit-dist passed, 132/132).
 
-## 2026-11-16 — Wave 23: DAC8 Live-Status-Refresh (Q4/2026-Recherche)
+## 2026-11-16 — Wave 24: Fork landscape 11/2026 (Glamsterdam/BPO follow-up)
 
-- Hintergrund: DAC8 ist seit 01.01.2026 **live**, das erste Meldejahr 2026 laeuft gerade — der bisherige Tool-Hinweis war bereits im Praesens formuliert, aber ohne deutsche Umsetzungs- und Frist-Fakten. Verifizierte Aktualisierung des rechtlichen Zeitkontexts in `Dac8SelfProof.tsx`:
-  - **DE-Umsetzung** durch das Kryptowerte-Steuertransparenzgesetz (**KStTG**): Bundestag 06.11.2025, Bundesrat-Zustimmung **19.12.2025** (Deloitte German Tax News, 23.12.2025; kleinstb.de, Stand 09/2026).
-  - Erster Meldezeitraum = **KJ 2026**; erste Uebermittlungen 2027: EU/CARF-Baseline **31.01.2027** (EY), deutsche **KStTG-Frist 31.07.2027** ans BZSt (kleinstb/PPI); erster automatischer EU-Austausch bis **30.09.2027**.
-  - Nutzer-**Selbstauskunft bis 01.01.2027** (Bestands-Accounts); KStTG-Bussgeldrahmen **bis 50.000 EUR** je Verstoß; Praxis-Falle **Einstandsbasis 0** bei zugewanderten Coins (Beweislast beim Nutzer); **CARF international ab 2027 in 58 Laendern**.
-- Lock-in: **+2 Checks (129 → 131)** — M03-Content-Asserts auf KStTG/Datum/Fristen/Bussgeld/CARF-58; README-Drift-Lock-in auf 131 aktualisiert.
-- Pipeline: 131/131 gruen; tsc mit beiden Strictness-Flags 0 Fehler.
-- **PR #3 zuvor squash-gemergt** (Owner-Entscheidung, Commit 2523235 auf main; Branch auf origin/main neubasiert).
+- Verified research on the Ethereum fork roadmap (multiply corroborated: BlockEden 25.01.2026, iq.wiki, Metrika, Blofin 14.10.2026, weex 06.10.2026, kiln.fi):
+  - **Fusaka follow-ups complete**: BPO-1 (17.12.2025; target 6→10, max 9→15) and **BPO-2 (07.01.2026; →14/21)** — blob capacity since Fusaka >3x, L2 fees ~−60 % per the BlockEden review.
+  - **Glamsterdam = next major fork** (Gloas + Amsterdam): headliners **EIP-7732 (ePBS)** and **EIP-7928 (block-level access lists)**, plus gas repricing (EIP-7904) and a gas-limit target of ~200 M; **active on Sepolia since 06.10.2026** (13:53:36 UTC, epoch 353,024), Hoodi late 10/2026, **mainnet target early 12/2026 — not yet fixed** (EIP-7773 leaves the date open).
+- Surgical edit: the adoption reference block in `PasskeyContinuity.tsx` (the project's only fork-context surface) extended with the 11/2026 fork landscape; hedging made explicit ("not yet fixed") so the text does not wrongly appear stale once the date is set.
+- Lock-in: **+1 check (131 → 132)** — M04 asserts Glamsterdam/06.10.2026/BPO-2/EIP-7732 in the source; README drift in sync.
+- Previously: **PR #4 squash-merged** (owner decision, commit d69aca5; DAC8 live status now in main). Branch `arena/bd2fa4fa` rebased onto the new main.
 
-## 2026-11-16 — Wave 22: exactOptionalPropertyTypes dauerhaft aktiviert
+## 2026-11-16 — Wave 23: DAC8 live-status refresh (Q4/2026 research)
 
-- **`exactOptionalPropertyTypes` permanent aktiviert** (tsconfig, zusaetzlich zu `noUncheckedIndexedAccess`). Alle gemessenen Diagnosen (27 Fehlerblöcke, Wellen-19b-Rest) behoben — ausschliesslich durch Verbreiterung der *Deklarationen*: optionale Properties, die Produzenten bereits explizit als `undefined` uebergeben, tragen jetzt den ehrlichen Typ `prop?: T | undefined`.
-- Geaenderte Typziele (reine Typ-Ebene, **kein einziges Byte Laufzeit-Code**): `StatusTile.detail` + `SourceBadge.source` (shared ui), `Analysis` (BitVault), `TxFacts`/`Cert` (DAC8: blockHash/blockHeight/timestamp/amountLabel/confirmed/note/costBasisHint/verification.detail), `DecodedOrder` + `resolveRefundRecipient`-Signatur (intents), `PolicyNode.key` (miniscript), `parseSafeExport`-Returntyp + `DecodedCall.descriptor` (stva), `PolicyDimension.evidence` + `HarLikeEntry.time` + `DeliveryFinding.time` (x402), `RawAnnouncement`/`StealthHit` txHash+caller (stealth.worker), `ChainFinding`/`CollisionItem` (SlotGuard), `TxAutopsy` (Userop), Export-`status.detail`.
-- Warum Deklarations-Seite statt Produzenten-Umbau: Prozent der Literale bauten `undefined`-Werte bereits als IST-Zustand (`note.trim() || undefined`, `facts?.blockHash`); das Flag zwingt die Typen nur, diese Wahrheit abzubilden. Ergebnis: `tsc --noEmit` mit beiden Flags 0 Fehler; volle Pipeline **129/129 gruen** (Referenzvektoren decken die betroffenen Parser erneut bitgenau ab).
-- Derselbe HYGIENE-Lock-in (bleibt genau 1 Check) erzwingt jetzt **beide** Flags dauerhaft — Check-Zahl bleibt 129, README/Drift-Lock-in unveraendert konsistent.
-- Notiz: Session-Git-Stand vor dieser Welle von GitHub neu abgeglichen (lokaler Branch zeigte auf Merge-Base, Remote-Head unveraendert uebernommen; kein Force-Push).
+- Background: DAC8 has been **live** since 01.01.2026, the first reporting year 2026 is currently running — the existing tool note was already phrased in the present tense but lacked the German implementation and deadline facts. Verified update of the legal time context in `Dac8SelfProof.tsx`:
+  - **DE implementation** via the Kryptowerte-Steuertransparenzgesetz (**KStTG**): Bundestag 06.11.2025, Bundesrat consent **19.12.2025** (Deloitte German Tax News, 23.12.2025; kleinstb.de, as of 09/2026).
+  - First reporting period = **calendar year 2026**; first submissions in 2027: EU/CARF baseline **31.01.2027** (EY), German **KStTG deadline 31.07.2027** to the BZSt (kleinstb/PPI); first automatic EU exchange by **30.09.2027**.
+  - User **self-certification by 01.01.2027** (pre-existing accounts); KStTG fine range **up to EUR 50,000** per violation; practical trap **cost basis 0** for coins transferred in (burden of proof on the user); **CARF internationally from 2027 across 58 countries**.
+- Lock-in: **+2 checks (129 → 131)** — M03 content asserts on KStTG/date/deadlines/fines/CARF-58; README drift lock-in updated to 131.
+- Pipeline: 131/131 green; tsc with both strictness flags 0 errors.
+- **PR #3 squash-merged before that** (owner decision, commit 2523235 on main; branch rebased onto origin/main).
 
-## 2026-11-16 — Wave 21: TypeScript-Stärke-Verdichtung umgesetzt
+## 2026-11-16 — Wave 22: exactOptionalPropertyTypes permanently enabled
 
-- **`noUncheckedIndexedAccess` permanent aktiviert** (tsconfig). Alle gemessenen 68 Stellen (18 Dateien, Wellen 19b-Probe) behoben: Array-/Map-Indizes und Regex-Gruppen-Extraktionen in evm-utils, x402-Lockfile-Parsen (npm/go/pip), BIP-322-PoF-PSBT-Varint-Reader, Contenthash-Varint, Miniscript-Satisfaction-Gewichten, Stealth-Worker (hash-bytes), Userop-Receipt-Decoder, Donation-Wallet-Flow u. a.
-- Technik konservativ gehalten: Guards statt Non-Null-Assertions; Laufzeit-Verhalten ungeaendert — beweisbar: volle Pipeline (Build 15 Seiten, dist-Audit, Dep-Audit) plus **128/128 Demo-Checks weiter gruen** (die Check-Matrix deckt die betroffenen Parser mit exakten Referenzvektoren ab).
-- Lock-in: tsconfig muss die Option aktiv halten; Rueckfall bricht die Pipeline.
-- Auf dem neuen Branch nach Merge von PR #2 (Squash 8681fbd).
+- **`exactOptionalPropertyTypes` permanently enabled** (tsconfig, in addition to `noUncheckedIndexedAccess`). All measured diagnostics (27 error blocks, wave-19b remainder) fixed — exclusively by widening the *declarations*: optional properties that producers already explicitly pass as `undefined` now carry the honest type `prop?: T | undefined`.
+- Changed type targets (pure type level, **not a single byte of runtime code**): `StatusTile.detail` + `SourceBadge.source` (shared ui), `Analysis` (BitVault), `TxFacts`/`Cert` (DAC8: blockHash/blockHeight/timestamp/amountLabel/confirmed/note/costBasisHint/verification.detail), `DecodedOrder` + `resolveRefundRecipient` signature (intents), `PolicyNode.key` (miniscript), `parseSafeExport` return type + `DecodedCall.descriptor` (stva), `PolicyDimension.evidence` + `HarLikeEntry.time` + `DeliveryFinding.time` (x402), `RawAnnouncement`/`StealthHit` txHash+caller (stealth.worker), `ChainFinding`/`CollisionItem` (SlotGuard), `TxAutopsy` (Userop), export `status.detail`.
+- Why the declaration side instead of rebuilding producers: most literals already built `undefined` values as the actual state (`note.trim() || undefined`, `facts?.blockHash`); the flag merely forces the types to reflect that truth. Result: `tsc --noEmit` with both flags 0 errors; full pipeline **129/129 green** (the reference vectors cover the affected parsers bit-exactly again).
+- The same HYGIENE lock-in (remains exactly 1 check) now enforces **both** flags permanently — check count stays 129, README/drift lock-in consistently unchanged.
+- Note: the session git state was re-synced from GitHub before this wave (local branch pointed at the merge base; remote head adopted unchanged; no force push).
 
-## 2026-11-15 — Wave 20: Clean-Room-Verifikation (Pre-Merge)
+## 2026-11-16 — Wave 21: TypeScript strictness consolidation implemented
 
-- Reproduzierbarkeit bewiesen: alle getrackten Dateien in leeren Raum kopiert, `npm ci` ausschliesslich aus dem Lockfile → komplette Pipeline gruen (typecheck, Build 15 Seiten, dist-Audit, Dep-Audit auf critical, 128/128 Checks). Lockfile hat keinen Drift durch die Weihen-Wellen erlitten.
+- **`noUncheckedIndexedAccess` permanently enabled** (tsconfig). All 68 measured sites (18 files, wave-19b probe) fixed: array/map indexes and regex group extractions in evm-utils, x402 lockfile parsing (npm/go/pip), the BIP-322 PoF PSBT varint reader, contenthash varint, miniscript satisfaction weights, the stealth worker (hash bytes), the UserOp receipt decoder, the donation wallet flow, and more.
+- Technique kept conservative: guards instead of non-null assertions; runtime behavior unchanged — provable: full pipeline (build 15 pages, dist audit, dep audit) plus **128/128 demo checks still green** (the check matrix covers the affected parsers with exact reference vectors).
+- Lock-in: tsconfig must keep the option enabled; regression breaks the pipeline.
+- On the new branch after the merge of PR #2 (squash 8681fbd).
 
-## 2026-11-15 — Wave 19b: TypeScript-Staerke-Probe (dokumentiert bewertet)
+## 2026-11-15 — Wave 20: clean-room verification (pre-merge)
 
-- Aktuell `strict: true`. Probe gegen `noUncheckedIndexedAccess` + `exactOptionalPropertyTypes`: **103 Diagnosen**; nur-`noUncheckedIndexedAccess`: **68 Stellen** (ueberwiegend Array-Index-Pattern in Tools).
-- Bewertung: rein statische Vertiefung ohne Laufzeit-Aenderung; 68 Call-Sites spät in der Session anzufassen waere churn-riskant. Dokumentierter Antrag fuer Folgearbeit (gemessen, nicht gefuehlt).
-- GitHub-Lizenz-Erkennung greift erst nach Merge (LICENSE liegt auf PR-Branch): expected.
+- Reproducibility proven: all tracked files copied into an empty room, `npm ci` exclusively from the lockfile → entire pipeline green (typecheck, build 15 pages, dist audit, dep audit at critical, 128/128 checks). The lockfile suffered no drift through the consecration waves.
 
-## 2026-11-15 — Wave 19: MIT-Lizenz (Owner-Entscheidung)
+## 2026-11-15 — Wave 19b: TypeScript strictness probe (documented assessment)
 
-- `LICENSE` (MIT, Copyright (c) 2026 AndrexTheDev) hinzugefuegt; `package.json` `license: MIT`; README-Lizenzsektion. Lock-in: LICENSE muss MIT-Kopfzeile tragen und package.json-Feld stimmen.
+- Currently `strict: true`. Probe against `noUncheckedIndexedAccess` + `exactOptionalPropertyTypes`: **103 diagnostics**; `noUncheckedIndexedAccess` alone: **68 sites** (predominantly array-index patterns in tools).
+- Assessment: purely static deepening without runtime change; touching 68 call sites late in the session would be churn-risky. Documented proposal for follow-up work (measured, not felt).
+- GitHub license recognition only kicks in after merge (LICENSE sits on the PR branch): expected.
 
-## 2026-11-15 — Wave 18: Merge-Readiness-Sweep
+## 2026-11-15 — Wave 19: MIT license (owner decision)
 
-- **Secrets-/Key-Audit** ueber alle 73 getrackten Dateien: keine Private-Key-Artefakte (Testvektoren sind dokumentierte Konstrukte, kein Material). Regex-Scan (`BEGIN…PRIVATE`, 64-hex `private_key`-Muster) sauber.
-- **CSP-Entscheidung erneut bestaetigt:** Meta-CSP in BaseLayout deckt `object-src 'none'`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'` ab; `script-src … 'unsafe-inline'` ist zwingend, solange 61 Astro-Inline-Skripte (DE|EN-Toggle, Hydration-Guards, JSON-LD) ohne Nonce-Mechanik bestehen — Hashes neben `'unsafe-inline'` waeren wirkungslos. Entscheidung ROADMAP #8 steht.
-- **og:image** verweist absolut auf /og-image.svg (vorhanden); robots.txt verlinkt die Sitemap; .gitignore deckt node_modules/dist/.astro/.env ab; groessster getrackter Blob ist package-lock.json (200 KB) — keine grossen Artefakte im Repo.
-- Repo-Befund: LICENSE fehlt upstream — Lizenzwahl liegt beim Owner (nicht Teil des Code-PRs).
+- `LICENSE` (MIT, Copyright (c) 2026 AndrexTheDev) added; `package.json` `license: MIT`; README license section. Lock-in: LICENSE must carry the MIT header and the package.json field must match.
 
-## 2026-11-15 — Wave 17: Feature↔Demo-Paritaet
+## 2026-11-15 — Wave 18: merge-readiness sweep
 
-- **SlotGuard-Demo** zeigt jetzt auf den MetaMask-Delegator (0x63c0c19a…E32B) → uebt den Known-Delegates-Badge-Pfad aus Wave 12 (Delegation mit Code, Label, Reset-Hinweis greifbar).
-- **Paritaets-Lock-in:** alle 10 Tools muessen DemoButton + Demo-Handler besitzen (Struktur-Assertion) — Feature-ohne-Demo-Regel verankert.
-- Demo-Regression: 126 Checks.
+- **Secrets/key audit** across all 73 tracked files: no private-key artifacts (test vectors are documented constructs, not material). Regex scan (`BEGIN…PRIVATE`, 64-hex `private_key` patterns) clean.
+- **CSP decision reconfirmed:** the meta CSP in BaseLayout covers `object-src 'none'`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`; `script-src … 'unsafe-inline'` is mandatory as long as 61 Astro inline scripts (language toggle, hydration guards, JSON-LD) exist without nonce mechanics — hashes next to `'unsafe-inline'` would be ineffective. Decision ROADMAP #8 stands.
+- **og:image** points absolutely at /og-image.svg (present); robots.txt links the sitemap; .gitignore covers node_modules/dist/.astro/.env; the largest tracked blob is package-lock.json (200 KB) — no large artifacts in the repo.
+- Repo finding: LICENSE is missing upstream — license choice is the owner's (not part of the code PR).
 
-## 2026-11-15 — Wave 16: UserOp-Demo uebt v0.9-Pfad
+## 2026-11-15 — Wave 17: feature↔demo parity
 
-- Offline-Demo der UserOp-Autopsy ist jetzt ein **zwei-Receipt-Array**: v0.6-Bundle (bisher) + v0.9-Bundle auf dem v0.9-EntryPoint-Singleton inklusive `IgnoredInitCode`-Ereignis — die Wave-4-Erkennung (Versions-Badge, IgnoredInitCode-Zeile) wird im Demo-Klick direkt sichtbar statt nur latent.
-- verify-demos prueft den Demo-Block (nicht bloss die globale Map): v0.9-Adresse + IgnoredInitCode-Referenz muessen im Demo-Pfad referenziert sein.
-- Demo-Regression: 124 Checks.
+- **SlotGuard demo** now points at the MetaMask delegator (0x63c0c19a…E32B) → exercises the known-delegates badge path from wave 12 (delegation with code, label, reset note tangible).
+- **Parity lock-in:** all 10 tools must have a DemoButton + demo handler (structural assertion) — the no-feature-without-demo rule is anchored.
+- Demo regression: 126 checks.
 
-## 2026-11-15 — Wave 15: Konsolidierung auf dem neuen Stack
+## 2026-11-15 — Wave 16: UserOp demo exercises the v0.9 path
 
-- Preview-Umgebung auf Astro 7.4.1 neu gestartet (alter Prozess lief noch auf 6.4.8-node_modules): **17/17 Routen 200**, Sitemap-Index korrekt, Title/Noscript unveraendert.
-- vite-Direkt-DevDep 7.3.8 → ^8.3.8 angeglichen (Astro 7 bringt ohnehin vite 8.3.8 — jetzt ein einziger Baum, keine dedup-Parallelkopie mehr).
-- `npm outdated` Final: nur typescript 5.9.3 (< 7.0.2, Wave-9/14-Entscheidung steht) — alle bewusst.
-- Kein Funktionsdelta, daher Demo-Regression unveraendert.
+- The UserOp-Autopsy offline demo is now a **two-receipt array**: v0.6 bundle (as before) + v0.9 bundle on the v0.9 EntryPoint singleton including an `IgnoredInitCode` event — the wave-4 detection (version badge, IgnoredInitCode line) becomes directly visible on the demo click instead of staying latent.
+- verify-demos checks the demo block (not just the global map): the v0.9 address + IgnoredInitCode reference must be referenced in the demo path.
+- Demo regression: 124 checks.
 
-## 2026-11-15 — Wave 14: npm-Audit-Sweep, Astro-Major 6 → 7, Security-Gate in verify
+## 2026-11-15 — Wave 15: consolidation on the new stack
 
-- **Ausloeser:** `npm audit` zeigte 3 Findings — darunter **GHSA-26w7-cxv4-gfx2 (RCE über AVIF-Bildoptimierung, CVSS 9.8, range < 7.2.8)**, womit der bewusste Astro-6-Pin (Wave 9) nicht mehr tragfaehig war.
-- **Major-Upgrade kontrolliert durchgefuehrt:** API-Abwaertskompatibilitaet vorab verifiziert (kein `Astro.glob`, keine Content-Collections, keine ViewTransitions im Code; rein statischer Output). Groesste Node-kompatible Version gewaehlt: **astro 7.0→7.4.1** (7.4.2+ erfordert Node >=22.23.4, Sandbox hat 22.22.3 — engines-Kompatibilitaet gegen npm pro Version geprueft) + @astrojs/react 7.1.9.
-- **Overrides** `esbuild ^0.28.2`, `sharp ^0.35.5` (GHSA-g7r4 Dev-Server, diverse libvips/libheif/libsvg-CVEs) eingezogen.
-- **Verbleibende Findings bewertet (not applicable fuer diese Suite):** GHSA-mh32 (XSS nur via dynamischer Tag-Namen — nicht verwendet) und GHSA-r3h5 (@astrojs/node Datei-Lesen — wir nutzen reinen Static-Output, no Server-Adapter). Beide mit Range <=7.4.6; Nachzug bei Node>=22.23.4-Umgebungen.
-- **Neues Quality-Gate:** `npm run verify` inkludiert jetzt `audit:deps` (npm audit, `--audit-level=critical --omit=dev`) — kritische Dep-Findings brechen kuenftig die Pipeline.
-- Version **1.1.0**. Komplette Pipeline (inkl. Build, 15 Seiten) auf Astro 7.4.1 reproduzierbar gruen.
+- Preview environment restarted on Astro 7.4.1 (the old process was still running on 6.4.8 node_modules): **17/17 routes 200**, sitemap index correct, title/noscript unchanged.
+- vite direct devDep 7.3.8 → ^8.3.8 aligned (Astro 7 ships vite 8.3.8 anyway — now a single tree, no dedup parallel copy).
+- `npm outdated` final: only typescript 5.9.3 (< 7.0.2, wave-9/14 decision stands) — all deliberate.
+- No functional delta, so the demo regression is unchanged.
 
-## 2026-11-15 — Wave 13: Fee-Bumping-Landschaft (BitVaultStress)
+## 2026-11-15 — Wave 14: npm audit sweep, Astro major 6 → 7, security gate in verify
 
-- Neues Wissensaccordion „Gebuehren-Bumping-Landschaft 2026" im Stress-Bericht: pre-signierte Recovery-TXs tragen fixe Fees — die Bewertung haengt von der Relais-Policy ab. Dokumentiert (Quellen: Optech #323, Core-Release-Notes): Full-RBF default seit Core 28.0 (10/2024), verpflichtend seit 29.0 (04/2025); Ephemeral Anchors (P2A `OP_1 0x4e73`) seit 28.0 standard-relay-faehig fuer Zero-Fee-Commitments; TRUC/v3-Pinning-Begrenzung (10.000 vB, eine unbestaetigte Vorfahre); 1p1c-Package-Relay als Rettungsweg unterbezahlter Parents.
-- Demo-Regression: 123 Checks; Drift-Lock-in hat erneut die README-Zahl gezogen.
+- **Trigger:** `npm audit` showed 3 findings — including **GHSA-26w7-cxv4-gfx2 (RCE via AVIF image optimization, CVSS 9.8, range < 7.2.8)**, which made the deliberate Astro 6 pin (wave 9) no longer viable.
+- **Major upgrade performed in a controlled manner:** API backward compatibility verified beforehand (no `Astro.glob`, no content collections, no ViewTransitions in the code; purely static output). Largest Node-compatible version chosen: **astro 7.0→7.4.1** (7.4.2+ requires Node >=22.23.4, the sandbox has 22.22.3 — engines compatibility checked against npm per version) + @astrojs/react 7.1.9.
+- **Overrides** `esbuild ^0.28.2`, `sharp ^0.35.5` (GHSA-g7r4 dev server, various libvips/libheif/libsvg CVEs) pulled in.
+- **Remaining findings assessed (not applicable to this suite):** GHSA-mh32 (XSS only via dynamic tag names — not used) and GHSA-r3h5 (@astrojs/node file reading — we use pure static output, no server adapter). Both with range <=7.4.6; follow-up in Node>=22.23.4 environments.
+- **New quality gate:** `npm run verify` now includes `audit:deps` (npm audit, `--audit-level=critical --omit=dev`) — critical dependency findings will break the pipeline going forward.
+- Version **1.1.0**. Complete pipeline (incl. build, 15 pages) reproducibly green on Astro 7.4.1.
 
-## 2026-11-15 — Wave 12: Known-Delegates, CI-Majors, security.txt
+## 2026-11-15 — Wave 13: fee-bumping landscape (BitVaultStress)
 
-- **SlotGuard-7702**: Known-Delegates-Registry (konservativ, >= 3 unabhaengige Quellen je Adresse): MetaMask EIP-7702 Delegator `0x63c0c19a282a1B52b07dD5a65b58948A07DAE32B` wird bei Delegationen namentlich als Badge markiert — Triage-Trennung „bekannte Implementierung" vs. „unbekannter Delegate" (Dormant-Sweeper-Kandidat). Reset-Hinweis via address(0)-Autorisierung.
-- **CI**: actions/checkout v4 → v7.0.1, actions/setup-node v4 → v7.1.0 (drei Major-Stufen nachgezogen, via GitHub-API gegen letzte Releases verifiziert).
-- **security.txt** (RFC 9116) unter `public/.well-known/security.txt`: Kontakt ueber Issues/Advisory-Flow, Expires 30.06.2027, Sprachen de/en. audit-dist erzwingt Existenz + parsebares, nicht abgelaufenes Expires.
-- Demo-Regression: 121 Checks.
+- New knowledge accordion "fee-bumping landscape 2026" in the stress report: pre-signed recovery TXs carry fixed fees — the assessment depends on the relay policy. Documented (sources: Optech #323, Core release notes): Full-RBF default since Core 28.0 (10/2024), mandatory since 29.0 (04/2025); ephemeral anchors (P2A `OP_1 0x4e73`) standard-relayable since 28.0 for zero-fee commitments; TRUC/v3 pinning limits (10,000 vB, one unconfirmed ancestor); 1p1c package relay as a rescue path for underpaid parents.
+- Demo regression: 123 checks; the drift lock-in once again pulled the README number.
 
-## 2026-11-15 — Wave 11: EIP-7951/Fusaka-Mainnet-Kontext (PasskeyContinuity)
+## 2026-11-15 — Wave 12: known delegates, CI majors, security.txt
 
-- P256VERIFY (Precompile 0x0100) ist seit dem **Fusaka-Hardfork (03.12.2025)** konsensfähig auf dem Ethereum-Mainnet aktiv — selbe Adresse wie RIP-7212 auf Rollups. Adoptions-Referenz im Tool entsprechend zweigeteilt (Mainnet EIP-7951 vs. Rollup-RIP-7212).
-- Fachlich wichtiger Unterschied dokumentiert: EIP-7951 macht die high-S-Ablehnung (Malleability-Schutz) verbindlich; RIP-7212 ueberliess sie den Chains. Malleability-Interpretation im Kommentar entsprechend praezisiert.
-- Der Doku-Drift-Lock-in hat direkt bewiesen, dass er greift: neuer Check erhoehte die Summe auf 117 → README-Zahl wurde vom Lock-in als veraltet gemeldet und aktualisiert.
-- Demo-Regression: 117 Checks.
+- **SlotGuard-7702**: known-delegates registry (conservative, >= 3 independent sources per address): the MetaMask EIP-7702 delegator `0x63c0c19a282a1B52b07dD5a65b58948A07DAE32B` is marked by name as a badge on delegations — triage separation "known implementation" vs. "unknown delegate" (dormant sweeper candidate). Reset note via address(0) authorization.
+- **CI**: actions/checkout v4 → v7.0.1, actions/setup-node v4 → v7.1.0 (three major steps caught up, verified via the GitHub API against the latest releases).
+- **security.txt** (RFC 9116) under `public/.well-known/security.txt`: contact via the issues/advisory flow, Expires 30.06.2027, languages de/en. audit-dist enforces existence + a parseable, unexpired Expires.
+- Demo regression: 121 checks.
 
-## 2026-11-15 — Wave 10: Doku-Drift-Eliminierung
+## 2026-11-15 — Wave 11: EIP-7951/Fusaka mainnet context (PasskeyContinuity)
 
-- **Drift-Lock-in (neu, selbstreferenziell):** der letzte Demo-Check prueft, dass die README exakt die aktuelle Check-Zahl nennt (inkl. seiner selbst) — Doku kann kuenftig nicht mehr hinter der Regression herhinken.
-- README: 78-Check → 116-Check korrigiert.
-- llms.txt auf Wellen 4–9 Synchronisationsstand gebracht: x402-Matrix jetzt mit 12 Eintraegen/2.31.0-Stand (inkl. 2026-10 zod/DoS und 2026-11 afterSettle), EntryPoint v0.6–v0.9-Erkennung samt IgnoredInitCode, Safe-Singleton-Registry ab v1.5.0, BIP-322-Complete-Praefixe PoF, FIDO CXF/CXP-Reifestufen, EF-Clear-Signing-Registry (ERC-7730/8176/8213).
+- P256VERIFY (precompile 0x0100) has been consensus-active on Ethereum mainnet since the **Fusaka hard fork (03.12.2025)** — same address as RIP-7212 on rollups. The adoption reference in the tool split accordingly (mainnet EIP-7951 vs. rollup RIP-7212).
+- The technically important difference is documented: EIP-7951 makes the high-S rejection (malleability protection) mandatory; RIP-7212 left it to the chains. The malleability interpretation in the comment was clarified accordingly.
+- The docs drift lock-in proved directly that it fires: the new check raised the total to 117 → the README number was reported as stale by the lock-in and updated.
+- Demo regression: 117 checks.
 
-## 2026-11-15 — Wave 9: Dependency-Hygiene & Currency-Audit
+## 2026-11-15 — Wave 10: documentation drift elimination
 
-- **Fix (Session-Eigenbefund):** Wave-5-Commit 641b898 hatte die Referenz-Pakete `content-hash`/`multiformats` versehentlich als Produktions-Dependencies eingetragen (Scratch-Install-Seiteneffekt). Nichts importierte sie; beide entfernt, Lockfile neu. Hygiene-Lock-in in verify-demos: eben diese Pakete duerfen nie Projekt-Deps werden + Obergrenze 26 Deps.
-- **Currency-Audit (npm, 15.11.2026):** 17/19 Deps aktuell (darunter viem 2.57.20, age-encryption 0.3.1, @noble/@scure 2.4.x, bip322-js 4.0.1). Bewusst NICHT geschwenkte Majors, je mit Begruendung:
-  - `astro` 6.4.8 (7.4.12 draussen): Major-Sprung erfordert Migrationsreview (Integration-Vertraege React/Sitemap, Vite-8-Paarung) — kein Blindbump in einer Audit-Toolchain.
-  - `@astrojs/react` 6.0.6 und `vite` 7.3.8: folgen der Astro-6/7-Paarung.
-  - `typescript` 5.9.3 (7.0.2 draussen): TS7 ist der native Port (Go) mit geaendertem Build/Tooling-Verhalten — erst nach Astro-7-Aufzug bewerten.
-  - `@astrojs/sitemap` ^3.6.0 resolved bereits auf 3.7.5 (Caret-Range nutzt Patch/Minor automatisch).
+- **Drift lock-in (new, self-referential):** the last demo check verifies that the README names exactly the current check count (including itself) — documentation can no longer lag behind the regression.
+- README: 78-check → 116-check corrected.
+- llms.txt brought up to the wave 4–9 synchronization state: the x402 matrix now with 12 entries/2.31.0 status (incl. 2026-10 zod/DoS and 2026-11 afterSettle), EntryPoint v0.6–v0.9 detection incl. IgnoredInitCode, the Safe singleton registry from v1.5.0, BIP-322 Complete prefixes PoF, FIDO CXF/CXP maturity levels, the EF clear-signing registry (ERC-7730/8176/8213).
 
-## 2026-11-15 — Wave 8: Passkey-Portabilität (FIDO CXF) + ERC-7715-Umbenennung
+## 2026-11-15 — Wave 9: dependency hygiene & currency audit
 
-- **PasskeyContinuity**: Fuenfter Checklisten-Punkt `portability` — unterstuetzt der Credential-Manager einen Export? Kontext: FIDO CXF 1.0 (Credential Exchange Format) ist seit 14.08.2025 Proposed Standard (Errata 09.03.2026), das Transport-Protokoll CXP jedoch weiter Working Draft vom 03.10.2024 — halbe Portabilitaet: Export-Format genormt, Transport nicht. Beide Quellenlagen (FIDO-Spec-Directory, unabhaengige Analyse 07/2026) dokumentiert.
-- **X402PaywallGuard**: ERC-7715-Methodenumbenennung im Draft beruecksichtigt — `wallet_requestExecutionPermissions` (Draft-Stand 09/2026) neben historischem `wallet_grantPermissions` (MetaMask-Referenzimlementierung Delegation Toolkit) im UI benannt. Hinweis: die zurueckgegebene Permission ist massgeblich, nicht die Anfrage (Draft-Regel).
-- Demo-Regression: 113 Checks.
+- **Fix (session self-finding):** wave-5 commit 641b898 had accidentally recorded the reference packages `content-hash`/`multiformats` as production dependencies (scratch install side effect). Nothing imported them; both removed, lockfile regenerated. Hygiene lock-in in verify-demos: precisely these packages must never become project deps + a cap of 26 deps.
+- **Currency audit (npm, 15.11.2026):** 17/19 deps current (including viem 2.57.20, age-encryption 0.3.1, @noble/@scure 2.4.x, bip322-js 4.0.1). Majors deliberately NOT switched, each with a rationale:
+  - `astro` 6.4.8 (7.4.12 available): a major jump requires a migration review (React/sitemap integration contracts, Vite 8 pairing) — no blind bump in an audit toolchain.
+  - `@astrojs/react` 6.0.6 and `vite` 7.3.8: follow the Astro 6/7 pairing.
+  - `typescript` 5.9.3 (7.0.2 available): TS7 is the native port (Go) with changed build/tooling behavior — assess only after the Astro 7 lift.
+  - `@astrojs/sitemap` ^3.6.0 already resolves to 3.7.5 (the caret range picks up patch/minor automatically).
 
-## 2026-11-15 — Wave 7: ERC-7730/8176/8213-Kontext + ENSv2-Dokumentation
+## 2026-11-15 — Wave 8: passkey portability (FIDO CXF) + ERC-7715 rename
 
-- **STVA**: Clear-Signing-Hinweise auf aktuellen Stand — ERC-7730-Deskriptoren seit 12.05.2026 aus dem EF-gehosteten, frei spiegelbaren Registry (clearsigning.org) nach Uebergabe von Ledger an die Trillion-Dollar-Security-Initiative; ERC-8176-Attestierungen fuer Deskriptor-Audits genannt. Der vom Tool berechnete Calldata-Fingerprint wird explizit als ERC-8213-Digest-Fallback eingeordnet.
-- **BundleWatch**: ENSv2-Migrationskontext dokumentiert (Universal-Resolver ist DAO-eigener Proxy unter 0xeEeEEEeE…E144EeEe; Sepolia laeuft seit 08/2026 auf v2, Mainnet bei Aktivierung — Abfrage bleibt kompatibel). Resolver-Adresse gegen ENS-Docs verifiziert (unveraendert).
-- Demo-Regression: 108 Checks (inkl. String-Lock-ins fuer ERC-8176/8213/ENSv2-Hinweise).
+- **PasskeyContinuity**: fifth checklist item `portability` — does the credential manager support an export? Context: FIDO CXF 1.0 (Credential Exchange Format) has been a Proposed Standard since 14.08.2025 (errata 09.03.2026), while the transport protocol CXP remains a Working Draft dated 03.10.2024 — half portability: the export format is standardized, the transport is not. Both source bases (FIDO spec directory, independent analysis 07/2026) documented.
+- **X402PaywallGuard**: the ERC-7715 method rename in the draft is covered — `wallet_requestExecutionPermissions` (draft status 09/2026) named alongside the historical `wallet_grantPermissions` (MetaMask reference implementation Delegation Toolkit) in the UI. Note: the returned permission is authoritative, not the request (draft rule).
+- Demo regression: 113 checks.
 
-### Nachtrag: x402-Advisory-Matrix auf Stand 11/2026 (2.31.0)
+## 2026-11-15 — Wave 7: ERC-7730/8176/8213 context + ENSv2 documentation
 
-- **X402-CORE-2026-10** (high, < 2.29.0): zod-3.x-Transitivabhaengigkeit enthaelt GHSA-mrhx-c7xc-m3w5 (CVE-2023-54404) — es gibt kein gepatchtes zod 3.x; 2.29.0 geht auf zod >= 4.6.6 und deckelt zugleich accepts/discovery/SIWX-Listen auf 1024 Eintraege sowie Facilitator-Antworten auf 1 MiB (Speicher-DoS). Match auf core/fetch/axios/extensions.
-- **X402-CORE-2026-11** (high, < 2.30.0): AfterSettle-Hook-Isolation — ein werfender afterSettle-Hook liess settle() ablehnen, obwohl das Settlement onchain bereits final war (Zahlung vollzogen, Server meldet Fehler). Gate-Hooks bleiben fail-closed.
-- Lock-ins aktualisiert: core 2.22.5 -> 5 Advisories; extensions 2.28.0 -> CORE-2026-10 + PT-2026-118463; core 2.29.0 -> nur CORE-2026-11; core 2.31.0 (Aktuellstand) -> keine npm-Advisories. 110 Checks insgesamt.
+- **STVA**: clear-signing notes brought up to date — ERC-7730 descriptors since 12.05.2026 from the EF-hosted, freely mirrorable registry (clearsigning.org) after the handover from Ledger to the Trillion Dollar Security initiative; ERC-8176 attestations for descriptor audits named. The calldata fingerprint computed by the tool is explicitly classified as the ERC-8213 digest fallback.
+- **BundleWatch**: ENSv2 migration context documented (the universal resolver is a DAO-owned proxy at 0xeEeEEEeE…E144EeEe; Sepolia has been running v2 since 08/2026, mainnet upon activation — the query stays compatible). Resolver address verified against the ENS docs (unchanged).
+- Demo regression: 108 checks (incl. string lock-ins for the ERC-8176/8213/ENSv2 notes).
 
-## 2026-11-15 — Wave 6: BIP-322 „Complete“ (v1.0.0/v2.0.0) in DAC8-SelfProof
+### Addendum: x402 advisory matrix updated to 11/2026 (2.31.0)
 
-- **BIP-322 Finale beruecksichtigt**: Der BIP wurde am 15.04.2026 auf „Complete“ gehoben — mit Breaking Changes: menschenlesbare Praefixe `smp`/`ful`/`pof`, direkt dem Base64 vorangestellt (kein Trennzeichen), Backward-Compat-Klausel (ohne Praefix = simple). bip322-js 4.0.1 versteht die Praefixe nicht; Erkennung + Abstreifen jetzt in `lib/bip322.ts` (`classifyBip322Signature`).
-- **Proof-of-Funds (pof)**: finalisiertes PSBT wird offline inspektiert (`inspectPofPsbt`): Eingabezahl, PSBT_GLOBAL_GENERIC_SIGNED_MESSAGE (0x09) und Challenge-Uebereinstimmung — mit explizitem Hinweis, dass der Unspent-Status onchain zu pruefen ist.
-- Demo-Signer erzeugt jetzt `smp`-praefigierte Signaturen (Spec-konform); Verifier akzeptiert weiterhin Legacy ohne Praefix (Regression abgesichert).
-- Negativ-Befund notiert: Bitcoin Core v30-Standardness-Aenderungen (datacarriersize 83 → 100.000, mehrere OP_RETURN-Ausgaben) betreffen nur Relais-Policy, keine Konsensregeln — BitVaultStress benoetigt keine Aenderung.
-- Demo-Regression: 104 Checks.
+- **X402-CORE-2026-10** (high, < 2.29.0): the zod 3.x transitive dependency contains GHSA-mrhx-c7xc-m3w5 (CVE-2023-54404) — there is no patched zod 3.x; 2.29.0 moves to zod >= 4.6.6 and simultaneously caps accepts/discovery/SIWX lists at 1024 entries and facilitator responses at 1 MiB (memory DoS). Matches core/fetch/axios/extensions.
+- **X402-CORE-2026-11** (high, < 2.30.0): afterSettle hook isolation — a throwing afterSettle hook made settle() reject although the settlement was already final onchain (payment completed, server reports an error). Gate hooks remain fail-closed.
+- Lock-ins updated: core 2.22.5 -> 5 advisories; extensions 2.28.0 -> CORE-2026-10 + PT-2026-118463; core 2.29.0 -> only CORE-2026-11; core 2.31.0 (current status) -> no npm advisories. 110 checks in total.
 
-## 2026-11-15 — Wave 5: Safe v1.5.0-Registry + Contenthash-Referenzvektoren
+## 2026-11-15 — Wave 6: BIP-322 "Complete" (v1.0.0/v2.0.0) in DAC8-SelfProof
 
-- **STVA (Safe Upgrade Diff)**: Kanonische Safe-Singleton-Registry aus `safe-global/safe-deployments` eingebettet — v1.3.0 (canonical/eip155), v1.4.1, v1.5.0 inkl. SafeL2- und SafeMigration-Varianten (9 Adressen, upstream verifiziert). Ziel-Implementierungen von Upgrade-Transaktionen werden gegen die Registry geprueft: Treffer mit Version-Badge, Nicht-Treffer mit Supply-Chain-Warnung in den Annahmen. Bei erkanntem Singleton < v1.5.0 Hinweis auf die offizielle Upgrade-Empfehlung (Safe-Blog 22.09.2026: Module-Guard-Pflicht, Fehler-Rueckgabe, ERC-1271).
-- Demo-Flow zielt jetzt realistisch auf SafeL2 v1.5.0; Argument-Namen `implementation`/`masterCopy`/`singleton` werden neben `newImplementation` aufgeloest.
-- **Contenthash-Regression auf Spezifikationsvektoren gehärtet**: EIP-1577-Beispielvektor und CIDv0-Pfad werden exakt gegen multiformats- bzw. content-hash-Referenzausgaben geprueft (`bafybeibj6…r7d4`, `QmbFMke1…xQDi`). Deckt die Varint-Verwechslung der Bug-Klasse walletbeat#1330 ab.
-- age-encryption 0.3.1 gegen npm bestaetigt (aktuell, kein Handlungsbedarf).
-- Demo-Regression: 94 Checks.
+- **BIP-322 final covered**: the BIP was raised to "Complete" on 15.04.2026 — with breaking changes: human-readable prefixes `smp`/`ful`/`pof`, prepended directly to the base64 (no separator), plus a backward-compat clause (no prefix = simple). bip322-js 4.0.1 does not understand the prefixes; detection + stripping now in `lib/bip322.ts` (`classifyBip322Signature`).
+- **Proof of funds (pof)**: a finalized PSBT is inspected offline (`inspectPofPsbt`): input count, PSBT_GLOBAL_GENERIC_SIGNED_MESSAGE (0x09) and challenge match — with an explicit note that the unspent status must be checked onchain.
+- The demo signer now produces `smp`-prefixed signatures (spec-compliant); the verifier continues to accept legacy without a prefix (regression secured).
+- Negative finding noted: the Bitcoin Core v30 standardness changes (datacarriersize 83 → 100,000, multiple OP_RETURN outputs) only affect relay policy, not consensus rules — BitVaultStress needs no change.
+- Demo regression: 104 checks.
+
+## 2026-11-15 — Wave 5: Safe v1.5.0 registry + contenthash reference vectors
+
+- **STVA (Safe Upgrade Diff)**: the canonical Safe singleton registry from `safe-global/safe-deployments` embedded — v1.3.0 (canonical/eip155), v1.4.1, v1.5.0 incl. SafeL2 and SafeMigration variants (9 addresses, verified upstream). Target implementations of upgrade transactions are checked against the registry: hits get a version badge, misses get a supply-chain warning in the assumptions. For a recognized singleton < v1.5.0 a note points to the official upgrade recommendation (Safe blog 22.09.2026: module guard requirement, error return, ERC-1271).
+- The demo flow now realistically targets SafeL2 v1.5.0; the argument names `implementation`/`masterCopy`/`singleton` are resolved alongside `newImplementation`.
+- **Contenthash regression hardened against specification vectors**: the EIP-1577 example vector and the CIDv0 path are checked exactly against the multiformats and content-hash reference outputs (`bafybeibj6…r7d4`, `QmbFMke1…xQDi`). Covers the varint confusion of the walletbeat#1330 bug class.
+- age-encryption 0.3.1 confirmed against npm (current, no action needed).
+- Demo regression: 94 checks.
 
 ## 2026-11-15 — Wave 4: ERC-4337 v0.8/v0.9 (UserOp-Autopsy)
 
-- EntryPoint-Erkennung fuer alle vier kanonischen Singletons (v0.6 `0x5FF13…d2789`, v0.7 `0x0000…da032`, v0.8 `0x4337084D…Ff108`, v0.9 `0x43370900…D8d009`); Version-Badge pro Transaktion.
-- v0.9-`IgnoredInitCode`-Event wird gesammelt und am Befund hervorgehoben (Fehldiagnose-Quelle: initCode wird still ignoriert, wenn der Sender existiert).
-- Topic-Konstanten per keccak256-Signatur verifiziert und in der Demo-Regression festgenagelt (84 Checks insgesamt).
+- EntryPoint detection for all four canonical singletons (v0.6 `0x5FF13…d2789`, v0.7 `0x0000…da032`, v0.8 `0x4337084D…Ff108`, v0.9 `0x43370900…D8d009`); version badge per transaction.
+- The v0.9 `IgnoredInitCode` event is collected and highlighted on the finding (misdiagnosis source: initCode is silently ignored when the sender exists).
+- Topic constants verified per keccak256 signature and pinned in the demo regression (84 checks in total).
 
-## 2026-11-15 — Recherche-Update (Arena-Branch b2c454a8)
+## 2026-11-15 — Research update (Arena branch b2c454a8)
 
-**Inhalte (Recherche Okt/Nov 2026):**
-- x402-Advisory-Matrix auf 10 Einträge erweitert: V12-Disclosure (25 Findings, 3 kritische — Default-Spend-Limit, Solana-ApproveChecked-Bypass, SIWx-Login-Replay; je Fix-Linie 2.23.0), separater Payment-Bypass `@x402/core` < 2.27.0, PT-2026-118463 (SIWX-Server-Auth-Bypass, npm/pip/go bis 2.28.0/2.25.0/2.28.0).
-- StealthAudit: kanonische Announcer-Adresse korrigiert auf `0x55649E01B5Df198D18D95b5cc5051630cfD45564` (war falsch gepflegt), Registry-Referenz ergänzt, Referenzen-Accordion.
-- SlotGuard: chainId-0-Replay-Warnung im Panic-Paket, Sweeper-Kontext (CrimeEnjoyor-Familie) im Befundtext.
-- DAC8-SelfProof: Zeitkontext Meldejahr 2026 + Filing-Fenster 2027.
-- IntentLens: Filler-Referenzrahmen (Across, Eco, LI.FI, UniswapX, Symbiosis).
-- PasskeyContinuity: RIP-7212-Adoptionsliste + Kostenrahmen (~3.450 vs. 200–300k Gas).
+**Content (research Oct/Nov 2026):**
+- x402 advisory matrix extended to 10 entries: V12 disclosure (25 findings, 3 critical — default spend limit, Solana ApproveChecked bypass, SIWx login replay; fix line 2.23.0 each), separate payment bypass `@x402/core` < 2.27.0, PT-2026-118463 (SIWX server auth bypass, npm/pip/go up to 2.28.0/2.25.0/2.28.0).
+- StealthAudit: canonical announcer address corrected to `0x55649E01B5Df198D18D95b5cc5051630cfD45564` (was maintained incorrectly), registry reference added, references accordion.
+- SlotGuard: chainId-0 replay warning in the panic package, sweeper context (CrimeEnjoyor family) in the finding text.
+- DAC8-SelfProof: time context reporting year 2026 + filing window 2027.
+- IntentLens: filler reference frame (Across, Eco, LI.FI, UniswapX, Symbiosis).
+- PasskeyContinuity: RIP-7212 adoption list + cost frame (~3,450 vs. 200–300k gas).
 
-**Technik:**
-- `npm run verify` Gesamtpipeline; `npm run test:demos` 78 Checks (neu: x402-Schwellen-Lock-in, py/go-Lockfile-Parser, SlotGuard-Offline-Dump-Varianten).
-- Astro Hover-Prefetch auf Tool-Karten (nur HTML).
+**Technique:**
+- `npm run verify` full pipeline; `npm run test:demos` 78 checks (new: x402 threshold lock-in, py/go lockfile parser, SlotGuard offline dump variants).
+- Astro hover prefetch on tool cards (HTML only).
 
-## 2026-11-15 — Initial-Release (PR #1, gemergt als 8d67f2b)
+## 2026-11-15 — Initial release (PR #1, merged as 8d67f2b)
 
-- 10 Werkzeuge, statische Astro-6-SSG-App, React-Islands, Tailwind 4.
-- Landing/Recht mit 0 KB JS, Route-Level Code-Splitting (viem/bitcoinjs/noble lazy).
-- Policy-Audit (`scripts/audit-dist.mjs`), Demo-Regression, CI-Workflow, A11y (Focus-Trap, aria-live, reduced-motion, Skip-Link), BreadcrumbList/SoftwareApplication/FAQPage/WebSite/Person JSON-LD, sitemap/robots/llms.txt.
+- 10 tools, static Astro 6 SSG app, React islands, Tailwind 4.
+- Landing/legal with 0 KB JS, route-level code splitting (viem/bitcoinjs/noble lazy).
+- Policy audit (`scripts/audit-dist.mjs`), demo regression, CI workflow, a11y (focus trap, aria-live, reduced motion, skip link), BreadcrumbList/SoftwareApplication/FAQPage/WebSite/Person JSON-LD, sitemap/robots/llms.txt.

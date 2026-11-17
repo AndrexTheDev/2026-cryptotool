@@ -4,24 +4,24 @@ import ToolGrid from '../components/ToolGrid.astro';
 
 const faq = [
   {
-    q: 'Was kostet die Nutzung der Suite?',
-    a: 'Die Suite verzichtet auf Preise, Abos und Accounts. Jede Analyse läuft lokal in deinem Browser. Wer die Arbeit unterstützen möchte, kann freiwillig per SOL, BTC oder EVM-Adresse spenden — ohne Einfluss auf Funktionen.',
+    q: 'What does the suite cost?',
+    a: 'The suite has no prices, subscriptions or accounts. Every analysis runs locally in your browser. If you want to support the work, you can voluntarily donate via SOL, BTC or an EVM address — with no influence on features.',
   },
   {
-    q: 'Wo werden meine Daten verarbeitet?',
-    a: 'Ausschließlich in deinem Browser: WebCrypto, Worker und IndexedDB. Es gibt keinen Server der Suite, der Daten empfängt. Optional kannst du öffentliche RPC-Endpunkte deiner Wahl für Chain-Daten nutzen — auch das machst du selbst konfigurierbar.',
+    q: 'Where is my data processed?',
+    a: 'Exclusively in your browser: WebCrypto, workers and IndexedDB. There is no suite server that receives data. Optionally you can use public RPC endpoints of your choice for chain data — you configure that yourself, too.',
   },
   {
-    q: 'Sind die Ergebnisse rechtsverbindlich?',
-    a: 'Nein. Die Suite liefert technische Vorab-Indikatoren und Befund-Artefakte. Sie ersetzt keine Rechts-, Steuer- oder Compliance-Beratung. Der DAC8-SelfProof ist ausdrücklich ein vorbereitendes Merkblatt, keine Meldung.',
+    q: 'Are the results legally binding?',
+    a: 'No. The suite provides technical preliminary indicators and finding artifacts. It does not replace legal, tax or compliance advice. DAC8-SelfProof is expressly a preparatory information sheet, not a filing.',
   },
   {
-    q: 'Kann ich die Werkzeuge offline nutzen?',
-    a: 'Ja. Jedes Werkzeug hat Offline-Pfade: manuelle Eingaben, Dumps, Dateien oder signierte Artefakte. Einmal geladen, benötigt die Seite für Kernfunktionen kein Server-Roundtrip.',
+    q: 'Can I use the tools offline?',
+    a: 'Yes. Every tool has offline paths: manual inputs, dumps, files or signed artifacts. Once loaded, the page needs no server roundtrip for its core functions.',
   },
   {
-    q: 'Warum spenden statt Abo?',
-    a: 'Weil Sicherheits-Werkzeuge am besten funktionieren, wenn sie ohne Zwang zugänglich sind. Spenden sind freiwillig, nicht rückerstattbar und schaffen keine Gegenleistung.',
+    q: 'Why donations instead of a subscription?',
+    a: 'Because security tools work best when they are accessible without coercion. Donations are voluntary, non-refundable and create no consideration.',
   },
 ];
 
@@ -37,7 +37,7 @@ const siteLd = [
     '@type': 'WebSite',
     name: 'AndrexTheDev — Web3 Security & Forensics Suite',
     url: SITE_URL,
-    inLanguage: ['de', 'en'],
+    inLanguage: ['en'],
     author: { '@type': 'Person', name: 'AndrexTheDev', email: 'hippie.highho@gmail.com' },
   },
   {
@@ -55,54 +55,54 @@ const siteLd = [
     applicationCategory: 'SecurityApplication',
     operatingSystem: 'Web Browser',
     url: SITE_URL,
-    description: 'Zehn lokale Web3-, Bitcoin- und Compliance-Werkzeuge — vollstaendig clientseitig, ohne Signup.',
+    description: 'Ten local Web3, Bitcoin and compliance tools — fully client-side, no signup.',
     author: { '@type': 'Person', name: 'AndrexTheDev', email: 'hippie.highho@gmail.com' },
     isAccessibleForFree: true,
-    usageInfo: 'Keine Konten, keine Preise; freiwillige On-Chain-Unterstuetzung.',
+    usageInfo: 'No accounts, no prices; voluntary on-chain support.',
   },
 ];
 
 const comparisons = [
-  { davor: 'Delegations kontrollieren unbekannte, unbegrenzte Ziele', danach: '7702-SlotGuard listet Delegate, Scope und Risiko in Minuten' },
-  { davor: 'Proxy-Upgrades werden blind signiert', danach: 'STVA-UpgradeDiff zeigt Storage-Kollisionen und Initializer-Fallen vorher' },
-  { davor: 'x402-Middleware veraltet, Replay-Gate unbemerkt', danach: 'x402-PaywallGuard mahnt betroffene Versionen und SIWx-Fehlkonfiguration' },
-  { davor: 'Intent-Spreads unklar, Fristen übersehen', danach: 'IntentLens-7683 berechnet Fill-Fenster und Spread deterministisch' },
-  { davor: 'Live-dApp unterscheidet sich heimlich vom Release', danach: 'BundleWatch-ENS gleicht Skript-Hashes mit dem ENS-Release ab' },
+  { before: 'Delegations control unknown, unlimited targets', after: '7702-SlotGuard lists delegate, scope and risk in minutes' },
+  { before: 'Proxy upgrades are signed blindly', after: 'STVA-UpgradeDiff shows storage collisions and initializer traps beforehand' },
+  { before: 'x402 middleware outdated, replay gate unnoticed', after: 'x402-PaywallGuard flags affected versions and SIWx misconfiguration' },
+  { before: 'Intent spreads unclear, deadlines missed', after: 'IntentLens-7683 computes fill windows and spread deterministically' },
+  { before: 'Live dApp silently differs from the release', after: 'BundleWatch-ENS reconciles script hashes with the ENS release' },
 ];
 
 const pillars = [
   {
-    title: '100 % lokal & clientseitig',
-    text: 'Berechnungen mit WebCrypto und Workern im Browser. Es gibt keinen Daten-Upload an einen Betreiber-Server — dein Browser ist die Laufzeit.',
+    title: '100 % local & client-side',
+    text: 'Computation with WebCrypto and workers in the browser. There is no data upload to an operator server — your browser is the runtime.',
     icon: 'M12 3l8 4v5c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7l8-4z',
   },
   {
-    title: 'Kein Signup, kein Tracking',
-    text: 'Keine Konten, keine Analytics, keine Cookies. Die Seite lädt Werkzeug-Code nur bei Bedarf nach — die Startseite enthält keinen einzigen Krypto-Import.',
+    title: 'No signup, no tracking',
+    text: 'No accounts, no analytics, no cookies. The page lazy-loads tool code only on demand — the homepage contains not a single crypto import.',
     icon: 'M9 12l2 2 4-5M12 3a9 9 0 100 18 9 9 0 000-18z',
   },
   {
-    title: 'Deterministische Mathematik',
-    text: 'Alle Risiko-Scores und Schwellenwerte sind fix im Code dokumentiert, reproduzierbar und exportierbar. Keine black-box Scoring-Dienste.',
+    title: 'Deterministic math',
+    text: 'All risk scores and thresholds are documented fixed in the code, reproducible and exportable. No black-box scoring services.',
     icon: 'M4 4h16v4H4zM4 10h10v4H4zM4 16h16v4H4z',
   },
   {
-    title: 'Open Source & prüfbar',
-    text: 'Jede Seite linkt auf den Quelltext des Moduls. Rizinfrische Builds sind reproduzierbar, die Hash-Standards (EIP-191, BIP-322, EIP-1577) öffentlich.',
+    title: 'Open source & auditable',
+    text: 'Every page links to the module source code. Fresh builds are reproducible, the hash standards (EIP-191, BIP-322, EIP-1577) are public.',
     icon: 'M8 7l-5 5 5 5M16 7l5 5-5 5M13 4l-3 16',
   },
 ];
 
 const steps = [
-  { n: '01', title: 'Modul öffnen', text: 'Eine Kachel wählen — Werkzeug-JavaScript lädt erst jetzt, isoliert vom Rest der Seite.' },
-  { n: '02', title: 'Eingabe wählen', text: 'Adresse, JSON, calldata, Log-Datei oder Demo-Szenario. Offline-Modus überall verfügbar.' },
-  { n: '03', title: 'Prüfung starten', text: 'Ein Klick startet die Analyse; Ergebnis erscheint als Ampel, KPIs, Details und Export.' },
+  { n: '01', title: 'Open a module', text: 'Pick a tile — the tool JavaScript loads only now, isolated from the rest of the page.' },
+  { n: '02', title: 'Choose an input', text: 'Address, JSON, calldata, log file or demo scenario. Offline mode available everywhere.' },
+  { n: '03', title: 'Start the check', text: 'One click starts the analysis; the result appears as a traffic light, KPIs, details and export.' },
 ];
 ---
 
 <BaseLayout shell="static"
-  title="Web3 Security Toolkit 2026 — 10 lokale Prüfwerkzeuge"
-  description="Zehn lokale Web3-, Bitcoin- und Compliance-Werkzeuge: EIP-7702, DAC8, BIP-322, Passkeys, x402, Intents, Privacy — im Browser, ohne Signup."
+  title="Web3 Security Toolkit 2026 — 10 local audit tools"
+  description="Ten local Web3, Bitcoin and compliance tools: EIP-7702, DAC8, BIP-322, passkeys, x402, intents, privacy — in the browser, no signup."
   path="/"
   jsonLd={[faqLd, ...siteLd]}
 >
@@ -111,40 +111,39 @@ const steps = [
     <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(16,185,129,0.14),transparent)] pointer-events-none" />
     <div class="container-x relative py-16 sm:py-24 text-center">
       <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-prime-hi bg-prime-dim border border-mint/30 rounded-full px-4 py-1.5">
-        10 Module · 100 % lokal · ohne Signup
+        10 modules · 100 % local · no signup
       </span>
       <h1 class="mt-6 text-4xl sm:text-6xl font-extrabold leading-[1.05] tracking-tight max-w-4xl mx-auto">
-        Web3-Sicherheit prüfen, <span class="text-transparent bg-clip-text bg-gradient-to-r from-prime to-prime-hi">bevor du signierst</span>.
+        Verify Web3 security, <span class="text-transparent bg-clip-text bg-gradient-to-r from-prime to-prime-hi">before you sign</span>.
       </h1>
       <p class="mt-5 text-base sm:text-lg text-dim max-w-2xl mx-auto">
-        EIP-7702-Delegations, Proxy-Upgrades, DAC8-Befunde, BIP-322-Nachweise, x402-Middleware, Intents, Privacy und mehr — als lokal laufende Werkzeuge, die keine Daten an Server senden.
+        EIP-7702 delegations, proxy upgrades, DAC8 findings, BIP-322 proofs, x402 middleware, intents, privacy and more — as locally running tools that send no data to servers.
       </p>
       <div class="mt-8 flex flex-wrap justify-center gap-3">
-        <a href="#tools" class="btn btn-primary px-6 py-3 text-base" data-i18n-de="Werkzeuge entdecken" data-i18n-en="Explore tools">Werkzeuge entdecken</a>
-        <a href="#support" class="btn btn-ghost px-6 py-3 text-base" data-i18n-de="♥ Projekt unterstützen" data-i18n-en="♥ Support the project">♥ Projekt unterstützen</a>
+        <a href="#tools" class="btn btn-primary px-6 py-3 text-base">Explore tools</a>
+        <a href="#support" class="btn btn-ghost px-6 py-3 text-base">♥ Support the project</a>
       </div>
       <div class="mt-10 inline-flex items-center gap-3 text-sm text-dim bg-surface border border-line rounded-full px-5 py-2.5">
         <span class="w-2 h-2 rounded-full bg-prime animate-pulse" />
-        Letztes Modul-Update: <time datetime="2026-11-15" class="text-ink font-medium">15. November 2026</time>
-        <span class="hidden sm:inline">· deutsch & englisch</span>
+        Last module update: <time datetime="2026-11-15" class="text-ink font-medium">15 November 2026</time>
       </div>
     </div>
   </section>
 
-  <!-- Bedrohungslage -->
+  <!-- Threat landscape -->
   <section class="border-y border-line bg-surface/50">
     <div class="container-x py-14">
       <div class="max-w-2xl">
-        <h2 class="text-2xl sm:text-3xl font-bold" data-i18n-de="Die Bedrohungslage 2026" data-i18n-en="The 2026 threat landscape">Die Bedrohungslage 2026</h2>
+        <h2 class="text-2xl sm:text-3xl font-bold">The 2026 threat landscape</h2>
         <p class="text-dim mt-3 text-sm sm:text-base">
-          Drei Entwicklungen machen Ad-hoc-Checks untauglich: <strong class="text-ink">EIP-7702-Delegations</strong> geben Smart Contracts Schlüsselgewalt über EOAs, <strong class="text-ink">x402-Zahlungs-Middleware</strong> verbreitet sich schneller als Audits, und <strong class="text-ink">DAC8/CARF-Meldepflichten</strong> verlangen dokumentierte Selbst-Auskünfte. Diese Suite prüft technisch, deterministisch und lokal — ohne dass irgendwo ein Account entsteht.
+          Three developments make ad-hoc checks inadequate: <strong class="text-ink">EIP-7702 delegations</strong> give smart contracts key power over EOAs, <strong class="text-ink">x402 payment middleware</strong> spreads faster than audits, and <strong class="text-ink">DAC8/CARF reporting duties</strong> demand documented self-disclosures. This suite checks technically, deterministically and locally — without any account being created anywhere.
         </p>
       </div>
       <div class="grid sm:grid-cols-3 gap-4 mt-8">
         {[
-          { k: '7702', t: 'Delegation-Hijacks', d: 'Ungeprüfte Delegate-Adressen können komplette Wallets übernehmen. SlotGuard zeigt jedes Delegee und seinen Scope.' },
-          { k: 'x402', t: 'Paywall-Middleware-Fallen', d: 'Veraltete x402-Versionen ohne Replay-Schutz oder Signatur-Bindung sind ein Einfallstor. PaywallGuard erkennt sie.' },
-          { k: 'ENS', t: 'Bundle-Substitution', d: 'Kommt es zum ENS-Umschwenk, lädt die dApp plötzlich fremde Skripte. BundleWatch vergleicht Hashes mit dem Referenz-Release.' },
+          { k: '7702', t: 'Delegation hijacks', d: 'Unchecked delegate addresses can take over entire wallets. SlotGuard shows every delegate and its scope.' },
+          { k: 'x402', t: 'Paywall middleware traps', d: 'Outdated x402 versions without replay protection or signature binding are an entry point. PaywallGuard detects them.' },
+          { k: 'ENS', t: 'Bundle substitution', d: 'If the ENS record switches, the dApp suddenly loads foreign scripts. BundleWatch compares hashes with the reference release.' },
         ].map((c) => (
           <div class="card p-5">
             <span class="mono text-xs text-prime-hi font-bold">{c.k}</span>
@@ -156,30 +155,30 @@ const steps = [
     </div>
   </section>
 
-  <!-- Tool-Bento -->
+  <!-- Tool bento -->
   <section id="tools" class="container-x py-16">
     <div class="flex items-end justify-between mb-2">
       <div>
-        <h2 class="text-2xl sm:text-3xl font-bold" data-i18n-de="Zehn Werkzeuge, ein Klick entfernt" data-i18n-en="Ten tools, one click away">Zehn Werkzeuge, ein Klick entfernt</h2>
-        <p class="text-dim text-sm mt-1">Filter: Kategorie wählen — Werkzeug-Code lädt erst nach dem Öffnen.</p>
+        <h2 class="text-2xl sm:text-3xl font-bold">Ten tools, one click away</h2>
+        <p class="text-dim text-sm mt-1">Filter: pick a category — tool code loads only after opening.</p>
       </div>
       <a href="/llms.txt" class="hidden md:inline btn btn-ghost btn-sm mono text-xs">llms.txt</a>
     </div>
     <ToolGrid />
   </section>
 
-  <!-- Vorher/Nachher -->
+  <!-- Before/After -->
   <section class="border-y border-line bg-surface/50">
     <div class="container-x py-14">
-      <h2 class="text-2xl sm:text-3xl font-bold" data-i18n-de="Vorher / Nachher" data-i18n-en="Before / After">Vorher / Nachher</h2>
+      <h2 class="text-2xl sm:text-3xl font-bold">Before / After</h2>
       <div class="mt-6 overflow-x-auto">
         <table class="table-x">
-          <thead><tr><th class="w-1/2">Ohne Prüfung</th><th>Mit Web3 Security Toolkit</th></tr></thead>
+          <thead><tr><th class="w-1/2">Without checking</th><th>With the Web3 Security Toolkit</th></tr></thead>
           <tbody>
             {comparisons.map((c) => (
               <tr>
-                <td class="text-sm text-dim">{c.davor}</td>
-                <td class="text-sm"><span class="badge badge-green mr-2">nachher</span>{c.danach}</td>
+                <td class="text-sm text-dim">{c.before}</td>
+                <td class="text-sm"><span class="badge badge-green mr-2">after</span>{c.after}</td>
               </tr>
             ))}
           </tbody>
@@ -188,9 +187,9 @@ const steps = [
     </div>
   </section>
 
-  <!-- Ablauf -->
+  <!-- Flow -->
   <section class="container-x py-14">
-    <h2 class="text-2xl sm:text-3xl font-bold" data-i18n-de="In drei Schritten zum Befund" data-i18n-en="Three steps to a finding">In drei Schritten zum Befund</h2>
+    <h2 class="text-2xl sm:text-3xl font-bold">Three steps to a finding</h2>
     <div class="grid sm:grid-cols-3 gap-4 mt-6">
       {steps.map((s) => (
         <div class="card p-5">
@@ -202,10 +201,10 @@ const steps = [
     </div>
   </section>
 
-  <!-- Vertrauenssäulen -->
+  <!-- Trust pillars -->
   <section class="border-y border-line bg-surface/50">
     <div class="container-x py-14">
-      <h2 class="text-2xl sm:text-3xl font-bold" data-i18n-de="Vertrauen durch Architektur" data-i18n-en="Trust through architecture">Vertrauen durch Architektur</h2>
+      <h2 class="text-2xl sm:text-3xl font-bold">Trust through architecture</h2>
       <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
         {pillars.map((p) => (
           <div class="card p-5">
@@ -220,7 +219,7 @@ const steps = [
 
   <!-- FAQ -->
   <section class="container-x py-14 max-w-3xl">
-    <h2 class="text-2xl sm:text-3xl font-bold" data-i18n-de="Häufige Fragen" data-i18n-en="Frequently asked questions">Häufige Fragen</h2>
+    <h2 class="text-2xl sm:text-3xl font-bold">Frequently asked questions</h2>
     <div class="mt-6 space-y-3">
       {faq.map((f) => (
         <details class="acc">
@@ -231,16 +230,16 @@ const steps = [
     </div>
   </section>
 
-  <!-- Support / Spenden -->
+  <!-- Support / donations -->
   <section id="support" class="border-t border-line bg-surface/50">
     <div class="container-x py-16 text-center">
-      <h2 class="text-2xl sm:text-3xl font-bold" data-i18n-de="Unterstütze unabhängige Web3-Sicherheit" data-i18n-en="Support independent Web3 security">Unterstütze unabhängige Web3-Sicherheit</h2>
+      <h2 class="text-2xl sm:text-3xl font-bold">Support independent Web3 security</h2>
       <p class="text-dim max-w-xl mx-auto mt-3 text-sm sm:text-base">
-        Spenden sind <strong class="text-ink">freiwillig</strong> und jederzeit erkennbar: drei Adressen, QR-Codes lokal generiert, keine Gegenleistung.
+        Donations are <strong class="text-ink">voluntary</strong> and transparent at all times: three addresses, QR codes generated locally, no consideration.
       </p>
       <div class="flex flex-wrap justify-center gap-3 mt-7">
-        <a href="/donate" class="btn btn-primary px-6 py-3" data-i18n-de="Zu den Spenden-Adressen" data-i18n-en="View donation addresses">Zu den Spenden-Adressen</a>
-        <a href="/disclaimer" class="btn btn-ghost px-6 py-3" data-i18n-de="Disclaimer lesen" data-i18n-en="Read the disclaimer">Disclaimer lesen</a>
+        <a href="/donate" class="btn btn-primary px-6 py-3">View donation addresses</a>
+        <a href="/disclaimer" class="btn btn-ghost px-6 py-3">Read the disclaimer</a>
       </div>
     </div>
   </section>

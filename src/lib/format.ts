@@ -1,4 +1,4 @@
-// Formatierungs- und Hex-Helfer.
+// Formatting and hex helpers.
 
 export function shortHex(v: string, head = 8, tail = 6): string {
   if (!v) return '';
@@ -9,7 +9,7 @@ export function shortHex(v: string, head = 8, tail = 6): string {
 
 export function hexToBytes(hex: string): Uint8Array {
   const clean = hex.startsWith('0x') ? hex.slice(2) : hex;
-  if (clean.length % 2 !== 0) throw new Error('Hex hat ungerade Laenge');
+  if (clean.length % 2 !== 0) throw new Error('Hex has odd length');
   const out = new Uint8Array(clean.length / 2);
   for (let i = 0; i < out.length; i++) out[i] = parseInt(clean.slice(i * 2, i * 2 + 2), 16);
   return out;
@@ -45,15 +45,15 @@ export function formatGwei(wei: bigint): string {
 }
 
 export function pct(value: number, digits = 2): string {
-  return value.toLocaleString('de-DE', { minimumFractionDigits: digits, maximumFractionDigits: digits }) + ' %';
+  return value.toLocaleString('en-GB', { minimumFractionDigits: digits, maximumFractionDigits: digits }) + ' %';
 }
 
 export function num(n: number | bigint, digits = 0): string {
-  return Number(n).toLocaleString('de-DE', { maximumFractionDigits: digits });
+  return Number(n).toLocaleString('en-GB', { maximumFractionDigits: digits });
 }
 
 export function satsFmt(sats: number): string {
-  return sats.toLocaleString('de-DE') + ' sats';
+  return sats.toLocaleString('en-GB') + ' sats';
 }
 
 export function isHexAddress(v: string): boolean {
@@ -75,5 +75,5 @@ export function isBitcoinTxid(v: string): boolean {
 
 export function timeAgo(ts: number): string {
   const d = new Date(ts * 1000);
-  return d.toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' });
+  return d.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
 }

@@ -1,11 +1,11 @@
-// Minimaler EIP-1577-Contenthash-Decoder.
+// Minimal EIP-1577 contenthash decoder.
 //
-// Dokumentierter Bibliotheks-Ersatz (Phase-1-Recherche):
-// Das Paket "content-hash" (letztes Release 2.5.x) zieht die veralteten
-// cids/multibase/multihashes-Stapel mit harter Node-Buffer-Abhaengigkeit in
-// den Browser-Bundle. Fuer den tatsaechlich benoetigten Umfang (ipfs/ipns mit
-// sha2-256-Multihash, CIDv0/v1) genuegt dieser schlanke Decoder auf Basis von
-// @scure/base - ohne Buffer-Polyfills und < 2 KB Bundle.
+// Documented library replacement (phase-1 research):
+// The "content-hash" package (latest release 2.5.x) pulls the outdated
+// cids/multibase/multihashes stack with a hard Node Buffer dependency into
+// the browser bundle. For the actually required scope (ipfs/ipns with
+// sha2-256 multihash, CIDv0/v1) this slim decoder based on
+// @scure/base suffices — no Buffer polyfills and < 2 KB bundle.
 import { base58, hex } from '@scure/base';
 
 export type DecodedContenthash =
@@ -30,7 +30,7 @@ function readVarint(bytes: Uint8Array, offset: number): { value: number; next: n
 
 /**
  * Dekodiert den ABI-Hex eines ENS-contenthash-Feldes.
- * Akzeptiert rohen contenthash-Hex (0xe30101...) oder umhuelltes bytes-ABI.
+ * Accepts raw contenthash hex (0xe30101...) or a wrapped bytes ABI.
  */
 export function decodeContenthash(input: string): DecodedContenthash {
   let bytes: Uint8Array;
@@ -48,13 +48,13 @@ export function decodeContenthash(input: string): DecodedContenthash {
   }
 
   const codec = readVarint(bytes, 0);
-  // 0xe3 = ipfs-ns, 0xe5 = ipns-ns, 0xf2 = kad? (nicht benoetigt)
+  // 0xe3 = ipfs-ns, 0xe5 = ipns-ns, 0xf2 = kad? (not needed)
   if (codec.value !== 0xe3 && codec.value !== 0xe5) return { kind: 'unknown', raw: input };
   let rest = bytes.slice(codec.next);
 
-  // CIDv0 ist direkt ein Multihash: 0x12 0x20 <32 Byte sha2-256>
+  // CIDv0 is directly a multihash: 0x12 0x20 <32 bytes sha2-256>
   if (rest[0] === 0x12 && rest[1] === 0x20 && rest.length >= 34) {
-    const cid = base58.encode(rest.slice(0, 34)); // CIDv0 ist plain base58 (Qm...)
+    const cid = base58.encode(rest.slice(0, 34)); // CIDv0 is plain base58 (Qm...)
     return { kind: codec.value === 0xe3 ? 'ipfs' : 'ipns', cid };
   }
 
@@ -63,7 +63,7 @@ export function decodeContenthash(input: string): DecodedContenthash {
     const mh = rest.slice(1);
     const mcodec = readVarint(mh, 0);
     const body = mh.slice(mcodec.next);
-    // als base32-cidv1-Text ausgeben (nur lesbar, kein Gateway-Fetch noetig)
+    // output as base32 cidv1 text (readable only, no gateway fetch needed)
     const cidBytes = rest.slice(0, 1 + mcodec.next + body.length);
     // base32 (cidv1 konvention: 'b' + rfc4648-base32-lower)
     const b32 = base32LowerEncode(cidBytes);
@@ -73,7 +73,7 @@ export function decodeContenthash(input: string): DecodedContenthash {
   return { kind: 'unknown', raw: input };
 }
 
-/** RFC-4648 Base32 lower-case ohne Padding (fuer CIDv1 'b...'). */
+/** RFC-4648 base32 lowercase without padding (for CIDv1 'b...'). */
 function base32LowerEncode(data: Uint8Array): string {
   const alphabet = 'abcdefghijklmnopqrstuvwxyz234567';
   let bits = 0;
@@ -91,7 +91,7 @@ function base32LowerEncode(data: Uint8Array): string {
   return out;
 }
 
-/** Baut eine lesbare Gateway-URL (nur clientseitiger Abruf, kein Proxy). */
+/** Builds a readable gateway URL (client-side fetch only, no proxy). */
 export function ipfsGatewayUrl(cid: string, subpath = ''): string {
   const path = cid.startsWith('b') ? cid : cid;
   return `https://ipfs.io/ipfs/${path}${subpath ? `/${subpath}` : ''}`;

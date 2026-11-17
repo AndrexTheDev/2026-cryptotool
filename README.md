@@ -1,57 +1,59 @@
 # AndrexTheDev — Web3 Security & Forensics Suite
 
-Zehn spezialisierte Web3-, Bitcoin- und Compliance-Werkzeuge, vollständig **lokal im Browser** ausgeführt: keine Konten, kein Server-Upload, keine Tracking-Pixel. Static-Site-Generierung mit **Astro 6 + React-Islands + TypeScript + Tailwind 4**.
+Ten specialized Web3, Bitcoin and compliance tools, executed **fully locally in the browser**: no accounts, no server upload, no tracking pixels. Static site generation with **Astro 7 + React islands + TypeScript + Tailwind 4**.
 
-## Werkzeuge
+The UI language is English. The legal pages (`/agb`, `/disclaimer`, `/datenschutz`) keep their German URL slugs by design; their content is provided in English as well.
 
-| # | Route | Zweck |
-|---|-------|-------|
-| 01 | `/tools/7702-slotguard` | EIP-7702-Delegationen, Storage-Kollisionen, Panic-Revoke-Paket |
-| 02 | `/tools/stva-upgradediff` | Drei-Ebenen-Prüfung von Safe-/Proxy-Upgrades |
-| 03 | `/tools/dac8-selfproof` | BIP-322 / EIP-191/712 / ERC-1271 Eigenübertrag-Nachweise |
-| 04 | `/tools/bitvault-stress` | Miniscript-Tresore, vByte, Dust-Klippe, Gebühren-Heatmap |
-| 05 | `/tools/passkey-continuity` | WebAuthn/P-256 Multi-Chain, RIP-7212-Erkennung |
-| 06 | `/tools/userop-autopsy` | Bundler-Marge & Paymaster-Spread aus EntryPoint-Logs |
-| 07 | `/tools/x402-paywallguard` | x402-Middleware-Schwachstellen, SIWX-Scanner, ERC-7715-Radar |
-| 08 | `/tools/intentlens-7683` | ERC-7683-Intents dekodieren, Spread, Refund-Calldata |
-| 09 | `/tools/stealthaudit-5564` | EIP-5564 Viewing-Key-Scan im WebWorker (kein Export von Keys) |
-| 10 | `/tools/bundlewatch-ens` | dApp-Frontend-Integrität gegen ENS-contenthash & Releases |
+## Tools
 
-## Entwicklung
+| # | Route | Purpose |
+|---|-------|---------|
+| 01 | `/tools/7702-slotguard` | EIP-7702 delegations, storage collisions, panic-revoke package |
+| 02 | `/tools/stva-upgradediff` | Three-layer verification of Safe/proxy upgrades |
+| 03 | `/tools/dac8-selfproof` | BIP-322 / EIP-191/712 / ERC-1271 self-transfer proofs |
+| 04 | `/tools/bitvault-stress` | Miniscript vaults, vByte, dust cliff, fee heatmap |
+| 05 | `/tools/passkey-continuity` | WebAuthn/P-256 multi-chain, RIP-7212 detection |
+| 06 | `/tools/userop-autopsy` | Bundler margin & paymaster spread from EntryPoint logs |
+| 07 | `/tools/x402-paywallguard` | x402 middleware vulnerabilities, SIWX scanner, ERC-7715 radar |
+| 08 | `/tools/intentlens-7683` | Decode ERC-7683 intents, spread, refund calldata |
+| 09 | `/tools/stealthaudit-5564` | EIP-5564 viewing-key scan in a WebWorker (no key export) |
+| 10 | `/tools/bundlewatch-ens` | dApp frontend integrity against ENS contenthash & releases |
+
+## Development
 
 ```bash
-npm ci             # Node >= 22 (Astro 6)
-npm run dev        # Dev-Server
-npm run build      # Produktions-Build nach dist/
-npm run preview    # dist/ lokal ausliefern
-npm run audit      # Policy-Audit ueber dist/ (nach Build)
-npm run test:demos # 132-Check Demo-Regression aller 10 Module
-npm run verify     # Gesamtpipeline: typecheck + build + audit-dist + audit:deps (npm audit, critical) + test:demos
+npm ci             # Node >= 22.23.4 (Astro 7)
+npm run dev        # dev server
+npm run build      # production build into dist/
+npm run preview    # serve dist/ locally
+npm run audit      # policy audit over dist/ (after build)
+npm run test:demos # 132-check demo regression of all 10 modules
+npm run verify     # full pipeline: typecheck + build + audit-dist + audit:deps (npm audit, critical) + test:demos
 ```
 
-## Architektur-Regeln (safety invariants)
+## Architecture rules (safety invariants)
 
-- **Keine Server-Logik**: `output: 'static'`, keine API-Routen, keine CSR-Only-Geheimnisse.
-- **Route-Level Code-Splitting**: schwere Krypto-Module (`viem`, `@noble/*`, `bitcoinjs-lib`, `bip322-js`) werden ausschließlich per dynamischem `import()` aus Tool-Islands gezogen — siehe `manualChunks` in `astro.config.mjs`.
-- **Landing + Recht = 0 KB JS**: `BaseLayout shell="static"` unterdrückt die `GlobalApp`-Hydration; nur Tool-Seiten nutzen `shell="interactive"`.
-- **Keine Seed-Phrasen/private Keys**: BitVault-Stress blockt Mnemonics aktiv; StealthAudit akzeptiert nur Viewing Keys und exportiert niemals Schlüsselmaterial.
-- **Offline-first**: Jedes Modul hat manuelle Eingabe- bzw. Datei-Fallbacks; RPC-Endpunkte sind nutzersetzbar (`RpcPanel`, persistiert lokal).
-- **Deterministik**: Risiko-Scores und Schwellenwerte sind fix im Modul-Code dokumentiert.
+- **No server logic**: `output: 'static'`, no API routes, no CSR-only secrets.
+- **Route-level code splitting**: heavy crypto modules (`viem`, `@noble/*`, `bitcoinjs-lib`, `bip322-js`) are loaded exclusively via dynamic `import()` from tool islands — see `manualChunks` in `astro.config.mjs`.
+- **Landing + legal = 0 KB JS**: `BaseLayout shell="static"` suppresses the `GlobalApp` hydration; only tool pages use `shell="interactive"`.
+- **No seed phrases/private keys**: BitVault-Stress actively blocks mnemonics; StealthAudit only accepts viewing keys and never exports key material.
+- **Offline-first**: every module has manual input or file fallbacks; RPC endpoints are user-replaceable (`RpcPanel`, persisted locally).
+- **Determinism**: risk scores and thresholds are documented fixed in the module code.
 
-## Phase-5-Audit
+## Phase-5 audit
 
-`scripts/audit-dist.mjs` prüft nach dem Build:
+`scripts/audit-dist.mjs` checks after the build:
 
-1. Negativ-Keywords in sichtbaren Texten (Preis-/Gratisbegriffe, konkrete Infrastruktur-Namen),
-2. zeichenexakte Spenden-Adressen (SOL/BTC/ETH + Checksummen-Kollisionen),
-3. Homepage-Bundle (keine Tool-/WASM-Chunks, JS-Budget ≤ 300 KB),
-4. Pflicht-Artefakte (sitemap, robots.txt, llms.txt, Rechtsseiten, CSP mit `wasm-unsafe-eval`).
+1. negative keywords in visible texts (price/"free" terms, concrete infrastructure names),
+2. character-exact donation addresses (SOL/BTC/ETH + checksum collisions),
+3. homepage bundle (no tool/WASM chunks, JS budget ≤ 300 KB),
+4. mandatory artifacts (sitemap, robots.txt, llms.txt, legal pages, CSP with `wasm-unsafe-eval`).
 
-## Rechtliches
+## Legal
 
-AGB, Disclaimer und Datenschutz-Transparenz: siehe `/agb`, `/disclaimer`, `/datenschutz`.
-Kontakt: **hippie.highho@gmail.com** · Spenden freiwillig (SOL/BTC/EVM, siehe `/donate`).
+Terms of use, disclaimer and privacy transparency: see `/agb`, `/disclaimer`, `/datenschutz`.
+Contact: **hippie.highho@gmail.com** · donations voluntary (SOL/BTC/EVM, see `/donate`).
 
-## Lizenz
+## License
 
 [MIT](LICENSE) © 2026 AndrexTheDev

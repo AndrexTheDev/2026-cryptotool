@@ -19,7 +19,7 @@ const SUGGESTED: Record<DonationChain, string[]> = {
 
 export default function DonationModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const trapRef = useFocusTrap<HTMLDivElement>(open);
-  // Auch als Standalone-Seite verwendbar: /donate (shell statisch ueber Wrapper)
+  // also usable as a standalone page: /donate (static shell via wrapper)
   const [chain, setChain] = useState<DonationChain>('eth');
   const [amount, setAmount] = useState('');
   const [raw, setRaw] = useState(false);
@@ -54,7 +54,7 @@ export default function DonationModal({ open, onClose }: { open: boolean; onClos
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     } catch {
-      /* Clipboard blockiert - Auswahl bleibt sichtbar */
+      /* clipboard blocked — the selection stays visible */
     }
   };
 
@@ -65,32 +65,32 @@ export default function DonationModal({ open, onClose }: { open: boolean; onClos
       const wallets = await discoverWallets();
       if (wallets.length === 0) {
         setSendState('error');
-        setSendMsg('Keine Wallet im Browser gefunden. Nutzen Sie QR-Code oder Kopieren stattdessen.');
+        setSendMsg('No wallet found in the browser. Use the QR code or copy instead.');
         return;
       }
       if (chain !== 'eth') {
         setSendState('error');
         setSendMsg(
-          `Direkt-Senden ist hier nur fuer Ethereum/EVM implementiert, weil kein ${entry.symbol}-Provider injiziert wurde. Scannen Sie bitte den QR-Code mit Ihrer ${entry.symbol}-Wallet.`,
+          `Direct sending is only implemented for Ethereum/EVM here, because no ${entry.symbol} provider was injected. Please scan the QR code with your ${entry.symbol} wallet.`,
         );
         return;
       }
       const w0 = wallets[0];
       if (!w0) {
         setSendState('error');
-        setSendMsg('Kein Wallet-Provider gefunden. Nutzen Sie QR-Code oder Kopieren stattdessen.');
+        setSendMsg('No wallet provider found. Use the QR code or copy instead.');
         return;
       }
       const provider: Eip1193Provider = w0.provider;
       if (!amount || Number(amount) <= 0) {
         setSendState('error');
-        setSendMsg('Bitte zuerst einen Betrag angeben.');
+        setSendMsg('Please enter an amount first.');
         return;
       }
       try {
         await switchChain(provider, 1);
       } catch {
-        /* Wallet bleibt auf aktueller Chain - Nutzer entscheidet dort */
+        /* wallet stays on the current chain — the user decides there */
       }
       const accounts = (await provider.request<string[]>({ method: 'eth_requestAccounts' })) as string[];
       const wei = BigInt(Math.round(Number(amount) * 1e6)) * 10n ** 12n;
@@ -99,10 +99,10 @@ export default function DonationModal({ open, onClose }: { open: boolean; onClos
         params: [{ from: accounts[0], to: entry.address, value: '0x' + wei.toString(16) }],
       });
       setSendState('done');
-      setSendMsg('Transaktion von Ihrer Wallet uebergeben. Vielen Dank fuer die Unterstuetzung!');
+      setSendMsg('Transaction handed to your wallet. Thank you for the support!');
     } catch (e) {
       setSendState('error');
-      setSendMsg((e as Error).message || 'Signatur abgebrochen.');
+      setSendMsg((e as Error).message || 'Signature aborted.');
     }
   };
 
@@ -112,7 +112,7 @@ export default function DonationModal({ open, onClose }: { open: boolean; onClos
       className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-6"
       role="dialog"
       aria-modal="true"
-      aria-label="AndrexTheDev unterstuetzen"
+      aria-label="Support AndrexTheDev"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -122,16 +122,16 @@ export default function DonationModal({ open, onClose }: { open: boolean; onClos
           <div>
             <h2 className="text-lg">Support AndrexTheDev</h2>
             <p className="text-sm mt-1">
-              Die Suite wird durch freiwillige On-Chain-Unterstützung der Community getragen. Unabhaengig, ohne Konto,
-              ohne Tracking.
+              The suite is funded by voluntary on-chain support from the community. Independent, no account,
+              no tracking.
             </p>
           </div>
-          <button className="btn btn-ghost btn-sm" onClick={onClose} aria-label="Schliessen">
+          <button className="btn btn-ghost btn-sm" onClick={onClose} aria-label="Close">
             ✕
           </button>
         </div>
 
-        <div className="flex gap-2 mt-4" role="tablist" aria-label="Netzwerk waehlen">
+        <div className="flex gap-2 mt-4" role="tablist" aria-label="Choose network">
           {DONATION_CHAINS.map((c) => (
             <button
               key={c.id}
@@ -155,13 +155,13 @@ export default function DonationModal({ open, onClose }: { open: boolean; onClos
           {chain === 'eth' && (
             <label className="flex items-center gap-2 text-xs text-dim cursor-pointer">
               <input type="checkbox" checked={raw} onChange={(e) => setRaw(e.target.checked)} />
-              Nur Adresse (Raw) im QR — zuverlaessiger fuer manche Mobile-Wallets
+              Raw address only in the QR — more reliable for some mobile wallets
             </label>
           )}
         </div>
 
         <div className="mt-4">
-          <span className="label">Empfaenger-Adresse ({entry.symbol})</span>
+          <span className="label">Recipient address ({entry.symbol})</span>
           <div className="flex flex-wrap gap-1.5 justify-center rounded-lg border border-line bg-obsidian p-3">
             {chunkAddress(entry.address).map((part, i) => (
               <span key={i} className="mono text-sm text-ink tracking-wide">
@@ -171,17 +171,17 @@ export default function DonationModal({ open, onClose }: { open: boolean; onClos
           </div>
           <div className="flex gap-2 mt-2">
             <button className="btn btn-ghost btn-sm flex-1" onClick={() => void copy(entry.address)}>
-              {copied ? '✓ Kopiert — bitte visuell gegenpruefen' : 'Adresse kopieren'}
+              {copied ? '✓ Copied — please verify visually' : 'Copy address'}
             </button>
           </div>
           <p className="text-xs text-dim mt-2">
-            Anti-Phishing: Prüfen Sie immer die ersten und letzten Zeichen — {entry.address.slice(0, 6)} …{' '}
+            Anti-phishing: always check the first and last characters — {entry.address.slice(0, 6)} …{' '}
             {entry.address.slice(-4)}.
           </p>
         </div>
 
         <div className="mt-4">
-          <span className="label">Betrag ({entry.symbol}, optional)</span>
+          <span className="label">Amount ({entry.symbol}, optional)</span>
           <div className="flex gap-2">
             {SUGGESTED[chain].map((s) => (
               <button
@@ -195,7 +195,7 @@ export default function DonationModal({ open, onClose }: { open: boolean; onClos
             <input
               className="input flex-1"
               inputMode="decimal"
-              placeholder="Eigener Betrag"
+              placeholder="Custom amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value.replace(',', '.'))}
             />
@@ -203,16 +203,16 @@ export default function DonationModal({ open, onClose }: { open: boolean; onClos
         </div>
 
         <button className="btn btn-primary w-full mt-4" onClick={() => void directSend()} disabled={sendState === 'sending'}>
-          {sendState === 'sending' ? 'Wallet-Signatur laeuft…' : 'Direkt aus eigener Wallet senden'}
+          {sendState === 'sending' ? 'Wallet signature in progress…' : 'Send directly from your own wallet'}
         </button>
         {sendMsg && (
           <p className={`text-sm mt-2 ${sendState === 'done' ? 'text-prime-hi' : 'text-gold-hi'}`}>{sendMsg}</p>
         )}
 
         <p className="text-xs text-dim mt-4 leading-relaxed border-t border-line pt-3">
-          Rechtliche Klarstellung: Unterstützungen sind 100&nbsp;% freiwillig, begründen keinen Anspruch auf Support,
-          SLA oder Gegenleistungen und schalten keine gesperrten Funktionen frei. On-Chain-Transaktionen sind technisch
-          endgültig und können nicht zurueckgebucht werden. Vollständige Details: siehe AGB und Disclaimer.
+          Legal clarification: donations are 100&nbsp;% voluntary, create no entitlement to support,
+          SLAs or consideration, and unlock no gated features. On-chain transactions are technically
+          final and cannot be charged back. Full details: see the terms (AGB) and disclaimer.
         </p>
       </div>
     </div>

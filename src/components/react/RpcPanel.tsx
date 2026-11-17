@@ -10,9 +10,9 @@ export function openRpcPanel() {
 }
 
 /**
- * Netzwerk-/RPC-Status-Panel: eigene Endpunkte hinterlegen (localStorage),
- * Verbindung testen, lokale Daten mit einem Klick loeschen.
- * Anbieter werden niemals namentlich angezeigt (Pflichtvorgabe).
+ * Network/RPC status panel: configure custom endpoints (localStorage),
+ * test the connection, wipe local data with one click.
+ * Providers are never shown by name (specification).
  */
 export default function RpcPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
   const trapRef = useFocusTrap<HTMLDivElement>(open);
@@ -27,7 +27,7 @@ export default function RpcPanel({ open, onClose }: { open: boolean; onClose: ()
 
   const save = () => {
     setUserRpc(chainId, value || null);
-    setStatus(value ? 'Eigener Endpunkt gespeichert (nur lokal in Ihrem Browser).' : 'Eigener Endpunkt entfernt.');
+    setStatus(value ? 'Custom endpoint saved (only locally in your browser).' : 'Custom endpoint removed.');
   };
 
   const test = async () => {
@@ -36,7 +36,7 @@ export default function RpcPanel({ open, onClose }: { open: boolean; onClose: ()
     const t0 = performance.now();
     try {
       await rpcCall(chainId, 'eth_blockNumber', [], { noCache: true });
-      setStatus(`Verbindung ok — Antwort in ${Math.round(performance.now() - t0)} ms.`);
+      setStatus(`Connection ok — response in ${Math.round(performance.now() - t0)} ms.`);
     } catch (e) {
       setStatus((e as Error).message);
     } finally {
@@ -46,7 +46,7 @@ export default function RpcPanel({ open, onClose }: { open: boolean; onClose: ()
 
   const wipe = async () => {
     await wipeLocalData();
-    setStatus('Alle lokalen Suite-Daten (Cache, Fortschritte, Endpunkte) wurden geloescht.');
+    setStatus('All local suite data (cache, progress, endpoints) has been deleted.');
   };
 
   return (
@@ -56,18 +56,18 @@ export default function RpcPanel({ open, onClose }: { open: boolean; onClose: ()
       onClick={(e) => e.target === e.currentTarget && onClose()}
       role="dialog"
       aria-modal="true"
-      aria-label="Netzwerk und Datenquellen"
+      aria-label="Network and data sources"
     >
       <div className="card w-full max-w-lg p-5">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-lg">Netzwerk & Datenquellen</h2>
+            <h2 className="text-lg">Network & data sources</h2>
             <p className="text-sm mt-1">
-              Die Suite laeuft vollständig in Ihrem Browser. Lesezugriffe erfolgen direkt an Blockchain-Endpunkte Ihrer
-              Wahl — ohne zentrale Datenspeicherung.
+              The suite runs entirely in your browser. Read calls go directly to the blockchain endpoints of your
+              choice — with no central data storage.
             </p>
           </div>
-          <button className="btn btn-ghost btn-sm" onClick={onClose} aria-label="Schliessen">
+          <button className="btn btn-ghost btn-sm" onClick={onClose} aria-label="Close">
             ✕
           </button>
         </div>
@@ -75,7 +75,7 @@ export default function RpcPanel({ open, onClose }: { open: boolean; onClose: ()
         <div className="mt-4 space-y-3">
           <div>
             <label className="label" htmlFor="rpc-chain">
-              Netzwerk
+              Network
             </label>
             <select
               id="rpc-chain"
@@ -95,35 +95,35 @@ export default function RpcPanel({ open, onClose }: { open: boolean; onClose: ()
           </div>
           <div>
             <label className="label" htmlFor="rpc-url">
-              Eigener RPC-Endpunkt (optional)
+              Custom RPC endpoint (optional)
             </label>
             <input
               id="rpc-url"
               className="input mono"
-              placeholder={current ?? 'https://… (Ihr eigener Endpunkt)'}
+              placeholder={current ?? 'https://… (your own endpoint)'}
               value={value}
               onChange={(e) => setValue(e.target.value)}
             />
             <p className="text-xs text-dim mt-1">
-              Alternativ per URL fuer alle Werkzeuge: <code>?ds-rpc-{chainId}=https://…</code>
+              Alternatively via URL for all tools: <code>?ds-rpc-{chainId}=https://…</code>
             </p>
           </div>
           <div className="flex gap-2">
             <button className="btn btn-primary btn-sm flex-1" onClick={save}>
-              Speichern
+              Save
             </button>
             <button className="btn btn-ghost btn-sm flex-1" onClick={() => void test()} disabled={testing}>
-              {testing ? 'Teste…' : 'Verbindung testen'}
+              {testing ? 'Testing…' : 'Test connection'}
             </button>
           </div>
           {status && <p className="text-sm text-gold-hi">{status}</p>}
           <div className="border-t border-line pt-3">
             <button className="btn btn-ghost btn-sm w-full" onClick={() => void wipe()}>
-              Alle lokalen Suite-Daten loeschen
+              Delete all local suite data
             </button>
             <p className="text-xs text-dim mt-2">
-              Loeschen Cache (IndexedDB), Scan-Fortschritte und hinterlegte Endpunkte (localStorage) — sofort und
-              vollstaendig auf diesem Geraet.
+              Deletes the cache (IndexedDB), scan progress and configured endpoints (localStorage) — immediately and
+              completely on this device.
             </p>
           </div>
         </div>

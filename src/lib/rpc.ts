@@ -1,10 +1,10 @@
-// Globaler RPC-Manager (Zero-Budget-Datenbeschaffung, Pflichtvorgabe 2.3).
-// Prioritaetskette pro Abruf:
-//   1) Nutzerdefinierter Endpunkt (URL-Query ?ds-rpc-<chainId>=... oder localStorage)
-//   2) Injizierter Wallet-Provider (window.ethereum, sofern Chain passt)
-//   3) Rotation CORS-faehiger oeffentlicher Endpunkte mit Backoff
-// Alle Lesezugriffe laufen direkt aus dem Browser; es existiert kein
-// betreibereigener Proxy, keine Datenbank, keine API-Schluessel.
+// Global RPC manager (zero-budget data sourcing).
+// Priority chain per request:
+//   1) user-defined endpoint (URL query ?ds-rpc-<chainId>=... or localStorage)
+//   2) injected wallet provider (window.ethereum, if the chain matches)
+//   3) rotation of CORS-capable public endpoints with backoff
+// All read access runs directly from the browser; there is no
+// operator-run proxy, no database, no API keys.
 import { chainById } from '../config/chains';
 import { idbGet, idbSet } from './idb';
 
@@ -23,7 +23,7 @@ function parseUrlOverrides() {
         if (Number.isFinite(id) && /^https?:\/\//i.test(value)) urlOverrides.set(id, value.trim());
       }
     });
-    // Hash-Variante (fuer Server ohne Query-Durchreiche)
+    // hash variant (for servers without query forwarding)
     if (window.location.hash.includes('?')) {
       const h = window.location.hash.slice(window.location.hash.indexOf('?'));
       new URLSearchParams(h).forEach((value, key) => {
@@ -64,13 +64,13 @@ export type RpcSource = 'user' | 'wallet' | 'public' | 'cache';
 export interface RpcResult<T = unknown> {
   data: T;
   source: RpcSource;
-  endpoint?: string; // intern; niemals namentlich in der UI zeigen
+  endpoint?: string; // internal; never show by name in the UI
 }
 
 // ---------------- In-Flight-Deduplizierung & TTL-Cache ----------------
 const inflight = new Map<string, Promise<unknown>>();
 
-// TTL in Sekunden pro Methode (immutable Daten: sehr grosszuegig)
+// TTL in seconds per method (immutable data: very generous)
 function ttlFor(method: string, params: unknown[]): number {
   switch (method) {
     case 'eth_getCode':
@@ -78,7 +78,7 @@ function ttlFor(method: string, params: unknown[]): number {
       return 3600;
     case 'eth_getTransactionReceipt':
     case 'eth_getTransactionByHash':
-      return 86400; // Receipts sind final
+      return 86400; // receipts are final
     case 'eth_getBlockByNumber':
     case 'eth_getBlockByHash':
       return params[0] === 'latest' || params[0] === 'pending' ? 8 : 3600;
@@ -132,7 +132,7 @@ async function postJson(url: string, method: string, params: unknown[], timeoutM
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = (await res.json()) as JsonRpcResponse;
-    if (json.error) throw new Error(json.error.message || `RPC-Fehler ${json.error.code}`);
+    if (json.error) throw new Error(json.error.message || `RPC error ${json.error.code}`);
     return json.result;
   } finally {
     clearTimeout(t);
@@ -159,8 +159,8 @@ async function injectedChainId(p: InjectEip1193): Promise<number | null> {
 }
 
 /**
- * Fuehrt einen JSON-RPC-Leseaufruf aus. Endpoint-Namen werden niemals in
- * UI-Texte oder Logs exportiert (nur interne Quelle als generische Kategorie).
+ * Executes a JSON-RPC read call. Endpoint names are never exported into
+ * UI texts or logs (internal source only as a generic category).
  */
 export async function rpcCall<T = unknown>(
   chainId: number,
@@ -187,7 +187,7 @@ export async function rpcCall<T = unknown>(
     if (userUrl) candidates.push({ url: userUrl, source: 'user' });
     for (const u of chain?.fallbackRpc ?? []) candidates.push({ url: u, source: 'public' });
 
-    // 2) Injizierter Wallet-Provider, sofern auf derselben Chain
+    // 2) injected wallet provider, if on the same chain
     if (opts.preferWallet !== false) {
       const p = injectedProvider();
       if (p) {
@@ -197,13 +197,13 @@ export async function rpcCall<T = unknown>(
             const v = (await p.request({ method, params })) as T;
             return { data: v, source: 'wallet' };
           } catch {
-            /* Wallet-Kanal nicht nutzbar — weiter mit HTTPS */
+            /* wallet channel not usable — continue with HTTPS */
           }
         }
       }
     }
 
-    // 1)/3) Direkte HTTPS-Endpunkte mit Rotation + exponentiellem Backoff
+    // 1)/3) direct HTTPS endpoints with rotation + exponential backoff
     let attempt = 0;
     for (const c of candidates) {
       try {
@@ -218,8 +218,8 @@ export async function rpcCall<T = unknown>(
       }
     }
     throw new RpcError(
-      `Alle verfuegbaren Endpunkte fuer Chain ${chainId} sind aktuell nicht erreichbar oder gedrosselt. ` +
-        'Hinterlegen Sie einen eigenen Endpunkt oder nutzen Sie den Offline-Modus (manuelle Daten-Eingabe).',
+      `All available endpoints for chain ${chainId} are currently unreachable or throttled. ` +
+        'Configure your own endpoint or use offline mode (manual data entry).',
       true,
     );
   })();
@@ -232,7 +232,7 @@ export async function rpcCall<T = unknown>(
   }
 }
 
-// Bequemlichkeits-Wrapper fuer gaengige Calls ---------------------------
+// convenience wrappers for common calls ---------------------------
 
 export async function getCode(chainId: number, address: string, block: 'latest' | string = 'latest') {
   return rpcCall<string>(chainId, 'eth_getCode', [address, block]);

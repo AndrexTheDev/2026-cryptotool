@@ -26,12 +26,12 @@ import {
   scanBytecodePatterns,
 } from '../../lib/evm-utils';
 
-// Kanonische, mehrfach unabhaengig verifizierte 7702-Delegate-Adressen.
-// Konservativ: nur Addressen mit mindestens drei unabhaengigen Quellen.
+// Canonical 7702 delegate addresses, verified by multiple independent sources.
+// Conservative: only addresses with at least three independent sources.
 export const KNOWN_DELEGATES: Record<string, { name: string; note: string }> = {
   '0x63c0c19a282a1b52b07dd5a65b58948a07dae32b': {
     name: 'MetaMask EIP-7702 Delegator',
-    note: 'MetaMask whitelistet ausschliesslich diesen Delegator; Rueckkehr zur EOA via 7702-Autorisierung auf address(0).',
+    note: 'MetaMask whitelists exclusively this delegator; return to EOA via a 7702 authorization to address(0).',
   },
 };
 const knownDelegate = (addr: string | null | undefined) => (addr ? KNOWN_DELEGATES[addr.toLowerCase()] : undefined);
@@ -72,7 +72,7 @@ interface PanicPack {
 }
 
 const DEMO_ADDRESS = '0x1111111111111111111111111111111111111777';
-const DEMO_BYTECODE = '0xef0100' + '63c0c19a282a1b52b07dd5a65b58948a07dae32b'; // MetaMask-Delegator → Demo zeigt Known-Delegates-Badge
+const DEMO_BYTECODE = '0xef0100' + '63c0c19a282a1b52b07dd5a65b58948a07dae32b'; // MetaMask delegator → demo shows the known-delegates badge
 const DEMO_DUMP = `0x0: 0x0000000000000000000000000000000000000000000000000000000000000001
 0x1: 0x000000000000000000000000c0ffee254729296a45a3885639ac7e10f9d54979
 0x2: 0x0000000000000000000000000000000000000000000000000000000000000042`;
@@ -90,12 +90,12 @@ function parseLayout(text: string): SlotLayoutItem[] {
   return out;
 }
 
-/** Baut die eigenstaendige, offline ausfuehrbare HTML-Notfalldatei. */
+/** Builds the self-contained, offline-runnable HTML emergency file. */
 function buildPanicHtml(pack: PanicPack, armor: string, passphraseHint: string): string {
   const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   return `<!doctype html>
-<html lang="de"><head><meta charset="utf-8">
-<title>Panic-Revoke — Notfallpaket (7702)</title>
+<html lang="en"><head><meta charset="utf-8">
+<title>Panic Revoke — emergency package (7702)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body{font-family:ui-sans-serif,system-ui,sans-serif;background:#07090d;color:#cbd5e1;max-width:46rem;margin:2rem auto;padding:0 1rem;line-height:1.65}
@@ -107,32 +107,32 @@ code{font-family:ui-monospace,Menlo,monospace}
 input,button{font:inherit;padding:.5rem .8rem;border-radius:.5rem;border:1px solid #334155;background:#0a0f16;color:#f8fafc}
 button{background:#10b981;color:#04150e;font-weight:700;border:none;cursor:pointer}
 </style></head><body>
-<h1>🛡 Panic-Revoke — EIP-7702-Notfallpaket</h1>
-<p class="warn"><strong>Wichtig:</strong> Jede reguläre Transaktion Ihres Kontos erhöht die Nonce und macht vorab signierte
-Notfallpakete uneinloesbar. Prüfen Sie vor Verwendung, ob die unten genannte Nonce noch die aktuelle Konto-Nonce ist —
-andernfalls erzeugen Sie das Paket im 7702-SlotGuard neu.</p>
-<h2>Konto &amp; Autorisierung (Klartext-Metadaten)</h2>
-<pre>Konto (EOA):        ${esc(pack.eoa)}
-Ziel-Delegation:     ${esc(ZERO_ADDR)} (vollstaendiger Widerruf)
-${pack.chainId === 0 ? 'Chain-Gueltigkeit:    alle Chains (chainId 0) — ACHTUNG: chainId-0-Autorisierungen lassen sich cross-chain replayen; nur bei bewusstem Multi-Chain-Widerruf verwenden, sonst Paket mit fester chainId neu erzeugen.' : 'Chain-Gueltigkeit:    chainId ' + pack.chainId}
-Autorisierungs-Nonce: ${pack.nonce}
-Autorisierungs-Digest: ${esc(pack.digest)}
-Erzeugt:             ${new Date().toISOString()}
-Signiert:            ${pack.signed ? 'ja (r/s/yParity im verschluesselten Teil)' : 'nein — Digest zum Nachsignieren enthalten'}</pre>
-<h2>Verschluesselter Kern (age, Passphrase)</h2>
-<p>Dieser Abschnitt ist mit Ihrer Passphrase verschluesselt und enthaelt die vollstaendige Autorisierung${
-    pack.signed ? ' inkl. Signatur' : ''
+<h1>🛡 Panic Revoke — EIP-7702 emergency package</h1>
+<p class="warn"><strong>Important:</strong> every regular transaction from your account increments the nonce and makes
+pre-signed emergency packages unredeemable. Before use, check whether the nonce below is still the current account nonce —
+otherwise regenerate the package in 7702 SlotGuard.</p>
+<h2>Account &amp; authorization (plain-text metadata)</h2>
+<pre>Account (EOA):      ${esc(pack.eoa)}
+Target delegation:   ${esc(ZERO_ADDR)} (full revocation)
+${pack.chainId === 0 ? 'Chain validity:      all chains (chainId 0) — WARNING: chainId-0 authorizations can be replayed cross-chain; use only for a deliberate multi-chain revocation, otherwise regenerate the package with a fixed chainId.' : 'Chain validity:      chainId ' + pack.chainId}
+Authorization nonce:  ${pack.nonce}
+Authorization digest: ${esc(pack.digest)}
+Created:             ${new Date().toISOString()}
+Signiert:            ${pack.signed ? 'yes (r/s/yParity in the encrypted part)' : 'no — digest included for later signing'}</pre>
+<h2>Encrypted core (age, passphrase)</h2>
+<p>This section is encrypted with your passphrase and contains the complete authorization${
+    pack.signed ? ' incl. signature' : ''
   }.</p>
 <pre>${esc(armor)}</pre>
-<h2>Verwendung im Ernstfall</h2>
+<h2>Use in an emergency</h2>
 <ol>
-<li>Datei offline oeffnen. Entschluesseln Sie den Abschnitt mit Ihrem Passphrase-Hinweis: <code>${esc(
-    passphraseHint || '(kein Hinweis hinterlegt)',
-  )}</code> — im 7702-SlotGuard (Bereich „Notfallpaket entschluesseln") oder mit einem beliebigen age-kompatiblen Werkzeug.</li>
-<li>Senden Sie eine Type-4-Transaktion (EIP-7702) mit der enthaltenen Autorisierung von Ihrem Konto (z.&nbsp;B. ueber ein Wallet oder ein Open-Source-CLI mit 7702-Unterstuetzung).</li>
-<li>Erfolgskontrolle: Der Account-Bytecode muss danach leer sein (<code>eth_getCode</code> = <code>0x</code>).</li>
+<li>Open the file offline. Decrypt the section using your passphrase hint: <code>${esc(
+    passphraseHint || '(no hint stored)',
+  )}</code> — in 7702 SlotGuard (section "Decrypt emergency package") or with any age-compatible tool.</li>
+<li>Send a type-4 transaction (EIP-7702) with the contained authorization from your account (e.g.&nbsp;via a wallet or an open-source CLI with 7702 support).</li>
+<li>Success check: the account bytecode must be empty afterwards (<code>eth_getCode</code> = <code>0x</code>).</li>
 </ol>
-<p class="small">Erzeugt lokal durch AndrexTheDev 7702-SlotGuard. Keine Server-Uebertragung. Kein Ersatz fuer Backups oder Rechtsberatung.</p>
+<p class="small">Generated locally by AndrexTheDev 7702 SlotGuard. No server transfer. No substitute for backups or legal advice.</p>
 </body></html>`;
 }
 
@@ -184,12 +184,12 @@ export default function SlotGuard7702() {
     setPanicInfo('');
     const addr = address.trim();
     if (!isHexAddress(addr)) {
-      setError('Bitte eine gueltige öffentliche Adresse angeben (0x…, 40 Hex-Zeichen). Es wird niemals ein privater Schluessel benoetigt.');
+      setError('Please provide a valid public address (0x…, 40 hex characters). A private key is never required.');
       return;
     }
     setRunning(true);
     const newFindings: ChainFinding[] = [];
-    const allNonZero = new Map<string, string>(); // slot -> value (erste gefundene)
+    const allNonZero = new Map<string, string>(); // slot -> value (first found)
     try {
       if (mode === 'offline') {
         const code = manualBytecode.trim() || '0x';
@@ -207,11 +207,11 @@ export default function SlotGuard7702() {
           nonZeroSlots: dump.filter((e) => BigInt(e.value) !== 0n).map((e) => ({ slot: e.slot, value: e.value })),
           scannedSlots: dump.length,
           source: 'offline',
-          note: 'Analyse ausschließlich aus manuell eingefuegten Rohdaten.',
+          note: 'Analysis based exclusively on manually pasted raw data.',
         });
       } else {
         if (chains.length === 0) {
-          setError('Bitte mindestens ein Netzwerk waehlen.');
+          setError('Please select at least one network.');
           setRunning(false);
           return;
         }
@@ -230,7 +230,7 @@ export default function SlotGuard7702() {
                   delegateHasCode = undefined;
                 }
               }
-              // Slot-Scan: 0..15 + EIP-1967 + optional ERC-7201-Namespace
+              // slot scan: 0..15 + EIP-1967 + optional ERC-7201 namespace
               const slots: { slot: string; label?: string }[] = [];
               for (let i = 0; i < 16; i++) slots.push({ slot: '0x' + i.toString(16).padStart(64, '0') });
               slots.push({ slot: EIP1967.IMPLEMENTATION, label: 'EIP-1967 Implementation' });
@@ -247,7 +247,7 @@ export default function SlotGuard7702() {
                     if (!allNonZero.has(s.slot)) allNonZero.set(s.slot, v.data);
                   }
                 } catch {
-                  /* einzelner Slot ueberspringen */
+                  /* skip individual slot */
                 }
               }
               newFindings.push({
@@ -267,7 +267,7 @@ export default function SlotGuard7702() {
         );
       }
 
-      // ---- Kollisionsanalyse (bestehender Storage x neues Layout) ----
+      // ---- collision analysis (existing storage x new layout) ----
       const layoutN = parseLayout(layoutNew);
       const layoutO = parseLayout(layoutOld);
       const roleOld = new Map(layoutO.map((l) => [l.slot, l.role]));
@@ -282,41 +282,41 @@ export default function SlotGuard7702() {
             value,
             oldRole: oRole,
             newRole: nRole,
-            reason: `Belegter Slot kollidiert mit neuer Rolle „${nRole}"${oRole ? ` (bisher: „${oRole}")` : ' (bisher unbelegt/dritt)'}.`,
+            reason: `Occupied slot collides with new role "${nRole}"${oRole ? ` (previously: "${oRole}")` : ' (previously unassigned/third-party)'}.`,
           });
         } else if (!nRole && !oRole) {
-          col.push({ slot, value, reason: 'Verwaister Wert ohne dokumentierte Rolle in den Layouts.' });
+          col.push({ slot, value, reason: 'Orphaned value without a documented role in the layouts.' });
         }
       }
       setCollisions(col);
 
-      // ---- Ampel-Gesamtbewertung ----
+      // ---- overall traffic-light assessment ----
       const anyError = newFindings.some((f) => f.status === 'error');
       const delegations = newFindings.filter((f) => f.status === 'delegation' || f.status === 'unknown-delegate');
       let level: StatusLevel = 'green';
-      let headline = 'Keine Delegation erkannt';
-      let detail = 'Auf allen geprueften Netzwerken besitzt das Konto Standard-EOA-Bytecode ohne 0xef0100-Delegationsmarker.';
+      let headline = 'No delegation detected';
+      let detail = 'On all checked networks the account has standard EOA bytecode without the 0xef0100 delegation marker.';
       if (newFindings.length === 0 || anyError) {
         level = 'amber';
-        headline = 'Teilweise unbekannt';
-        detail = 'Mindestens ein Netzwerk lieferte keine Antwort. Ergebnisse nur fuer erfolgreich abgefragte Netzwerke gueltig; Offline-Modus nutzbar.';
+        headline = 'Partially unknown';
+        detail = 'At least one network did not respond. Results are valid only for successfully queried networks; use offline mode if needed.';
       }
       if (delegations.length > 0) {
         if (newFindings.some((f) => f.status === 'unknown-delegate')) {
           level = 'amber';
-          headline = 'Delegation auf unbekannten Delegate';
+          headline = 'Delegation to an unknown delegate';
           detail =
-            'Der Delegate verweist auf eine Adresse ohne ausgerollten Code oder ohne verifizierbare Antwort. Vor jeder weiteren Signatur pruefen. Kontext (2026): Die Mehrheit boesartiger 7702-Delegationen entfiel forensischen Auswertungen zufolge auf eine einzige wiederkehrende Sweeper-Vertragsfamilie — ein unbekannter Delegate ist daher ein kritischer Kandidat fuer einen Dormant-Sweeper (kann Wochen inaktiv bleiben und bei Geldeingang zugreifen).';
+            'The delegate points to an address without deployed code or without a verifiable response. Check before any further signature. Context (2026): according to forensic analyses, the majority of malicious 7702 delegations trace back to a single recurring sweeper contract family — an unknown delegate is therefore a critical candidate for a dormant sweeper (can stay inactive for weeks and strike when funds arrive).';
         } else if (col.length > 0) {
           level = 'red';
-          headline = 'Kollidierende Storage-Slots / verwaiste Werte';
+          headline = 'Colliding storage slots / orphaned values';
           detail =
-            'Beim Wechsel des Delegate drohen Storage-Kollisionen: Belegte Slots ueberschneiden sich mit dem neuen Layout oder sind nicht zuordenbar. Panic-Revoke-Paket unten vorbereiten.';
+            'Switching the delegate risks storage collisions: occupied slots overlap with the new layout or cannot be attributed. Prepare the panic-revoke package below.';
         } else {
           level = 'amber';
-          headline = 'Aktive 7702-Delegation gefunden';
+          headline = 'Active 7702 delegation found';
           detail =
-            'Das Konto delegiert Ausfuehrung an eine Contract-Adresse. Pruefen Sie Delegate und Storage-Slots auf Integritaet; halten Sie ein frisches Panic-Revoke-Paket bereit.';
+            'The account delegates execution to a contract address. Check the delegate and storage slots for integrity; keep a fresh panic-revoke package ready.';
         }
       }
       setOverall({ level, headline, detail });
@@ -333,11 +333,11 @@ export default function SlotGuard7702() {
     setPanicInfo('');
     try {
       const eoa = address.trim();
-      if (!isHexAddress(eoa)) throw new Error('Gueltige Kontoadresse erforderlich.');
+      if (!isHexAddress(eoa)) throw new Error('A valid account address is required.');
       let nonce: number;
       if (panicNonce.trim() !== '') {
         nonce = Number(panicNonce);
-        if (!Number.isInteger(nonce) || nonce < 0) throw new Error('Nonce muss eine nicht-negative Ganzzahl sein.');
+        if (!Number.isInteger(nonce) || nonce < 0) throw new Error('Nonce must be a non-negative integer.');
       } else {
         const res = await rpcCall<string>(panicChain, 'eth_getTransactionCount', [eoa, 'latest']);
         nonce = Number(BigInt(res.data));
@@ -346,21 +346,21 @@ export default function SlotGuard7702() {
       const digest = await authorizationDigest(panicChain === 0 ? 0 : panicChain, ZERO_ADDR, nonce);
       const pack: PanicPack = { digest, chainId: panicChain, nonce, address: ZERO_ADDR, eoa };
 
-      // optionale Nachsignatur: Signatur-Teile validieren
+      // optional later signing: validate signature parts
       const hasSig = signR.trim() && signS.trim();
       if (hasSig) {
         const r = signR.trim();
         const s = signS.trim();
         let yParity = signV.trim();
-        if (!/^0x[0-9a-fA-F]{64}$/.test(r) || !/^0x[0-9a-fA-F]{64}$/.test(s)) throw new Error('r und s muessen 32-Byte-Hex sein.');
+        if (!/^0x[0-9a-fA-F]{64}$/.test(r) || !/^0x[0-9a-fA-F]{64}$/.test(s)) throw new Error('r and s must be 32-byte hex.');
         if (yParity === '27') yParity = '0x0';
         if (yParity === '28') yParity = '0x1';
         if (yParity !== '0x0' && yParity !== '0x1' && yParity !== '0' && yParity !== '1')
-          throw new Error('yParity/v muss 0, 1, 27 oder 28 sein.');
+          throw new Error('yParity/v must be 0, 1, 27 or 28.');
         pack.signed = { r, s, yParity: yParity === '0' ? '0x0' : yParity };
       }
 
-      if (passphrase.length < 8) throw new Error('Passphrase mit mindestens 8 Zeichen waehlen.');
+      if (passphrase.length < 8) throw new Error('Choose a passphrase of at least 8 characters.');
       const age = await import('age-encryption');
       const encrypter = new age.Encrypter();
       encrypter.setPassphrase(passphrase);
@@ -371,12 +371,12 @@ export default function SlotGuard7702() {
       const html = buildPanicHtml(pack, armor, passHint.trim());
       downloadSelfContainedHtml(html, `panic-revoke-${eoa.slice(0, 10)}.html`);
       setPanicInfo(
-        `Notfallpaket erzeugt und als panic-revoke-${eoa.slice(0, 10)}.html gespeichert. Digest: ${shortHex(digest, 14, 10)}. ` +
-          'Nach jeder regulären Transaktion unbedingt neu erzeugen (Nonce-Verfall).',
+        `Emergency package created and saved as panic-revoke-${eoa.slice(0, 10)}.html. Digest: ${shortHex(digest, 14, 10)}. ` +
+          'Regenerate without fail after every regular transaction (nonce expiry).',
       );
-      void v; // viem lazy import (wird in authorizationDigest genutzt)
+      void v; // viem lazy import (used in authorizationDigest)
     } catch (e) {
-      setPanicInfo('Fehler: ' + (e as Error).message);
+      setPanicInfo('Error: ' + (e as Error).message);
     } finally {
       setPanicBusy(false);
     }
@@ -391,15 +391,15 @@ export default function SlotGuard7702() {
     <div className="space-y-5">
       <StepSection
         n={1}
-        title="Konto & Netzwerke festlegen"
-        hint="Öffentliche Adresse genuegt — privater Schluessel wird nie benoetigt. Offline-Modus: Bytecode und Storage-Dump direkt einfuegen."
+        title="Set account & networks"
+        hint="A public address is sufficient — a private key is never needed. Offline mode: paste bytecode and storage dump directly."
       >
         <div className="flex flex-wrap gap-2">
           <button className={`btn btn-sm ${mode === 'online' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setMode('online')}>
-            Online (Multi-Chain)
+            Online (multi-chain)
           </button>
           <button className={`btn btn-sm ${mode === 'offline' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setMode('offline')}>
-            Offline (manuelle Rohdaten)
+            Offline (manual raw data)
           </button>
           <span className="ml-auto">
             <DemoButton onClick={demo} />
@@ -407,7 +407,7 @@ export default function SlotGuard7702() {
         </div>
         <div>
           <label className="label" htmlFor="sg-addr">
-            Öffentliche EOA-Adresse
+            Public EOA address
           </label>
           <input
             id="sg-addr"
@@ -420,26 +420,26 @@ export default function SlotGuard7702() {
         </div>
         {mode === 'online' ? (
           <div>
-            <span className="label">Netzwerke</span>
+            <span className="label">Networks</span>
             <ChainMultiSelect selected={chains} onChange={setChains} />
           </div>
         ) : (
           <div className="grid gap-4">
             <div>
               <label className="label" htmlFor="sg-code">
-                Account-Bytecode (eth_getCode-Ausgabe)
+                Account bytecode (eth_getCode output)
               </label>
               <textarea
                 id="sg-code"
                 className="textarea mono"
-                placeholder="0xef0100… (23 Byte) oder laengerer Bytecode"
+                placeholder="0xef0100… (23 bytes) or longer bytecode"
                 value={manualBytecode}
                 onChange={(e) => setManualBytecode(e.target.value)}
               />
             </div>
             <div>
               <label className="label" htmlFor="sg-dump">
-                Storage-Dump (eine Zeile pro Slot: „slot value" oder JSON)
+                Storage dump (one line per slot: "slot value" or JSON)
               </label>
               <textarea
                 id="sg-dump"
@@ -453,19 +453,19 @@ export default function SlotGuard7702() {
         )}
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="label" htmlFor="sg-old">Bisheriger Delegate (optional)</label>
+            <label className="label" htmlFor="sg-old">Current delegate (optional)</label>
             <input id="sg-old" className="input mono" placeholder="0x…" value={oldDelegate} onChange={(e) => setOldDelegate(e.target.value)} />
           </div>
           <div>
-            <label className="label" htmlFor="sg-new">Geplanter neuer Delegate (optional)</label>
+            <label className="label" htmlFor="sg-new">Planned new delegate (optional)</label>
             <input id="sg-new" className="input mono" placeholder="0x…" value={newDelegate} onChange={(e) => setNewDelegate(e.target.value)} />
           </div>
           <div>
-            <label className="label" htmlFor="sg-lo">Layout bisher (Slot: Rolle)</label>
+            <label className="label" htmlFor="sg-lo">Current layout (slot: role)</label>
             <textarea id="sg-lo" className="textarea mono" rows={3} placeholder={'0x0: owner\n0x1: nonce'} value={layoutOld} onChange={(e) => setLayoutOld(e.target.value)} />
           </div>
           <div>
-            <label className="label" htmlFor="sg-ln">Layout neu (Slot: Rolle)</label>
+            <label className="label" htmlFor="sg-ln">New layout (slot: role)</label>
             <textarea id="sg-ln" className="textarea mono" rows={3} placeholder={'0x0: owner\n0x1: guardian'} value={layoutNew} onChange={(e) => setLayoutNew(e.target.value)} />
           </div>
         </div>
@@ -475,7 +475,7 @@ export default function SlotGuard7702() {
             <input
               id="sg-ns"
               className="input mono"
-              placeholder="z. B. openzeppelin.storage.Ownable"
+              placeholder="e.g. openzeppelin.storage.Ownable"
               value={namespace}
               onChange={(e) => setNamespace(e.target.value)}
             />
@@ -483,51 +483,51 @@ export default function SlotGuard7702() {
         )}
       </StepSection>
 
-      <StepSection n={2} title="Delegation & Storage prüfen">
+      <StepSection n={2} title="Check delegation & storage">
         <p className="text-sm">
-          Liest den 0xef0100-Delegationsmarker, extrahiert den aktiven Delegate, prueft <code>eth_getCode</code> des
-          Delegates und scannt Slots 0–15 sowie EIP-1967-/ERC-7201-Namensraeume auf belegte Werte — anschließend folgt
-          die Kollisionsanalyse bisheriges vs. neues Layout.
+          Reads the 0xef0100 delegation marker, extracts the active delegate, checks <code>eth_getCode</code> of the
+          delegate and scans slots 0–15 plus EIP-1967/ERC-7201 namespaces for occupied values — followed by the
+          collision analysis of current vs. new layout.
         </p>
         <button className="btn btn-primary w-full sm:w-auto" onClick={() => void analyze()} disabled={running}>
-          {running ? 'Analyse laeuft…' : 'Prüfen'}
+          {running ? 'Analyzing…' : 'Check'}
         </button>
         {error && <ErrorNote message={error} />}
       </StepSection>
 
       {overall && (
-        <StepSection n={3} title="Ampel-Ergebnisbericht">
+        <StepSection n={3} title="Traffic-light result report">
           <StatusTile level={overall.level} headline={overall.headline} detail={overall.detail} />
           <KpiGrid>
-            <Kpi label="Gepruefte Netzwerke" value={findings.filter((f) => f.status !== 'error').length + '/' + findings.length} />
+            <Kpi label="Networks checked" value={findings.filter((f) => f.status !== 'error').length + '/' + findings.length} />
             <Kpi
-              label="Aktive Delegationen"
+              label="Active delegations"
               value={findings.filter((f) => f.status === 'delegation').length}
               tone={findings.some((f) => f.status === 'delegation') ? 'amber' : 'green'}
             />
             <Kpi
-              label="Belegte Slots (gesamt)"
+              label="Occupied slots (total)"
               value={findings.reduce((a, f) => Math.max(a, f.nonZeroSlots.length), 0)}
               tone={collisions.length > 0 ? 'red' : 'default'}
             />
-            <Kpi label="Kollisionen / verwaist" value={collisions.length} tone={collisions.length ? 'red' : 'green'} />
+            <Kpi label="Collisions / orphaned" value={collisions.length} tone={collisions.length ? 'red' : 'green'} />
           </KpiGrid>
 
           {findings.map((f) => (
             <details key={f.chainId} className="acc">
               <summary>
                 <span className="flex items-center gap-2">
-                  {f.chainId === 0 ? 'Offline-Eingabe' : chainById(f.chainId)?.name ?? `Chain ${f.chainId}`}
+                  {f.chainId === 0 ? 'Offline input' : chainById(f.chainId)?.name ?? `Chain ${f.chainId}`}
                   <SourceBadge source={f.source} />
                 </span>
                 <span className={`badge ${f.status === 'no-delegation' ? 'badge-green' : f.status === 'delegation' ? 'badge-amber' : 'badge-red'}`}>
                   {f.status === 'no-delegation'
-                    ? 'keine Delegation'
+                    ? 'no delegation'
                     : f.status === 'delegation'
-                      ? 'Delegation aktiv'
+                      ? 'delegation active'
                       : f.status === 'unknown-delegate'
-                        ? 'Delegate unbekannt'
-                        : 'Fehler'}
+                        ? 'delegate unknown'
+                        : 'error'}
                 </span>
               </summary>
               <div className="acc-body space-y-2">
@@ -536,8 +536,8 @@ export default function SlotGuard7702() {
                   <p>
                     Delegate: <code className="mono text-prime-hi break-all">{f.delegate}</code>{' '}
                     {f.delegateLabel && <span className="badge badge-green">{f.delegateLabel}</span>}
-                    {f.delegateHasCode === true && <span className="badge badge-green">Code vorhanden</span>}
-                    {f.delegateHasCode === false && <span className="badge badge-red">kein Code</span>}
+                    {f.delegateHasCode === true && <span className="badge badge-green">code present</span>}
+                    {f.delegateHasCode === false && <span className="badge badge-red">no code</span>}
                   </p>
                 )}
                 {f.code && f.code !== '0x' && (
@@ -547,9 +547,9 @@ export default function SlotGuard7702() {
                 )}
                 {f.code && f.code !== '0x' && (
                   <div>
-                    <p className="text-xs text-dim mb-1">Kritische Opcode-Muster im Account-Code:</p>
+                    <p className="text-xs text-dim mb-1">Critical opcode patterns in the account code:</p>
                     {scanBytecodePatterns(f.code).length === 0 ? (
-                      <p className="text-sm text-prime-hi">Keine delegatecall-/selfdestruct-Muster erkannt.</p>
+                      <p className="text-sm text-prime-hi">No delegatecall/selfdestruct patterns detected.</p>
                     ) : (
                       <ul className="text-sm space-y-1">
                         {scanBytecodePatterns(f.code).map((p) => (
@@ -566,8 +566,8 @@ export default function SlotGuard7702() {
                     <thead>
                       <tr>
                         <th>Slot</th>
-                        <th>Bedeutung</th>
-                        <th>Wert</th>
+                        <th>Meaning</th>
+                        <th>Value</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -581,7 +581,7 @@ export default function SlotGuard7702() {
                     </tbody>
                   </table>
                 ) : (
-                  <p className="text-sm">Keine belegten Slots im Scanbereich ({f.scannedSlots} Slots geprueft).</p>
+                  <p className="text-sm">No occupied slots in the scan range ({f.scannedSlots} slots checked).</p>
                 )}
               </div>
             </details>
@@ -589,15 +589,15 @@ export default function SlotGuard7702() {
 
           {collisions.length > 0 && (
             <details className="acc" open>
-              <summary>Storage-Kollisionen & verwaiste Werte ({collisions.length})</summary>
+              <summary>Storage collisions & orphaned values ({collisions.length})</summary>
               <div className="acc-body">
                 <table className="table-x">
                   <thead>
                     <tr>
                       <th>Slot</th>
-                      <th>Bisher</th>
-                      <th>Neu</th>
-                      <th>Bewertung</th>
+                      <th>Current</th>
+                      <th>New</th>
+                      <th>Assessment</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -618,52 +618,52 @@ export default function SlotGuard7702() {
           <div className="status-tile status-amber">
             <span aria-hidden="true">⚠</span>
             <p className="text-sm">
-              <strong>Nonce-Warnung:</strong> Jede reguläre Transaktion dieses Kontos erhöht die Nonce und macht vorab
-              signierte Notfallpakete (Panic-Revoke) uneinloesbar. Erzeugen Sie das Paket nach jeder Kontoaenderung neu
-              und lagern Sie es offline.
+              <strong>Nonce warning:</strong> every regular transaction from this account increments the nonce and makes
+              pre-signed emergency packages (panic revoke) unredeemable. Regenerate the package after every account change
+              and store it offline.
             </p>
           </div>
 
           <details className="acc" open={panicOpen}>
-            <summary onClick={(e) => e.preventDefault()}>Break-Glass: Panic-Revoke-Generator</summary>
+            <summary onClick={(e) => e.preventDefault()}>Break-glass: panic-revoke generator</summary>
             <div className="acc-body space-y-3">
               {!panicOpen && (
                 <button className="btn btn-outline-amber btn-sm" onClick={() => setPanicOpen(true)}>
-                  Notfallpaket konfigurieren
+                  Configure emergency package
                 </button>
               )}
               {panicOpen && (
                 <>
                   <div className="grid sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="label" htmlFor="pg-chain">Chain-Gueltigkeit</label>
+                      <label className="label" htmlFor="pg-chain">Chain validity</label>
                       <select id="pg-chain" className="select" value={panicChain} onChange={(e) => setPanicChain(Number(e.target.value))}>
-                        <option value={0}>alle Chains (chainId 0)</option>
+                        <option value={0}>all chains (chainId 0)</option>
                         {[1, 8453, 42161, 10, 137, 56].map((id) => (
                           <option key={id} value={id}>
-                            nur chainId {id}
+                            chainId {id} only
                           </option>
                         ))}
                       </select>
                     </div>
                     <div>
-                      <label className="label" htmlFor="pg-nonce">Nonce (leer = aktuell abrufen)</label>
-                      <input id="pg-nonce" className="input mono" placeholder="z. B. 12" value={panicNonce} onChange={(e) => setPanicNonce(e.target.value)} />
+                      <label className="label" htmlFor="pg-nonce">Nonce (empty = fetch current)</label>
+                      <input id="pg-nonce" className="input mono" placeholder="e.g. 12" value={panicNonce} onChange={(e) => setPanicNonce(e.target.value)} />
                     </div>
                     <div>
-                      <label className="label" htmlFor="pg-pass">Passphrase (min. 8 Zeichen)</label>
+                      <label className="label" htmlFor="pg-pass">Passphrase (min. 8 characters)</label>
                       <input id="pg-pass" type="password" className="input" value={passphrase} onChange={(e) => setPassphrase(e.target.value)} />
                     </div>
                     <div>
-                      <label className="label" htmlFor="pg-hint">Passwort-Hinweis (optional, im Klartext der Datei)</label>
-                      <input id="pg-hint" className="input" placeholder="z. B. 'Messer-Kluever-Tresor 2026'" value={passHint} onChange={(e) => setPassHint(e.target.value)} />
+                      <label className="label" htmlFor="pg-hint">Password hint (optional, in the file's plain text)</label>
+                      <input id="pg-hint" className="input" placeholder="e.g. 'kitchen-drawer safe 2026'" value={passHint} onChange={(e) => setPassHint(e.target.value)} />
                     </div>
                   </div>
                   <p className="text-xs text-dim">
-                    Vorbereitet wird eine EIP-7702-Autorisierung an {ZERO_ADDR} (vollständiger Widerruf). Signiert werden
-                    kann mit jedem 7702-faehigen Wallet-Flow (<code>wallet_signAuthorization</code>) oder extern über den
-                    ausgewiesenen Digest; Signaturteile (r, s, v/yParity) können hier nachgetragen werden und werden
-                    verschlüsselt abgelegt.
+                    This prepares an EIP-7702 authorization to {ZERO_ADDR} (full revocation). Signing works
+                    with any 7702-capable wallet flow (<code>wallet_signAuthorization</code>) or externally via the
+                    displayed digest; signature parts (r, s, v/yParity) can be added here and are
+                    stored encrypted.
                   </p>
                   <div className="grid sm:grid-cols-3 gap-3">
                     <input className="input mono" placeholder="r (0x…64 Hex)" value={signR} onChange={(e) => setSignR(e.target.value)} />
@@ -671,7 +671,7 @@ export default function SlotGuard7702() {
                     <input className="input mono" placeholder="v / yParity (0,1,27,28)" value={signV} onChange={(e) => setSignV(e.target.value)} />
                   </div>
                   <button className="btn btn-primary" onClick={() => void buildPanic()} disabled={panicBusy}>
-                    {panicBusy ? 'Verschluesselung laeuft…' : 'Verschluesseltes Notfallpaket erzeugen (HTML-Download)'}
+                    {panicBusy ? 'Encrypting…' : 'Create encrypted emergency package (HTML download)'}
                   </button>
                   {panicInfo && <p className="text-sm text-gold-hi">{panicInfo}</p>}
                 </>
@@ -680,34 +680,34 @@ export default function SlotGuard7702() {
           </details>
 
           <ExportBar
-            onJson={() => downloadJSON(resultJson, '7702-slotguard-bericht.json')}
+            onJson={() => downloadJSON(resultJson, '7702-slotguard-report.json')}
             onPrint={() =>
               openPrintableReport({
-                title: '7702-SlotGuard Prüfbericht',
-                subtitle: `Konto ${address} · ${new Date().toLocaleString('de-DE')}`,
+                title: '7702 SlotGuard Review Report',
+                subtitle: `Account ${address} · ${new Date().toLocaleString('en-GB')}`,
                 status: overall,
                 sections: [
                   {
-                    heading: 'Netzwerk-Ergebnisse',
+                    heading: 'Network results',
                     body:
                       '<pre>' +
                       findings
                         .map(
                           (f) =>
-                            `${f.chainId === 0 ? 'Offline' : `Chain ${f.chainId}`}: ${f.status}${f.delegate ? ` · Delegate ${f.delegate}` : ''} · ${f.nonZeroSlots.length} belegte Slots`,
+                            `${f.chainId === 0 ? 'Offline' : `Chain ${f.chainId}`}: ${f.status}${f.delegate ? ` · delegate ${f.delegate}` : ''} · ${f.nonZeroSlots.length} occupied slots`,
                         )
                         .join('\n') +
                       '</pre>',
                   },
                   collisions.length
                     ? {
-                        heading: 'Storage-Kollisionen',
+                        heading: 'Storage collisions',
                         body: '<pre>' + collisions.map((c) => `${c.slot}\n  ${c.reason}`).join('\n') + '</pre>',
                       }
-                    : { heading: 'Storage-Kollisionen', body: '<p>Keine erkannt.</p>' },
+                    : { heading: 'Storage collisions', body: '<p>None detected.</p>' },
                   {
-                    heading: 'Nonce-Warnung',
-                    body: '<p>Jede reguläre Transaktion erhoeht die Nonce; vorab signierte Notfallpakete verfallen danach und muessen neu erzeugt werden.</p>',
+                    heading: 'Nonce warning',
+                    body: '<p>Every regular transaction increments the nonce; pre-signed emergency packages expire afterwards and must be regenerated.</p>',
                   },
                 ],
               })

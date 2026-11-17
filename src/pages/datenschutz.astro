@@ -3,72 +3,72 @@ import LegalLayout from '../layouts/LegalLayout.astro';
 ---
 
 <LegalLayout
-  title="Datenschutz-Transparenz | AndrexTheDev"
-  description="Zero-Data-Architektur: keine Konten, keine Tracking-Cookies, lokale Browser-Speicherung mit Ein-Klick-Löschung — AndrexTheDev."
-  heading="Datenschutz-Transparenz"
+  title="Privacy Transparency | AndrexTheDev"
+  description="Zero-data architecture: no accounts, no tracking cookies, local browser storage with one-click deletion — AndrexTheDev."
+  heading="Privacy Transparency"
 >
-  <h2>1. Zero-Data-Architektur</h2>
+  <h2>1. Zero-data architecture</h2>
   <p>
-    Die Suite ist konsequent so gebaut, dass personenbezogene Daten gar nicht erst beim Betreiber anfallen:
+    The Suite is consistently built so that personal data does not arise at the operator in the first place:
   </p>
   <ul>
-    <li><strong>Keine Nutzerkonten:</strong> Es gibt keine Registrierung, kein Login und keine Sitzungsverwaltung durch den Betreiber.</li>
-    <li><strong>Keine Tracking-Cookies:</strong> Es werden keine Cookies gesetzt.</li>
-    <li><strong>Keine Analytics-Skripte:</strong> Es existieren keine externen Analyse-, Zählpixel- oder Fingerprinting-Dienste.</li>
-    <li><strong>Keine Server-Logs von Wallet-Eingaben:</strong> Adressen, Transaktionsdaten und Prüfeingaben werden lokal im Browser verarbeitet und nicht an eine Infrastruktur des Betreibers übertragen.</li>
+    <li><strong>No user accounts:</strong> there is no registration, no login and no session management by the operator.</li>
+    <li><strong>No tracking cookies:</strong> no cookies are set.</li>
+    <li><strong>No analytics scripts:</strong> there are no external analytics, counting-pixel or fingerprinting services.</li>
+    <li><strong>No server logs of wallet inputs:</strong> addresses, transaction data and check inputs are processed locally in the browser and not transmitted to any infrastructure of the operator.</li>
   </ul>
 
-  <h2>2. Lokale Speicherung im Browser</h2>
+  <h2>2. Local storage in the browser</h2>
   <p>
-    Funktionsbedingt nutzt die Suite ausschließlich browserseitige Speicherorte:
+    For functional reasons the Suite uses only browser-side storage locations:
   </p>
   <ul>
-    <li><strong>localStorage:</strong> Sprachpräferenz und optional selbst hinterlegte Netzwerk-Endpunkte (Schlüssel-Präfixe <code>atd-</code> und <code>ds-rpc-</code>).</li>
-    <li><strong>IndexedDB:</strong> kurzlebiger Lese-Cache für Blockchain-Antworten sowie pausierbare Scan-Fortschritte (z.&nbsp;B. zeitlich eingegrenzte Stealth-Scans).</li>
+    <li><strong>localStorage:</strong> optionally self-configured network endpoints (key prefixes <code>atd-</code> and <code>ds-rpc-</code>).</li>
+    <li><strong>IndexedDB:</strong> short-lived read cache for blockchain responses and pausable scan progress (e.g. time-boxed stealth scans).</li>
   </ul>
   <p id="lokal">
-    Diese Daten verlassen Ihr Gerät nicht durch die Suite und lassen sich jederzeit mit einem Klick löschen:
-    über <strong>Netzwerk &amp; Datenquellen → „Alle lokalen Suite-Daten löschen“</strong> in der Navigationsleiste.
-    Alternativ können Sie die Website-Daten in Ihren Browser-Einstellungen entfernen.
+    This data does not leave your device through the Suite and can be deleted at any time with one click:
+    via <strong>Network &amp; data sources → "Delete all local suite data"</strong> in the navigation bar.
+    Alternatively you can remove the website data in your browser settings.
   </p>
 
-  <h2>3. Direkte Browser-Verbindungen zu Blockchain-Endpunkten</h2>
+  <h2>3. Direct browser connections to blockchain endpoints</h2>
   <p>
-    Wenn Sie ein Werkzeug im Online-Modus nutzen, sendet <strong>Ihr Browser direkt</strong> Leseanfragen (JSON-RPC) an
-    Netzwerk-Endpunkte — vorzugsweise an von Ihnen hinterlegte Endpunkte, alternativ rotierend an öffentlich erreichbare
-    Lese-Endpunkte. Dabei gilt:
+    When you use a tool in online mode, <strong>your browser directly</strong> sends read requests (JSON-RPC) to
+    network endpoints — preferably to endpoints you have configured, alternatively rotating across publicly reachable
+    read endpoints. The following applies:
   </p>
   <ul>
-    <li>Der Endpunkt-Betreiber sieht Ihre IP-Adresse und die abgefragten öffentlichen Daten (z.&nbsp;B. eine Adresse oder einen Transaktionshash).</li>
-    <li>Es findet <strong>keine</strong> Übertragung privater Schlüssel oder Seed-Phrasen statt — die Suite nimmt solche Eingaben nicht entgegen und blockiert erkannte Muster aktiv.</li>
-    <li>Sie können die Netz-Qualität einschränken, indem Sie eigene Endpunkte hinterlegen oder die Offline-Modi der Werkzeuge (manuelle Eingabe von Rohdaten, Datei-Upload) verwenden.</li>
+    <li>The endpoint operator sees your IP address and the queried public data (e.g. an address or a transaction hash).</li>
+    <li>There is <strong>no</strong> transmission of private keys or seed phrases — the Suite does not accept such input and actively blocks recognized patterns.</li>
+    <li>You can limit network exposure by configuring your own endpoints or by using the offline modes of the tools (manual entry of raw data, file upload).</li>
   </ul>
 
-  <h2>4. Wallet-Verbindungen</h2>
+  <h2>4. Wallet connections</h2>
   <p>
-    Optionale Wallet-Verbindungen (EIP-1193/EIP-6963) erfolgen ausschließlich auf Ihre ausdrückliche Aktion hin und
-    ausschließlich zwischen Ihrem Browser und Ihrer Wallet-Software. Die Suite erhält nur die Daten, die Sie in der
-    Wallet freigeben (z.&nbsp;B. öffentliche Adresse, Signatur einer Challenge).
+    Optional wallet connections (EIP-1193/EIP-6963) take place exclusively upon your explicit action and
+    exclusively between your browser and your wallet software. The Suite only receives the data you release in the
+    wallet (e.g. a public address, the signature of a challenge).
   </p>
 
-  <h2>5. E-Mail-Kontakt</h2>
+  <h2>5. Email contact</h2>
   <p>
-    Bei Kontaktaufnahme per E-Mail an <strong>hippie.highho@gmail.com</strong> verarbeitet der Betreiber die mit der
-    E-Mail übermittelten Daten (Absender, Inhalt, Metadaten) zur Bearbeitung der Anfrage. Rechtsgrundlage ist
-    Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;b bzw. lit.&nbsp;f DSGVO. Anfragen werden gelöscht, sobald sie erledigt sind,
-    sofern keine gesetzlichen Aufbewahrungspflichten bestehen.
+    When contacting <strong>hippie.highho@gmail.com</strong> by email, the operator processes the data
+    transmitted with the email (sender, content, metadata) to handle the request. The legal basis is
+    Art.&nbsp;6(1)(b) or Art.&nbsp;6(1)(f) GDPR. Requests are deleted once they have been dealt with,
+    unless statutory retention obligations exist.
   </p>
 
-  <h2>6. Ihre Rechte</h2>
+  <h2>6. Your rights</h2>
   <p>
-    Soweit personenbezogene Daten beim Betreiber verarbeitet werden (im Wesentlichen E-Mail-Kommunikation), stehen
-    Ihnen die Rechte auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und
-    Widerspruch zu. Zudem besteht ein Beschwerderecht bei der zuständigen Datenschutz-Aufsichtsbehörde.
+    To the extent personal data is processed by the operator (essentially email communication), you have
+    the rights of access, rectification, erasure, restriction of processing, data portability and
+    objection. You also have the right to lodge a complaint with the competent data protection supervisory authority.
   </p>
 
-  <h2>7. Verantwortlicher</h2>
+  <h2>7. Controller</h2>
   <p>
-    Verantwortlich im Sinne der DSGVO: <strong>AndrexTheDev</strong>, Erreichbarkeit per E-Mail:
+    Controller within the meaning of the GDPR: <strong>AndrexTheDev</strong>, reachable by email:
     <strong>hippie.highho@gmail.com</strong>.
   </p>
 </LegalLayout>

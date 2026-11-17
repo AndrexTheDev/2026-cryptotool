@@ -4,74 +4,74 @@ import LegalLayout from '../layouts/LegalLayout.astro';
 
 <LegalLayout
   title="Disclaimer | AndrexTheDev Web3 Security Suite"
-  description="Haftungsausschluss der AndrexTheDev Web3 Security & Forensics Suite: As-Is-Bereitstellung, keine Beratung, Non-Custodial, spezifische technische Risiken."
-  heading="Disclaimer / Haftungsausschluss"
+  description="Disclaimer of the AndrexTheDev Web3 Security & Forensics Suite: as-is provision, no advice, non-custodial, specific technical risks."
+  heading="Disclaimer"
 >
-  <h2>1. Bereitstellung „wie besehen“ (As-Is)</h2>
+  <h2>1. Provision "as is"</h2>
   <p>
-    Die Web3 Security &amp; Forensics Suite (nachfolgend „Suite“) von <strong>AndrexTheDev</strong> wird ohne Gewähr
-    bereitgestellt. Es wird keine Garantie für Vollständigkeit, Richtigkeit, Fehlerfreiheit, Aktualität oder
-    Verfügbarkeit übernommen — insbesondere nicht für Daten, die aus externen Blockchain-Netzwerken, öffentlichen
-    Endpunkten oder vom Nutzer eingefügten Rohdaten stammen. Alle Prüfergebnisse sind <strong>Diagnosehinweise</strong>,
-    die stets einer eigenständigen fachlichen Nachprüfung bedürfen.
+    The Web3 Security &amp; Forensics Suite (hereinafter the "Suite") by <strong>AndrexTheDev</strong> is provided
+    without warranty of any kind. No guarantee is given for completeness, correctness, freedom from errors, currency
+    or availability — in particular not for data originating from external blockchain networks, public
+    endpoints or raw data pasted by the user. All check results are <strong>diagnostic indicators</strong>
+    that always require independent professional verification.
   </p>
 
-  <h2>2. Keine Anlage-, Finanz-, Rechts- oder Steuerberatung</h2>
+  <h2>2. No investment, financial, legal or tax advice</h2>
   <p>
-    Keine Ausgabe der Suite — auch nicht die der Module DAC8-SelfProof, STVA-UpgradeDiff oder BitVault-Stress — stellt
-    eine Anlage-, Finanz-, Rechts- oder Steuerberatung dar. Für steuerliche Einordnungen (z.&nbsp;B. Nachweise im
-    Kontext von EU-DAC8, Travel Rule oder nationaler Steuerdokumentation) wenden Sie sich an eine zur Beratung
-    befugte Person Ihres Vertrauens. Ein kryptografischer Verfügungsmacht-Nachweis ersetzt keine steuerrechtliche
-    Einzelfallprüfung.
+    No output of the Suite — including that of the DAC8-SelfProof, STVA-UpgradeDiff or BitVault-Stress modules —
+    constitutes investment, financial, legal or tax advice. For tax assessments (e.g. evidence in the
+    context of EU DAC8, the Travel Rule or national tax documentation) please consult a person authorized to
+    provide advice whom you trust. A cryptographic proof of control does not replace a tax-law
+    case-by-case assessment.
   </p>
 
-  <h2>3. Non-Custodial-Hinweis</h2>
+  <h2>3. Non-custodial notice</h2>
   <p>
-    Die Suite <strong>speichert oder überträgt zu keinem Zeitpunkt private Schlüssel oder Seed-Phrasen</strong>. Es
-    existiert kein betriebener Server, der Nutzereingaben entgegennimmt; Verarbeitungen finden lokal im Browser statt.
-    Jede On-Chain-Transaktion (z.&nbsp;B. das Absenden einer vorbereiteten Refund- oder Revoke-Calldata) erfolgt
-    ausschließlich in der alleinigen Verantwortung des Nutzers und über vom Nutzer selbst gewählte Wallets und
-    Netzwerk-Endpunkte.
+    The Suite <strong>never stores or transmits private keys or seed phrases</strong>. There
+    is no operated server that receives user input; processing takes place locally in the browser.
+    Every on-chain transaction (e.g. submitting a prepared refund or revoke calldata) takes place
+    exclusively under the sole responsibility of the user and via wallets and
+    network endpoints chosen by the user.
   </p>
 
-  <h2>4. Spezifische technische Risiken</h2>
+  <h2>4. Specific technical risks</h2>
   <ul>
     <li>
-      <strong>Block-Snapshot-Abhängigkeit (STVA-UpgradeDiff):</strong> Simulations- und Vergleichsergebnisse beziehen
-      sich auf die konkret ausgewiesene Blocknummer und den Blockhash. Spätere Zustandsänderungen (neue Implementierung,
-      geänderter Storage) werden dadurch nicht erfasst.
+      <strong>Block snapshot dependency (STVA-UpgradeDiff):</strong> simulation and comparison results refer
+      to the specifically stated block number and block hash. Later state changes (new implementation,
+      changed storage) are not captured by them.
     </li>
     <li>
-      <strong>Nonce-Verfall (7702-SlotGuard):</strong> Jede reguläre Transaktion Ihres Kontos erhöht die Nonce. Ein
-      vorab signiertes Notfallpaket (Panic-Revoke-Autorisierung) verliert danach seine Einloesbarkeit und muss
-      <strong>neu generiert</strong> werden. Ein verschluesseltes Notfallpaket ist kein Backup-Ersatz, sondern ein
-      Reaktionswerkzeug.
+      <strong>Nonce expiry (7702-SlotGuard):</strong> every regular transaction of your account increments the nonce. A
+      pre-signed emergency package (panic-revoke authorization) then loses its redeemability and must be
+      <strong>regenerated</strong>. An encrypted emergency package is not a backup substitute, but a
+      reaction tool.
     </li>
     <li>
-      <strong>Rechtliche Einzelfallprüfung (DAC8-SelfProof):</strong> Ein signiertes Prüfdossier dokumentiert
-      kryptografische Verfügungsmacht zu einem Zeitpunkt. Steuerliche Anerkennung (Eigenübertrag, Einstandspreise,
-      Spekulationsfristen) ist eine eigenständige rechtliche Frage.
+      <strong>Legal case-by-case assessment (DAC8-SelfProof):</strong> a signed audit dossier documents
+      cryptographic control at a point in time. Tax recognition (self-transfer, acquisition costs,
+      holding periods) is a separate legal question.
     </li>
     <li>
-      <strong>Endpunkt-Verfügbarkeit:</strong> Öffentliche Lese-Endpunkte können gedrosselt oder offline sein. Die
-      Module bieten deshalb durchgehend Offline-Modi mit manueller Eingabe; Ergebnisqualität hängt dann von der
-      Korrektheit der eingefügten Rohdaten ab.
+      <strong>Endpoint availability:</strong> public read endpoints may be throttled or offline. The
+      modules therefore consistently offer offline modes with manual input; result quality then depends on the
+      correctness of the pasted raw data.
     </li>
     <li>
-      <strong>Gebühren- und Marktdaten:</strong> Referenzkurse oder Gebührenannahmen (z.&nbsp;B. Paymaster-Spreads,
-      Dust-Klippen) sind Modellrechnungen und kein Handelsangebot.
+      <strong>Fee and market data:</strong> reference rates or fee assumptions (e.g. paymaster spreads,
+      dust cliffs) are model calculations and not a trading offer.
     </li>
   </ul>
 
-  <h2>5. Externe Inhalte und Netzwerke</h2>
+  <h2>5. External content and networks</h2>
   <p>
-    Für Inhalte und Verfügbarkeit externer Netzwerke, Block-Explorer, IPFS-Gateways oder Wallet-Software wird keine
-    Haftung übernommen. Verlinkungen dienen der Information und begründen keine Haftung für fremde Inhalte.
+    No liability is accepted for the content and availability of external networks, block explorers, IPFS gateways
+    or wallet software. Links are provided for information purposes and create no liability for third-party content.
   </p>
 
-  <h2>6. Anwendbares Recht</h2>
+  <h2>6. Applicable law</h2>
   <p>
-    Es gilt das Recht des Betreiberstandorts unter Ausschluss kollisionsrechtlicher Verweisungsnormen, soweit gesetzlich
-    zulässig. Zwingende Verbraucherschutzrechte bleiben unberührt.
+    The law of the operator's location applies, excluding conflict-of-laws referral rules, to the extent legally
+    permissible. Mandatory consumer protection rights remain unaffected.
   </p>
 </LegalLayout>

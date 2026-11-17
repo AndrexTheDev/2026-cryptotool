@@ -1,6 +1,6 @@
-// ERC-7683 Intent-Dekodierung (herstellerunabhaengig, deterministic).
+// ERC-7683 intent decoding (vendor-independent, deterministic).
 
-// GaslessCrossChainOrder / OnchainCrossChainOrder ABI-Schnitt fuer viem
+// GaslessCrossChainOrder / OnchainCrossChainOrder ABI cuts for viem
 export const ERC7683_ABI = [
   {
     type: 'function',
@@ -114,7 +114,7 @@ export interface DecodedOrder {
   orderDataType?: string | undefined;
   orderData?: string | undefined;
   orderDataFields?: { label: string; value: string }[];
-  decodeConfidence: 'vollstaendig' | 'teilweise' | 'roh';
+  decodeConfidence: 'full' | 'partial' | 'raw';
 }
 
 /** Best-Effort-Tuple-Dekodierung von orderData (gaengige Schemata). */
@@ -159,8 +159,8 @@ export async function decodeOrderData(orderData: string): Promise<{ label: strin
         c.schema.forEach((s2, i) => {
           let val = String(dec[i]);
           if (s2.type === 'bytes32' && /token|relayer|recipient|depositor/i.test(s2.name)) {
-            if (isPaddedAddr(val)) val = '0x' + val.slice(26); // gepaddete Adresse auf 20 B zurueckschneiden
-            else plausible = false; // bytes32-Token, das keine Adresse ist -> anderes Schema wahrscheinlicher
+            if (isPaddedAddr(val)) val = '0x' + val.slice(26); // trim padded address back to 20 B
+            else plausible = false; // bytes32 token that is not an address -> different schema more likely
           }
           if (s2.type === 'uint256' && /chainId/i.test(s2.name)) {
             try {
@@ -204,10 +204,10 @@ export async function decodeOpenCalldata(calldata: string): Promise<DecodedOrder
         fillDeadline: Number(o.fillDeadline),
         orderDataType: String(o.orderDataType),
         orderData: String(o.orderData),
-        decodeConfidence: 'vollstaendig',
+        decodeConfidence: 'full',
       };
       order.orderDataFields = await decodeOrderData(order.orderData!);
-      if (!order.orderDataFields.length) order.decodeConfidence = 'teilweise';
+      if (!order.orderDataFields.length) order.decodeConfidence = 'partial';
       return order;
     }
     if (decoded.functionName === 'open') {
@@ -216,16 +216,16 @@ export async function decodeOpenCalldata(calldata: string): Promise<DecodedOrder
         fillDeadline: Number(o.fillDeadline),
         orderDataType: String(o.orderDataType),
         orderData: String(o.orderData),
-        decodeConfidence: 'vollstaendig',
+        decodeConfidence: 'full',
       };
       order.orderDataFields = await decodeOrderData(order.orderData!);
-      if (!order.orderDataFields.length) order.decodeConfidence = 'teilweise';
+      if (!order.orderDataFields.length) order.decodeConfidence = 'partial';
       return order;
     }
   } catch {
-    /* unbekannter Selektor */
+    /* unknown selector */
   }
-  return { orderData: cd, decodeConfidence: 'roh' };
+  return { orderData: cd, decodeConfidence: 'raw' };
 }
 
 export function parseOrderJson(json: string): DecodedOrder | null {
@@ -241,7 +241,7 @@ export function parseOrderJson(json: string): DecodedOrder | null {
       fillDeadline: order.fillDeadline != null ? Number(order.fillDeadline) : undefined,
       orderDataType: order.orderDataType ? String(order.orderDataType) : undefined,
       orderData: order.orderData ? String(order.orderData) : undefined,
-      decodeConfidence: 'teilweise',
+      decodeConfidence: 'partial',
     };
     if (!o.fillDeadline && !o.orderData) return null;
     return o;
@@ -256,7 +256,7 @@ export async function parseOrderJsonFull(json: string): Promise<DecodedOrder | n
   if (!o) return null;
   if (o.orderData) {
     o.orderDataFields = await decodeOrderData(o.orderData);
-    if (o.orderDataFields.length) o.decodeConfidence = 'vollstaendig';
+    if (o.orderDataFields.length) o.decodeConfidence = 'full';
   }
   return o;
 }
@@ -270,7 +270,7 @@ export interface SpreadResult {
   sameTokenNote?: string;
 }
 
-/** Maximaler impliziter Solver-Spread (nur wenn Input/Output denselben Token messen). */
+/** Maximum implicit solver spread (only when input/output measure the same token). */
 export function computeSpread(order: DecodedOrder): SpreadResult | null {
   const f = order.orderDataFields ?? [];
   const get = (re: RegExp) => f.find((x) => re.test(x.label));
@@ -289,14 +289,14 @@ export function computeSpread(order: DecodedOrder): SpreadResult | null {
       spreadPct,
       comparable: true,
       sameTokenNote:
-        'Vergleich der nominalen Raw-Einheiten. Cross-Asset-Orders (unterschiedliche Tokens/Dezimalstellen) benoetigen zusaetzlich Kurs-Referenz — Wertangabe stets mit Vorsicht lesen.',
+        'Comparison of nominal raw units. Cross-asset orders (different tokens/decimals) additionally require a price reference — always read value figures with caution.',
     };
   } catch {
     return null;
   }
 }
 
-/** Refund-Empfaenger-Prioritaet: refundAddress -> recipient -> depositor. */
+/** Refund recipient priority: refundAddress -> recipient -> depositor. */
 export function resolveRefundRecipient(opts: {
   refundAddress?: string | undefined;
   recipient?: string | undefined;
@@ -304,14 +304,14 @@ export function resolveRefundRecipient(opts: {
   user?: string | undefined;
 }): { address?: string | undefined; source: string } {
   const isZero = (a?: string) => !a || /^0x0{40}$/i.test(a);
-  if (!isZero(opts.refundAddress)) return { address: opts.refundAddress, source: 'refundAddress (explizit)' };
-  if (!isZero(opts.recipient)) return { address: opts.recipient, source: 'recipient (Fallback 1)' };
+  if (!isZero(opts.refundAddress)) return { address: opts.refundAddress, source: 'refundAddress (explicit)' };
+  if (!isZero(opts.recipient)) return { address: opts.recipient, source: 'recipient (fallback 1)' };
   const dep = opts.depositor ?? opts.user;
-  if (!isZero(dep)) return { address: dep, source: 'depositor/user (Fallback 2)' };
-  return { address: undefined, source: 'nicht aufloesbar' };
+  if (!isZero(dep)) return { address: dep, source: 'depositor/user (fallback 2)' };
+  return { address: undefined, source: 'not resolvable' };
 }
 
-/** Kodiert resolveFor(order, fillerData) zur Refund-Identifikation (view-only, ERC-7683). */
+/** Encodes resolveFor(order, fillerData) for refund identification (view-only, ERC-7683). */
 export async function encodeResolveFor(order: {
   originSettler: string;
   user: string;
@@ -327,7 +327,7 @@ export async function encodeResolveFor(order: {
     try {
       return v.getAddress(a);
     } catch {
-      // Checksum-Toleranz: Kleinbuchstaben-Variante akzeptieren (analysieren, nicht signieren)
+      // checksum tolerance: accept the lowercase variant (analyze, not sign)
       return v.getAddress(a.toLowerCase());
     }
   };
