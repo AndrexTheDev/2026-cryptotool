@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-17 — Wave 31: TypeScript 7 assessment (documented decision)
+
+- **Dedicated evaluation of TS 7.0.2** (PR #15) against this repo, per the wave-9/14/26 deferral. Findings: tsconfig is TS7-clean (`module: ESNext`, `moduleResolution: Bundler`, `target: ES2022`, no removed options); zero programmatic-API consumers (no typescript-eslint/ts-jest/ts-morph/typedoc; Vite transpiles via esbuild); no `astro check`/Volar usage — the known TS 7.0 template-checking blocker (compiler API absent until 7.1) does not apply here. CI on PR #15 is green with the full pipeline.
+- **Decision: defer to TS 7.1+** — the native compiler's diagnostics do not yet match the classic compiler 100%, and 7.0 ships no stable programmatic API (would block future `astro check`/lint adoption). No urgency: no security issue, typecheck speed irrelevant at this size. PR #15 stays open as the standing candidate; Dependabot will propose 7.1.
+- **Audit re-check after the astro 7.4.12 merge:** GHSA-mh32 + GHSA-r3h5 are gone from `npm audit`; the remainder is the picomatch chain (GHSA-fc5q, still no published fix — not exploitable here, build-time globs only).
+
 ## 2026-11-17 — Wave 30: Astro 7.4.12 via Dependabot (blocker resolved)
 
 - **astro 7.4.1 → 7.4.12** (PR #14, Dependabot prod-minor-patch group): the wave-26/29 follow-up landed through the designed path — the CI runner (Node 22 → 22.23.x) satisfies the ≥ 22.23.4 engine floor and verified the full pipeline (typecheck, build, audit-dist, 132/132). Clears **GHSA-mh32-jxcr-mh9f** (XSS via dynamic tag names, low — fixed in 7.4.5) and **GHSA-r3h5-4585-7x3w** (@astrojs/node image endpoint, medium — fixed in 7.4.7); both were unreachable in this deployment (static output, no adapter, no dynamic tags).
