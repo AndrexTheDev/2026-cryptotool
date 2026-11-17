@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-16 — Wave 24: Fork-Landschaft 11/2026 (Glamsterdam/BPO-Nachlese)
+
+- Verifizierte Recherche zur Ethereum-Fork-Roadmap (mehrfach gedeckt: BlockEden 25.01.2026, iq.wiki, Metrika, Blofin 14.10.2026, weex 06.10.2026, kiln.fi):
+  - **Fusaka-Nachzuegler abgeschlossen**: BPO-1 (17.12.2025; target 6→10, max 9→15) und **BPO-2 (07.01.2026; →14/21)** — Blob-Kapazitaet seit Fusaka >3x, L2-Fees ~−60 % laut BlockEden-Nachlese.
+  - **Glamsterdam = naechster grosser Fork** (Gloas + Amsterdam): Headliner **EIP-7732 (ePBS)** und **EIP-7928 (Block-Level Access Lists)**, dazu Gas-Repricing (EIP-7904) und Gas-Limit-Ziel ~200 Mio.; seit **06.10.2026 auf Sepolia aktiv** (13:53:36 UTC, Epoch 353.024), Hoodi Ende 10/2026, **Mainnet-Ziel Anfang 12/2026 — noch nicht fixiert** (EIP-7773 laesst das Datum offen).
+- Punktueller Edit: Adoptions-Referenz-Block in `PasskeyContinuity.tsx` (einzige Fork-Kontext-Flaeche des Projekts) um die Fork-Landschaft 11/2026 ergaenzt; Hedging explizit („noch nicht fixiert"), damit der Text nach Termin-Fixierung nicht faelschlich veraltet wirkt.
+- Lock-in: **+1 Check (131 → 132)** — M04 assertiert Glamsterdam/06.10.2026/BPO-2/EIP-7732 im Quelltext; README-Drift synchron.
+- Zuvor: **PR #4 squash-gemergt** (Owner-Entscheidung, Commit d69aca5; DAC8-Live-Status jetzt in main). Branch `arena/bd2fa4fa` auf neuem main-Stand.
+
 ## 2026-11-16 — Wave 23: DAC8 Live-Status-Refresh (Q4/2026-Recherche)
 
 - Hintergrund: DAC8 ist seit 01.01.2026 **live**, das erste Meldejahr 2026 laeuft gerade — der bisherige Tool-Hinweis war bereits im Praesens formuliert, aber ohne deutsche Umsetzungs- und Frist-Fakten. Verifizierte Aktualisierung des rechtlichen Zeitkontexts in `Dac8SelfProof.tsx`:
