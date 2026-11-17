@@ -1,0 +1,30 @@
+# Dependabot — automated dependency currency (Wave 29).
+# Grouped minor/patch PRs weekly; majors arrive individually for deliberate review.
+# Note: astro >= 7.4.2 needs Node >= 22.23.4 — the CI runner (node '22' → 22.23.x)
+# satisfies this even though the dev sandbox (22.22.3) does not, so CI is the
+# verification path for the pending astro bump (see ROADMAP open follow-ups).
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+    open-pull-requests-limit: 5
+    groups:
+      prod-minor-patch:
+        dependency-type: production
+        update-types: ['minor', 'patch']
+      dev-minor-patch:
+        dependency-type: development
+        update-types: ['minor', 'patch']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+    open-pull-requests-limit: 3

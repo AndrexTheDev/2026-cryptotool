@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-17 — Wave 29: Dependabot (dependency-currency automation)
+
+- `.github/dependabot.yml` added: weekly (Mondays) grouped minor/patch PRs for npm (production and development groups) and GitHub Actions; majors arrive as individual PRs for deliberate review.
+- Rationale: the manual currency audits of waves 9/14/26/28 are now automated. Notably this covers the pending astro ≥ 7.4.7 bump — the CI runner (`node: '22'` → 22.23.x) satisfies the engine floor even though the dev sandbox (22.22.3) does not, so a Dependabot astro PR is verified end-to-end by the full CI pipeline (typecheck, build, audit-dist, 132-check demo regression).
+- picomatch stays transitive-only (no fix released); it rides along once the parent packages bump.
+
 ## 2026-11-17 — Wave 28: Dependency currency (viem 2.58.0)
 
 - **viem 2.57.20 → 2.58.0** (minor, released 2026-11-17): core EVM library used by SlotGuard/STVA/PasskeyContinuity/BundleWatch/IntentLens. No API surface changes affecting this codebase; full regression re-verified.
