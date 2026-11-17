@@ -72,7 +72,7 @@ pre{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:.5rem;padding:.8re
 ${rep.subtitle ? `<p class="sub">${esc(rep.subtitle)}</p>` : ''}
 ${rep.status ? `<div class="status"><strong>${esc(rep.status.headline)}</strong>${rep.status.detail ? esc(rep.status.detail) : ''}</div>` : ''}
 ${rep.sections.map((s) => `<h2>${esc(s.heading)}</h2><div>${s.body}</div>`).join('\n')}
-<p class="meta">${esc(rep.footerNote ?? 'Generated locally in the browser by the AndrexTheDev Web3 Security & Forensics Suite. No server storage, no transfer of private keys.')}</p>
+<p class="meta">${esc(rep.footerNote ?? 'Generated locally in the browser by StackAutopsy (Web3 Security & Forensics Suite). No server storage, no transfer of private keys.')}</p>
 <script>window.addEventListener('load',()=>{/* Druckdialog optional via Button */});<\/script>
 </body></html>`;
   const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }));

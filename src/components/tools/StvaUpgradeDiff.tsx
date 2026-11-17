@@ -371,7 +371,7 @@ export default function StvaUpgradeDiff() {
       ``,
       `Overall status: ${report.level.toUpperCase()} — ${report.headline}`,
       ``,
-      `Generated locally by AndrexTheDev STVA-UpgradeDiff.`,
+      `Generated locally by StackAutopsy STVA-UpgradeDiff.`,
     ];
     return lines.join('\n');
   };

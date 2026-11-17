@@ -116,7 +116,7 @@ Path weights: ${a.paths.map((p) => `\n  - ${esc(p.label)}: ${p.vbytes} vB (scrip
 <li>Multiple copies: store this file in at least two separate locations.</li>
 </ul>
 <p class="warn">Security: never write seed words or private keys into digital practice files.</p>
-<p style="color:#64748b;font-size:.8rem">Generated locally by AndrexTheDev BitVault Stress. No network access, no keys.</p>
+<p style="color:#64748b;font-size:.8rem">Generated locally by StackAutopsy BitVault Stress. No network access, no keys.</p>
 </body></html>`;
 }
 
