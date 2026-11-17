@@ -370,7 +370,12 @@ sichtbar wird — Deshalb ist der positive Nachweis (32B=1) mit echtem Vektor en
                 Precompile seit dem Fusaka-Hardfork (03.12.2025) als <strong>EIP-7951</strong> konsensfaegig aktiv —
                 selbe Adresse, aber mit verbindlicher high-S-Ablehnung (Malleability-Schutz). Auf Rollups laeuft er als
                 <strong>RIP-7212</strong> finalisiert auf Optimism, Base, zkSync Era, Polygon zkEVM, Linea und Scroll — die Precompile-Verifikation
-                zieht die Kosten von ~200.000–300.000 Gas auf ~3.450 Gas (~98 % Reduktion). Der Live-Test oben
+                zieht die Kosten von ~200.000–300.000 Gas auf ~3.450 Gas (~98 % Reduktion).{' '}
+                <strong className="text-ink">Fork-Landschaft (Stand 11/2026):</strong> Die Fusaka-Nachzuegler BPO-1
+                (17.12.2025) und BPO-2 (07.01.2026) hoben die Blob-Kapazitaet schrittweise auf 14 Ziel- / 21
+                Max-Blobs pro Block; naechster grosser Fork ist <strong>Glamsterdam</strong> (ePBS via EIP-7732,
+                Block-Level Access Lists via EIP-7928) — seit 06.10.2026 auf Sepolia aktiv, Mainnet-Termin
+                (angestrebt: Anfang 12/2026) zum Zeitpunkt dieses Textes noch nicht fixiert. Der Live-Test oben
                 verifiziert jede ausgewaehlte Chain dennoch individuell — Chain-Listen alterieren schneller als
                 statische Dokumentation.
               </p>
