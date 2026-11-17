@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-17 — Wave 26: Post-i18n dependency audit (documented assessment)
+
+- **Trigger:** after the i18n merge a full `npm audit` (all severities, incl. dev) reports **12 high-severity findings**, all transitive — none reachable in this deployment.
+- **Root cause 1 — GHSA-fc5q-39xc-vjpf / CVE-2026-112366 (picomatch ReDoS, high, CVSS 7.5):** affects every published version ≤ 4.0.7 (the newest on npm). No patched release exists yet (fix PR micromatch/picomatch#194 is merged but unpublished). Propagates through fdir → tinyglobby → vite → astro, and anymatch@2.3.2 (inside unstorage). **Not applicable here:** the ReDoS needs an attacker-controlled repeated extglob pattern; the only glob patterns in play are our own build config (`src/**/*` etc.), never request/user input. All affected packages are build-time tooling (vite/tinyglobby/fdir/anymatch/unstorage), not runtime.
+- **Root cause 2 — GHSA-mh32-jxcr-mh9f / CVE-2026-126361 (astro XSS via dynamic tag names, low, CVSS 2.3):** exploitable only if untrusted input is used as an element name. We never do that (no dynamic tag rendering). Fixed in 7.4.5.
+- **Root cause 3 — GHSA-r3h5-4585-7x3w / CVE-2026-126364 (@astrojs/node image endpoint file read, medium):** only reachable with the `@astrojs/node` adapter. We use pure static output, no adapter — the image endpoint does not exist. Fixed in 7.4.7.
+- **Why no upgrade now:** Astro 7.4.2+ (which carries the 7.4.5/7.4.7 fixes) raises the Node engine floor to **≥ 22.23.4**; this sandbox runs Node **22.22.3**, so 7.4.1 is the newest engines-compatible release. The two astro fixes (7.4.5, 7.4.7) therefore cannot be installed here. Verified per-version against `npm view astro@<v> engines.node`.
+- **Production gate stays green:** `npm run audit:deps` (prod-only, `--audit-level=critical`) reports 0 critical findings — none of the 12 are production-critical. `astro`/`vite` are build-time dependencies (listed under `dependencies` because Astro requires it), but their vulnerable code paths (image endpoint, dynamic tags, globbing) are not part of the shipped static bundle.
+- **Action / lock-in:** follow-up scheduled — bump astro to ≥ 7.4.7 (clears GHSA-mh32 + GHSA-r3h5) once the environment provides Node ≥ 22.23.4; re-audit picomatch once a fixed release (>4.0.7) is published. Documented in ROADMAP. Pipeline unchanged: tsc (both flags) 0 errors, `npm run verify` green (build 15 pages, audit-dist passed, 132/132 demo checks).
+
 ## 2026-11-17 — Wave 25: Internationalization (English-first)
 
 - **Scope**: the entire repository is now English-first — UI shell (TopNav/Footer/ToolGrid/ToolPageHeader/layouts), all shared React components, all 10 tool components, lib/worker/hooks, scripts (verify-demos.mjs, audit-dist.mjs) and documentation (README/CHANGELOG/ROADMAP).
