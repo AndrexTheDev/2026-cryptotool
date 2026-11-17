@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-17 — Wave 28: Dependency currency (viem 2.58.0)
+
+- **viem 2.57.20 → 2.58.0** (minor, released 2026-11-17): core EVM library used by SlotGuard/STVA/PasskeyContinuity/BundleWatch/IntentLens. No API surface changes affecting this codebase; full regression re-verified.
+- Re-checked the blocked follow-ups: picomatch still 4.0.7 (no fix released), astro 7.4.2+ still blocked (sandbox Node 22.22.3 < 22.23.4), typescript 7.0.2 still waits on the astro lift. Remaining outdated: none actionable.
+- Pipeline: tsc (both flags) 0 errors; `npm run verify` green (15 pages, audit-dist passed, 132/132).
+
 ## 2026-11-17 — Wave 27: Rebrand to StackAutopsy
 
 - **New product brand:** the suite is now **StackAutopsy** — Web3 Security & Forensics Suite. The former "A" monogram was replaced by a new mark: a three-layer stack (emerald) with the middle layer in gold — the "dissected layer", the forensic signature of the brand.
