@@ -3,6 +3,9 @@
   "private": true,
   "version": "1.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=22.22.0"
+  },
   "description": "AndrexTheDev Web3 Security & Forensics Suite - 10 clientseitige Web3/Bitcoin/Compliance-Werkzeuge",
   "scripts": {
     "dev": "astro dev --host 0.0.0.0",
