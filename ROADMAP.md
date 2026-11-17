@@ -1,4 +1,12 @@
-# Roadmap — Systematic Evolution (status: 15.11.2026, branch arena/b2c454a8)
+# Roadmap — Systematic Evolution (status: 17.11.2026)
+
+## Open follow-ups
+
+- [ ] **Astro bump ≥ 7.4.7** (clears GHSA-mh32-jxcr-mh9f XSS low + GHSA-r3h5-4585-7x3w @astrojs/node medium): blocked in this sandbox — 7.4.2+ requires Node ≥ 22.23.4, we have 22.22.3. Neither advisory is reachable here (static output, no adapter, no dynamic tags). Re-attempt when the environment provides Node ≥ 22.23.4.
+- [ ] **picomatch ReDoS (GHSA-fc5q-39xc-vjpf / CVE-2026-112366, high):** no patched release exists yet (fix PR merged, unpublished). ReDoS needs attacker-controlled extglob patterns; only our own build config globs are used — not exploitable. Re-audit once picomatch > 4.0.7 ships; it propagates via fdir/tinyglobby/vite/astro (build-time only).
+- [ ] **typescript 7.x** (native Go port, changed build/tooling behavior): assess only after the Astro/Node lift (wave-9/14 decision).
+
+## Waves 1–3 (completed, Nov 2026)
 
 Research bases (October–November 2026):
 
