@@ -28,7 +28,7 @@
     "@scure/bip32": "2.4.0",
     "@scure/btc-signer": "2.4.1",
     "age-encryption": "0.3.1",
-    "astro": "^7.4.1",
+    "astro": "^7.4.12",
     "bip322-js": "4.0.1",
     "buffer": "^6.0.3",
     "fflate": "0.8.3",
