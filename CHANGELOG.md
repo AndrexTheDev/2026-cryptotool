@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-17 — Wave 34: Live-first doctrine — X402 guard verifies against the npm registry
+
+**Doctrine change (owner directive):** StackAutopsy is an *online* security tool — checks are verified live against the network of truth, systematically. Status before this wave: 9/10 tools already live (7× EVM via the shared RPC manager, BitVaultStress + Dac8SelfProof via BTC APIs, BundleWatchEns via ENS/IPFS). The one remaining offline-only tool was X402PaywallGuard, which matched dependency versions against the embedded advisory DB only.
+
+- **New `src/lib/npm-live.ts`:** browser-direct verification against `registry.npmjs.org` (CORS-enabled, read-only, no API key, no operator proxy). Abbreviated packument → latest version + release date; in-memory session cache; total functions (network failure → null, never throws). Pure helpers (`npmRegistryUrl`, `isNpmPackageName`) are unit-locked by the demo regression.
+- **X402PaywallGuard:** after every scan that detects npm dependencies, a **Live registry check** now runs automatically — per package: scanned version vs. live latest, release date, status badge (current / update available / registry unreachable) + manual "Re-verify live". Transparency note: only package names are requested; all other inputs stay local.
+- Demo regression 132 → **135 checks** (README badge + CI label updated; the hygiene gate enforces the count).
+
+Next systematic steps (following waves): uniform live-status badges + pasted-vs-live cross-checks across the nine chain-connected tools.
+
 ## 2026-11-17 — Wave 33: TypeScript 7 adopted + brand-asset audit lock
 
 - **typescript 5.9.3 → 7.0.2** (PR #15, owner decision): the Wave-31 assessment had deferred to 7.1; on owner direction we re-verified and adopted. Local proof on the sandbox (Node 22.22.3): tsc 7.0.2 (native) reports **0 errors in both modes** (standard + noUncheckedIndexedAccess/exactOptionalPropertyTypes), identical to 5.9.3 on this codebase. CI on the PR was already green with the full pipeline. Note: no stable programmatic compiler API until 7.1 — only relevant if `astro check`/lint tooling is adopted later.
