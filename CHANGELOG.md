@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-17 — Wave 36: Pasted-vs-live cross-checks (doctrine wave 3)
+
+Pasted data is no longer trusted on its own — where the same entity is queryable on-chain, the tool automatically fetches it and flags divergence.
+
+- **Shared `CrossBadge`** (ui.tsx): uniform verdict badge — `matches chain ✓` (green), `MISMATCH vs chain` (red), `cross-check unavailable` (neutral, e.g. offline/unreachable), with tooltip explaining the semantics.
+- **SlotGuard7702:** pasted account bytecode (offline mode) is automatically compared against `eth_getCode` on the reference network (first selected chain). Mismatch raises a red warning: wrong network, stale export, or manipulated data — trust the live result.
+- **UseropAutopsy:** pasted receipts (offline JSON mode) are re-fetched live by tx hash (`eth_getTransactionReceipt`, selected network) and compared on gasUsed + blockNumber; mismatch raises a red warning and recommends re-fetching by hash.
+- **Lock-in:** LIVE module extended — CrossBadge exists, both tools wire the cross-check. **138 → 141 checks** (README + CI label synced).
+
 ## 2026-11-17 — Wave 35: Uniform live provenance — every tool shows its data source
 
 **Live-first doctrine, wave 2:** every live answer across all 10 tools now carries uniform provenance, visible in the UI.

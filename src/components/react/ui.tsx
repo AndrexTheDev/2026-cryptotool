@@ -231,6 +231,25 @@ export function DemoButton({ onClick, label = 'Load demo scenario' }: { onClick:
   );
 }
 
+export function CrossBadge({ verdict }: { verdict?: 'match' | 'mismatch' | 'unavailable' | 'pending' | undefined }) {
+  if (!verdict) return null;
+  const map = {
+    match: ['badge-green', 'matches chain ✓'],
+    mismatch: ['badge-red', 'MISMATCH vs chain'],
+    unavailable: ['', 'cross-check unavailable'],
+    pending: ['', 'cross-checking…'],
+  } as const;
+  const [cls, text] = map[verdict];
+  return (
+    <span
+      className={`badge ${cls}`.trim()}
+      title="Pasted input automatically cross-checked against live chain data (same address/tx, same network)."
+    >
+      {text}
+    </span>
+  );
+}
+
 export function SourceBadge({
   source,
   at,
