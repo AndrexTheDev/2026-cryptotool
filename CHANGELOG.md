@@ -1,5 +1,42 @@
 # Changelog
 
+## 2026-11-15 — Wave 42: Interaction suite — export flows verified end-to-end
+
+`scripts/beta-interact.mjs` grows from 54 to **60 checks**. Phase 4 drives the six tools that expose export buttons after a demo run (UseropAutopsy, PasskeyContinuity, BitVaultStress, BundleWatchEns, X402PaywallGuard, IntentLens7683): every ⬇ JSON / ⬇ CSV / ⬇ Druck-PDF / ⬇ Offline-HTML button is clicked with `URL.createObjectURL` captured, and the produced blob is validated — JSON must parse, CSV must be a semicolon/CRLF table, print/offline output must be a complete HTML document. All downloads are generated locally in the browser; the suite proves they contain real report content, not empty shells.
+
+## 2026-11-15 — Wave 41: Interaction suite — error paths + mocked cross-check verdicts
+
+`scripts/beta-interact.mjs` grows from 40 to **54 checks**, adding two phases:
+
+- **Phase 2 — error paths (10 checks):** every tool's primary action is clicked *without* any input. Each tool must surface visible validation feedback (provide/paste/enter/…), never a crash or a silent no-op.
+- **Phase 3 — cross-check verdicts end-to-end (4 checks):** with the chain mocked at the fetch layer, the Wave-36/37 anti-forgery feature is verified as a user sees it — SlotGuard: pasted bytecode == mocked `eth_getCode` → **"matches chain ✓"**; differing chain state → **"MISMATCH vs chain"** + stale/manipulated warning. DAC8: certificate facts == mocked esplora tx → **"matches chain ✓"**; forged block hash → **"MISMATCH vs chain"**.
+
+One test-side fix while developing: the mock initially fed SlotGuard only the `0xef0100` prefix (regex artifact on the concatenated constant), correctly producing MISMATCH — the suite now resolves the concatenated constant. Both badges render through the shared `CrossBadge` component, so the four checks cover every tool that inherits the cross-check UI.
+
+## 2026-11-17 — Wave 40: Interaction tests — demo → run → outcome, per tool
+
+New `scripts/beta-interact.mjs` (**40 checks**, happy-dom): every tool is rendered in a real DOM, then driven like a user — click "Load demo scenario", click the primary action, await the outcome. External network is blocked except the npm registry, so this also proves graceful degradation (endpoint unreachable → clean error UI, never a crash).
+
+**Two real bugs found and fixed by this suite:**
+- **StealthAudit5564:** the demo button constructed a `Worker` uncaught — in a context without Web Workers the click handler died with an uncaught `ReferenceError`. Now both worker creations are guarded with a clear error message pointing at the offline mode.
+- **X402PaywallGuard:** duplicate React keys in the dependency-findings table (`name+version` collided when one package triggered multiple advisories) → key now includes the advisory id.
+
+Wired in: `npm run test:interact`, part of `verify`, CI step, README. Suite duration ~60 s (endpoint-backoff waits included).
+
+Local: 40/40 interaction, 70/70 beta, 142/142 demo, tsc 0 (both modes).
+
+## 2026-11-17 — Wave 39: Full beta-test suite — module by module, user perspective
+
+New `scripts/beta-test.mjs` (**70 checks**, zero new runtime deps — esbuild pinned as explicit devDependency, version already locked by the existing override):
+
+- **A — lib functional + adversarial inputs:** format roundtrips (hex/utf8/wei incl. umlaut+emoji), CSV escaping (quotes/semicolons/newlines/CRLF), x402 parsers (broken JSON, BOM+CRLF requirements.txt, go.mod, boundary versions — fix version must NOT flag), HAR payment-header detection (case-insensitive), ERC-7715 radar, contenthash decoding (valid IPFS cidv1 vector, garbage, empty).
+- **B — SSR render smoke, all 10 tools:** each component is bundled (esbuild) and server-rendered via `renderToString` — exactly what the astro island build does; a crash here would break production. Asserts render size, the tool's primary input id, and the demo-button wiring.
+- **C — live paths:** real `fetchLatestNpm('fflate')` against the npm registry; RPC degradation (`getUserRpc`/`setUserRpc` SSR-safe without `window`; unknown chain → typed `RpcError`, no hang); cross-check wiring contracts (SlotGuard/UseropAutopsy/DAC8/X402).
+- Fix en route: `RpcError` refactored off TS parameter properties → `rpc.ts` is now strip-types testable like every other lib.
+- Wired in: `npm run test:beta`, part of `npm run verify`, CI step "Beta-Tests", README documented.
+
+Local: 70/70 beta, 142/142 demo, tsc 0 (both modes).
+
 ## 2026-11-17 — Wave 38: Copy audit for the live-first doctrine + external freshness
 
 - **External freshness:** Glamsterdam re-checked — Hoodi postponement reason now documented in PasskeyContinuity (ChainSecurity: EIP-8037 gas repricing can lock mainnet contracts into failure states, 13 documented real-world cases; still no new date, EIP-7773 leaves mainnet open). ROADMAP tracks it as open follow-up with trigger and now reflects the live-first state (Waves 34–38 resolved). typescript 7.0.2 = latest (7.1 not released), picomatch 4.0.7 (blocker unchanged), `npm audit` → 0 vulnerabilities.

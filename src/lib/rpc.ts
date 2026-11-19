@@ -111,12 +111,11 @@ interface JsonRpcResponse {
 }
 
 export class RpcError extends Error {
-  constructor(
-    message: string,
-    public readonly allFailed = false,
-  ) {
+  public readonly allFailed: boolean;
+  constructor(message: string, allFailed = false) {
     super(message);
     this.name = 'RpcError';
+    this.allFailed = allFailed;
   }
 }
 

@@ -42,3 +42,9 @@ jobs:
 
       - name: Demo-Regression (142 Checks)
         run: node --experimental-strip-types scripts/verify-demos.mjs
+
+      - name: Beta-Tests (70 Checks, inkl. SSR-Render aller Tools)
+        run: node --experimental-strip-types scripts/beta-test.mjs
+
+      - name: Interaktions-Tests (60 Checks — Demo, Fehlerpfade, Cross-Check, Exporte)
+        run: node scripts/beta-interact.mjs
