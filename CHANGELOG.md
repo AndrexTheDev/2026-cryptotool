@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-11-17 — Wave 40: Interaction tests — demo → run → outcome, per tool
+
+New `scripts/beta-interact.mjs` (**40 checks**, happy-dom): every tool is rendered in a real DOM, then driven like a user — click "Load demo scenario", click the primary action, await the outcome. External network is blocked except the npm registry, so this also proves graceful degradation (endpoint unreachable → clean error UI, never a crash).
+
+**Two real bugs found and fixed by this suite:**
+- **StealthAudit5564:** the demo button constructed a `Worker` uncaught — in a context without Web Workers the click handler died with an uncaught `ReferenceError`. Now both worker creations are guarded with a clear error message pointing at the offline mode.
+- **X402PaywallGuard:** duplicate React keys in the dependency-findings table (`name+version` collided when one package triggered multiple advisories) → key now includes the advisory id.
+
+Wired in: `npm run test:interact`, part of `verify`, CI step, README. Suite duration ~60 s (endpoint-backoff waits included).
+
+Local: 40/40 interaction, 70/70 beta, 142/142 demo, tsc 0 (both modes).
+
 ## 2026-11-17 — Wave 39: Full beta-test suite — module by module, user perspective
 
 New `scripts/beta-test.mjs` (**70 checks**, zero new runtime deps — esbuild pinned as explicit devDependency, version already locked by the existing override):

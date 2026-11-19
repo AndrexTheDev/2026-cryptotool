@@ -15,7 +15,8 @@
     "audit": "node scripts/audit-dist.mjs",
     "test:demos": "node --experimental-strip-types scripts/verify-demos.mjs",
     "test:beta": "node --experimental-strip-types scripts/beta-test.mjs",
-    "verify": "npm run typecheck && npm run build && node scripts/audit-dist.mjs && npm run audit:deps && npm run test:demos && npm run test:beta",
+    "test:interact": "node scripts/beta-interact.mjs",
+    "verify": "npm run typecheck && npm run build && node scripts/audit-dist.mjs && npm run audit:deps && npm run test:demos && npm run test:beta && npm run test:interact",
     "audit:deps": "npm audit --omit=dev --audit-level=critical"
   },
   "dependencies": {
@@ -44,6 +45,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "esbuild": "^0.28.2",
+    "happy-dom": "^21.0.4",
     "typescript": "7.0.2",
     "vite": "^8.3.8"
   },

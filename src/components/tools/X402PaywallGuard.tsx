@@ -262,7 +262,7 @@ export default function X402PaywallGuard() {
                   </thead>
                   <tbody>
                     {report.deps.map((d) => (
-                      <tr key={d.name + d.version}>
+                      <tr key={d.advisory.id + '@' + d.name + '@' + d.version}>
                         <td className="mono text-xs">{d.name}</td>
                         <td className="mono">{d.version}</td>
                         <td className="mono">&lt; {d.advisory.belowVersion}</td>

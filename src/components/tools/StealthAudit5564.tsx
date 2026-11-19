@@ -105,7 +105,13 @@ export default function StealthAudit5564() {
   const demo = async () => {
     setError('');
     setWarning('');
-    const worker = new Worker(new URL('../../workers/stealth.worker.ts', import.meta.url), { type: 'module' });
+    let worker: Worker;
+    try {
+      worker = new Worker(new URL('../../workers/stealth.worker.ts', import.meta.url), { type: 'module' });
+    } catch {
+      setError('Web Worker unavailable in this browser context (sandboxed frame?). The demo dataset cannot be generated — paste announcement logs manually (offline mode).');
+      return;
+    }
     const demoData = await new Promise<{ viewingPrivHex: string; spendingPubHex: string; announcements: RawAnnouncement[] }>((resolve) => {
       worker.onmessage = (e) => {
         worker.terminate();
@@ -124,7 +130,13 @@ export default function StealthAudit5564() {
 
   const runWorker = (announcements: RawAnnouncement[], vk: string, sp: string, from: number, to: number): Promise<{ hits: StealthHit[]; checked: number; tagFiltered: number }> => {
     return new Promise((resolve, reject) => {
-      const worker = new Worker(new URL('../../workers/stealth.worker.ts', import.meta.url), { type: 'module' });
+      let worker: Worker;
+      try {
+        worker = new Worker(new URL('../../workers/stealth.worker.ts', import.meta.url), { type: 'module' });
+      } catch {
+        reject(new Error('Web Worker unavailable in this browser context — use offline mode with pasted logs.'));
+        return;
+      }
       const t = setTimeout(() => {
         worker.terminate();
         reject(new Error('Worker timeout (60s). Scan fewer blocks per round.'));
