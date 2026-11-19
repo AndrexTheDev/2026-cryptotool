@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import {
   ChainMultiSelect,
   CopyButton,
+  CrossBadge,
   DemoButton,
   ErrorNote,
   ExportBar,
@@ -47,6 +48,8 @@ interface ChainFinding {
   scannedSlots: number;
   source?: 'user' | 'wallet' | 'public' | 'cache' | 'offline';
   at?: number | undefined;
+  /** Pasted-vs-live cross-check (offline mode): pasted bytecode vs eth_getCode on the reference chain. */
+  cross?: { verdict: 'match' | 'mismatch' | 'unavailable'; chainId: number; at?: number | undefined } | undefined;
   note?: string;
 }
 
@@ -210,6 +213,21 @@ export default function SlotGuard7702() {
           source: 'offline',
           note: 'Analysis based exclusively on manually pasted raw data.',
         });
+
+        // Live-first doctrine: pasted bytecode is automatically cross-checked
+        // against the live chain state (reference: first selected network).
+        const refChain = chains[0] ?? 1;
+        try {
+          const live = await getCode(refChain, addr);
+          const norm = (s: string) => s.trim().toLowerCase();
+          newFindings[0]!.cross = {
+            verdict: norm(live.data ?? '0x') === norm(code) ? 'match' : 'mismatch',
+            chainId: refChain,
+            at: live.at,
+          };
+        } catch {
+          newFindings[0]!.cross = { verdict: 'unavailable', chainId: refChain };
+        }
       } else {
         if (chains.length === 0) {
           setError('Please select at least one network.');
@@ -521,6 +539,7 @@ export default function SlotGuard7702() {
                 <span className="flex items-center gap-2">
                   {f.chainId === 0 ? 'Offline input' : chainById(f.chainId)?.name ?? `Chain ${f.chainId}`}
                   <SourceBadge source={f.source} at={f.at} />
+                  {f.cross && <CrossBadge verdict={f.cross.verdict} />}
                 </span>
                 <span className={`badge ${f.status === 'no-delegation' ? 'badge-green' : f.status === 'delegation' ? 'badge-amber' : 'badge-red'}`}>
                   {f.status === 'no-delegation'
@@ -534,6 +553,19 @@ export default function SlotGuard7702() {
               </summary>
               <div className="acc-body space-y-2">
                 {f.note && <p className="text-gold-hi text-sm">{f.note}</p>}
+                {f.cross?.verdict === 'mismatch' && (
+                  <p className="badge badge-red whitespace-normal text-left">
+                    Cross-check failed: the pasted bytecode differs from the live chain state on{' '}
+                    {chainById(f.cross.chainId)?.name ?? `chain ${f.cross.chainId}`} — wrong network, stale export, or manipulated
+                    data. Trust the live result, not the paste.
+                  </p>
+                )}
+                {f.cross?.verdict === 'match' && (
+                  <p className="text-xs text-dim">
+                    Pasted bytecode confirmed identical to the live state on{' '}
+                    {chainById(f.cross.chainId)?.name ?? `chain ${f.cross.chainId}`}.
+                  </p>
+                )}
                 {f.delegate && (
                   <p>
                     Delegate: <code className="mono text-prime-hi break-all">{f.delegate}</code>{' '}

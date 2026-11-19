@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
   ChainSingleSelect,
+  CrossBadge,
   DemoButton,
   ErrorNote,
   ExportBar,
@@ -67,6 +68,8 @@ interface TxAutopsy {
   blockNumber: number;
   source?: 'user' | 'wallet' | 'public' | 'cache' | undefined;
   at?: number | undefined;
+  /** Pasted-vs-live cross-check (offline mode): pasted receipt vs eth_getTransactionReceipt. */
+  cross?: 'match' | 'mismatch' | 'unavailable' | undefined;
   error?: string;
 }
 
@@ -244,7 +247,26 @@ export default function UseropAutopsy() {
       if (mode === 'offline') {
         const parsed = JSON.parse(receiptJson) as Record<string, unknown> | Record<string, unknown>[];
         const list = Array.isArray(parsed) ? parsed : [parsed];
-        for (const r of list) out.push(parseReceipt(String(r.transactionHash ?? '0x'), r));
+        for (const r of list) {
+          const t = { ...parseReceipt(String(r.transactionHash ?? '0x'), r) };
+          // Live-first doctrine: a pasted receipt is automatically cross-checked
+          // against the live chain (same tx hash, selected network).
+          if (/^0x[0-9a-fA-F]{64}$/.test(t.hash)) {
+            try {
+              const live = await getTxReceipt(chainId, t.hash);
+              if (!live.data) {
+                t.cross = 'unavailable';
+              } else {
+                const sameGas = BigInt(String(live.data.gasUsed)) === t.txGasUsed;
+                const sameBlock = Number(BigInt(String(live.data.blockNumber))) === t.blockNumber;
+                t.cross = sameGas && sameBlock ? 'match' : 'mismatch';
+              }
+            } catch {
+              t.cross = 'unavailable';
+            }
+          }
+          out.push(t);
+        }
       } else {
         const hashes = extractHashes();
         if (hashes.length === 0) throw new Error('No transaction hashes recognized (up to 25, one per line or explorer CSV).');
@@ -357,10 +379,17 @@ export default function UseropAutopsy() {
               <summary>
                 <span className="mono text-xs">{shortHex(r.hash, 14, 10)}</span>
                 <SourceBadge source={r.source} at={r.at} />
+                {r.cross && <CrossBadge verdict={r.cross} />}
                 {r.error ? <span className="badge badge-red">Error</span> : <span className={r.marginPct > 15 ? 'badge badge-amber' : 'badge badge-green'}>{r.marginPct.toFixed(2)} %</span>}
               </summary>
               <div className="acc-body space-y-2">
                 {r.error && <p className="text-gold-hi text-sm">{r.error}</p>}
+                {r.cross === 'mismatch' && (
+                  <p className="badge badge-red whitespace-normal text-left">
+                    Cross-check failed: the pasted receipt (gasUsed / block) does not match the live chain receipt — wrong
+                    network, stale export, or manipulated data. Re-fetch by hash for the authoritative result.
+                  </p>
+                )}
                 {!r.error && (
                   <>
                     <table className="table-x">

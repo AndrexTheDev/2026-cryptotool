@@ -562,6 +562,13 @@ function existsDistWellKnown() {
   ok(/at:\s*number/.test(rpc) && rpc.includes("source: 'cache', at:"), 'LIVE: rpc.ts timestamps every answer (RpcResult.at incl. cache hits)');
   const ui = readFileSync('src/components/react/ui.tsx', 'utf8');
   ok(ui.includes("'registry'") && ui.includes("'gateway'"), 'LIVE: SourceBadge covers registry + gateway sources');
+
+  // Wave 36: pasted-vs-live cross-checks (live-first doctrine, wave 3)
+  ok(/export function CrossBadge/.test(ui), 'LIVE: shared CrossBadge (match/mismatch) exists');
+  const sg = readFileSync('src/components/tools/SlotGuard7702.tsx', 'utf8');
+  ok(sg.includes('cross') && sg.includes('matches chain') === false && sg.includes('CrossBadge') && /getCode\(refChain/.test(sg), 'LIVE: SlotGuard cross-checks pasted bytecode vs eth_getCode');
+  const uo = readFileSync('src/components/tools/UseropAutopsy.tsx', 'utf8');
+  ok(uo.includes('CrossBadge') && /getTxReceipt\(chainId, t\.hash\)/.test(uo), 'LIVE: UseropAutopsy cross-checks pasted receipts vs live chain');
 }
 
 // ---------------------------------------------------------------- HYGIENE: docs drift lock-in (last check)
