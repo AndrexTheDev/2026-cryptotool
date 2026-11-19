@@ -46,5 +46,5 @@ jobs:
       - name: Beta-Tests (70 Checks, inkl. SSR-Render aller Tools)
         run: node --experimental-strip-types scripts/beta-test.mjs
 
-      - name: Interaktions-Tests (54 Checks — Demo, Fehlerpfade, Cross-Check)
+      - name: Interaktions-Tests (60 Checks — Demo, Fehlerpfade, Cross-Check, Exporte)
         run: node scripts/beta-interact.mjs

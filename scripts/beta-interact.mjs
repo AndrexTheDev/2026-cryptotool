@@ -258,6 +258,94 @@ for (const [name, runRe] of tools) {
   btcTxMock = null;
 }
 
+// ============================================================================
+// Phase 4: export flows — JSON/CSV/print downloads produce valid content
+// (6 tools expose export buttons after demo+run; verified as a user clicks them)
+// ============================================================================
+const capturedBlobs = [];
+URL.createObjectURL = (b) => {
+  capturedBlobs.push(b);
+  return 'blob:mock-' + capturedBlobs.length;
+};
+URL.revokeObjectURL = () => {};
+window.open = () => null;
+
+const exportTools = [
+  ['UseropAutopsy', /analy|run|autopsy/i, null, 4000],
+  ['PasskeyContinuity', /test|check|run|probe/i, null, 20000],
+  ['BitVaultStress', /stress|analy|run|compile/i, null, 4000],
+  ['BundleWatchEns', /compare|check|audit|run/i, null, 4000],
+  ['X402PaywallGuard', /analy|scan|audit|run|check/i, null, 4000],
+  ['IntentLens7683', /decode|analy|run|check/i, null, 4000],
+];
+
+for (const [name, runRe, secondRe, waitMs] of exportTools) {
+  try {
+    const Comp = await bundleTool(name);
+    const { container, cleanup } = await mount(Comp);
+    const demoBtn = [...container.querySelectorAll('button')].find((b) => /load demo/i.test(b.textContent ?? ''));
+    if (demoBtn) {
+      await act(async () => {
+        demoBtn.click();
+      });
+    }
+    await clickRun(container, runRe);
+    await act(async () => sleep(waitMs));
+    if (secondRe) {
+      const s2 = [...container.querySelectorAll('button')].find(
+        (b) => /btn-primary/.test(b.className) && secondRe.test(b.textContent ?? '') && !b.disabled,
+      );
+      if (s2) {
+        await act(async () => {
+          s2.click();
+          await sleep(1500);
+        });
+      }
+    }
+    const expBtns = [...container.querySelectorAll('button')].filter((b) => /⬇/.test(b.textContent ?? ''));
+    let valid = expBtns.length > 0;
+    const detail = [];
+    for (const eb of expBtns) {
+      capturedBlobs.length = 0;
+      await act(async () => {
+        eb.click();
+      });
+      const label = (eb.textContent ?? '').trim();
+      if (capturedBlobs.length === 0) {
+        valid = false;
+        detail.push(`${label}:no-blob`);
+        continue;
+      }
+      const text = await capturedBlobs[0].text();
+      if (text.length < 20) {
+        valid = false;
+        detail.push(`${label}:empty`);
+      } else if (/JSON/.test(label)) {
+        try {
+          JSON.parse(text);
+        } catch {
+          valid = false;
+          detail.push(`${label}:invalid-json`);
+        }
+      } else if (/CSV/.test(label)) {
+        if (!text.includes(';') || !text.includes('\r\n')) {
+          valid = false;
+          detail.push(`${label}:bad-csv`);
+        }
+      } else if (/Druck|HTML/.test(label)) {
+        if (!/<!doctype html|<html/i.test(text)) {
+          valid = false;
+          detail.push(`${label}:bad-html`);
+        }
+      }
+    }
+    t(`P4 ${name}: ${expBtns.length} export flow(s) produce valid downloads`, valid, detail.join(','));
+    await cleanup();
+  } catch (e) {
+    t(`P4 ${name}: export flows`, false, String((e && e.message) || e));
+  }
+}
+
 rmSync('.beta-cache', { recursive: true, force: true });
 
 console.log(`\n${pass + fail} interaction checks, ${fail} failure(s)`);

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-15 — Wave 42: Interaction suite — export flows verified end-to-end
+
+`scripts/beta-interact.mjs` grows from 54 to **60 checks**. Phase 4 drives the six tools that expose export buttons after a demo run (UseropAutopsy, PasskeyContinuity, BitVaultStress, BundleWatchEns, X402PaywallGuard, IntentLens7683): every ⬇ JSON / ⬇ CSV / ⬇ Druck-PDF / ⬇ Offline-HTML button is clicked with `URL.createObjectURL` captured, and the produced blob is validated — JSON must parse, CSV must be a semicolon/CRLF table, print/offline output must be a complete HTML document. All downloads are generated locally in the browser; the suite proves they contain real report content, not empty shells.
+
 ## 2026-11-15 — Wave 41: Interaction suite — error paths + mocked cross-check verdicts
 
 `scripts/beta-interact.mjs` grows from 40 to **54 checks**, adding two phases:
