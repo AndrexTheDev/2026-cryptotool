@@ -1,8 +1,10 @@
 # Changelog
 
-## 2026-11-17 — Wave 38: Copy audit for the live-first doctrine
+## 2026-11-17 — Wave 38: Copy audit for the live-first doctrine + external freshness
 
-After Waves 34–37 the product claim "local" needed precision work — the tools now verify live by default.
+- **External freshness:** Glamsterdam re-checked — Hoodi postponement reason now documented in PasskeyContinuity (ChainSecurity: EIP-8037 gas repricing can lock mainnet contracts into failure states, 13 documented real-world cases; still no new date, EIP-7773 leaves mainnet open). ROADMAP tracks it as open follow-up with trigger and now reflects the live-first state (Waves 34–38 resolved). typescript 7.0.2 = latest (7.1 not released), picomatch 4.0.7 (blocker unchanged), `npm audit` → 0 vulnerabilities.
+
+**Copy audit** — after Waves 34–37 the product claim "local" needed precision work; the tools now verify live by default:
 
 - **Landing page:** hero pill `100 % local` → `browser-local · live-verified`; hero paragraph now states "computed locally in your browser and cross-checked live against the chains — nothing ever passes through an operator server"; FAQ "Where is my data processed?" now describes live-by-default read calls + automatic cross-checks (instead of "you configure that yourself"); FAQ "offline?" explains that cross-checks degrade to "unavailable" without network; meta description "local" → "browser-local, live-verified".
 - **llms.txt:** "executed entirely locally" → "computed locally … and verified live against the public networks"; endpoint description corrected from "chosen by the user" to "public by default, user-configurable".
