@@ -7,6 +7,7 @@ import {
   ExportBar,
   Kpi,
   KpiGrid,
+  SourceBadge,
   StatusTile,
   StepSection,
   type StatusLevel,
@@ -32,6 +33,8 @@ interface ImplInfo {
   codeHash?: string;
   sizeBytes?: number;
   patterns?: { opcode: string; label: string; count: number }[];
+  source?: 'user' | 'wallet' | 'public' | 'cache' | undefined;
+  at?: number | undefined;
   fetchError?: string;
 }
 
@@ -189,6 +192,8 @@ export default function StvaUpgradeDiff() {
             codeHash: v.keccak256(c as `0x${string}`),
             sizeBytes: bytes(c),
             patterns: scanBytecodePatterns(c),
+            source: code.source,
+            at: code.at,
           };
         } catch (e) {
           return { address: addr, fetchError: (e as Error).message };
@@ -502,6 +507,11 @@ export default function StvaUpgradeDiff() {
                   </thead>
                   <tbody>
                     <tr><td>Address</td><td className="mono text-xs break-all">{shortHex(report.oldImpl?.address ?? '—', 12, 8)}</td><td className="mono text-xs break-all">{shortHex(report.newImpl?.address ?? '—', 12, 8)}</td></tr>
+                    <tr>
+                      <td>Live source</td>
+                      <td><SourceBadge source={report.oldImpl?.source} at={report.oldImpl?.at} /></td>
+                      <td><SourceBadge source={report.newImpl?.source} at={report.newImpl?.at} /></td>
+                    </tr>
                     {report.singletonCheck !== undefined && (
                       <tr>
                         <td>Registry</td>

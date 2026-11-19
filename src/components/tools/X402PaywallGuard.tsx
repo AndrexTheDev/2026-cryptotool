@@ -7,6 +7,7 @@ import {
   FileDrop,
   Kpi,
   KpiGrid,
+  SourceBadge,
   StatusTile,
   StepSection,
   type StatusLevel,
@@ -115,6 +116,7 @@ export default function X402PaywallGuard() {
   const [live, setLive] = useState<Record<string, NpmLiveInfo | null>>({});
   const [livePending, setLivePending] = useState(false);
   const [liveNonce, setLiveNonce] = useState(0);
+  const [liveAt, setLiveAt] = useState<number | null>(null);
 
   useEffect(() => {
     const names = [...new Set((report?.depsList ?? []).filter((d) => d.ecosystem === 'npm').map((d) => d.name))];
@@ -129,6 +131,7 @@ export default function X402PaywallGuard() {
       if (cancelled) return;
       setLive(Object.fromEntries(rows));
       setLivePending(false);
+      setLiveAt(Date.now());
     });
     return () => {
       cancelled = true;
@@ -285,7 +288,8 @@ export default function X402PaywallGuard() {
                 <p className="text-xs text-dim">
                   Each detected npm package is verified live against the npm registry: your browser connects directly to
                   registry.npmjs.org (read-only, no API key, no operator proxy). Only the package names are requested —
-                  no other input leaves your device. Findings above stay valid even when the registry is unreachable.
+                  no other input leaves your device. Findings above stay valid even when the registry is unreachable.{' '}
+                  {liveAt && <SourceBadge source="registry" at={liveAt} />}
                 </p>
                 <div className="overflow-x-auto">
                   <table className="table-x">

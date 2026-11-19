@@ -46,6 +46,7 @@ interface ChainFinding {
   nonZeroSlots: { slot: string; label?: string | undefined; value: string }[];
   scannedSlots: number;
   source?: 'user' | 'wallet' | 'public' | 'cache' | 'offline';
+  at?: number | undefined;
   note?: string;
 }
 
@@ -259,6 +260,7 @@ export default function SlotGuard7702() {
                 nonZeroSlots: nonZero,
                 scannedSlots: slots.length,
                 source: codeRes.source,
+                at: codeRes.at,
               });
             } catch (e) {
               newFindings.push({ chainId, status: 'error', note: (e as Error).message, nonZeroSlots: [], scannedSlots: 0 });
@@ -518,7 +520,7 @@ export default function SlotGuard7702() {
               <summary>
                 <span className="flex items-center gap-2">
                   {f.chainId === 0 ? 'Offline input' : chainById(f.chainId)?.name ?? `Chain ${f.chainId}`}
-                  <SourceBadge source={f.source} />
+                  <SourceBadge source={f.source} at={f.at} />
                 </span>
                 <span className={`badge ${f.status === 'no-delegation' ? 'badge-green' : f.status === 'delegation' ? 'badge-amber' : 'badge-red'}`}>
                   {f.status === 'no-delegation'

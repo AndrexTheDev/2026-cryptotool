@@ -6,6 +6,7 @@ import {
   ExportBar,
   Kpi,
   KpiGrid,
+  SourceBadge,
   StatusTile,
   StepSection,
   type StatusLevel,
@@ -25,6 +26,9 @@ interface ScanState {
   toBlock: number;
   scannedTo: number;
   source: 'online' | 'offline' | 'demo';
+  /** RPC provenance of the last fetched log chunk (online mode only). */
+  rpcSource?: 'user' | 'wallet' | 'public' | 'cache' | undefined;
+  rpcAt?: number | undefined;
   durationMs: number;
   announcerTopic: string;
 }
@@ -181,6 +185,8 @@ export default function StealthAudit5564() {
       const { sha256 } = await import('@noble/hashes/sha2.js');
       const idbKey = 'stealth:' + Array.from(sha256(new TextEncoder().encode(keys.vk + ':' + chainId)), (b) => b.toString(16).padStart(2, '0')).join('');
       let announcements: RawAnnouncement[] = [];
+      let lastRpcSource: ScanState['rpcSource'];
+      let lastRpcAt: number | undefined;
 
       if (mode === 'offline') {
         if (!logsJson.trim()) throw new Error('Paste announcement logs (JSON) or load the demo.');
@@ -207,6 +213,8 @@ export default function StealthAudit5564() {
               toBlock: to,
               scannedTo: cursor - 1,
               source: 'online',
+              rpcSource: lastRpcSource,
+              rpcAt: lastRpcAt,
               durationMs: performance.now() - t0,
               announcerTopic: topic0,
             });
@@ -221,6 +229,8 @@ export default function StealthAudit5564() {
               fromBlock: cursor,
               toBlock: end,
             });
+            lastRpcSource = logs.source;
+            lastRpcAt = logs.at;
             for (const raw of logs.data as { topics: string[]; data: string; blockNumber: string; transactionHash?: string }[]) {
               const d = decodeAnnouncementLog(raw);
               if (d) announcements.push(d);
@@ -251,6 +261,8 @@ export default function StealthAudit5564() {
         toBlock: to,
         scannedTo: to,
         source: mode === 'offline' ? (logsJson.includes('demo') ? 'demo' : 'offline') : 'online',
+        rpcSource: lastRpcSource,
+        rpcAt: lastRpcAt,
         durationMs: performance.now() - t0,
         announcerTopic: '',
       });
@@ -378,6 +390,11 @@ export default function StealthAudit5564() {
             <Kpi label="View-tag filter (discarded early)" value={num(scan.tagFiltered)} />
             <Kpi label="Block window" value={`${num(scan.fromBlock)}–${num(scan.toBlock)}`} />
           </KpiGrid>
+          {scan.source === 'online' && (
+            <p className="text-xs text-dim">
+              Live data source: <SourceBadge source={scan.rpcSource} at={scan.rpcAt} />
+            </p>
+          )}
 
           {scan.hits.length > 0 && (
             <details className="acc" open>

@@ -7,6 +7,7 @@ import {
   FileDrop,
   Kpi,
   KpiGrid,
+  SourceBadge,
   StatusTile,
   StepSection,
   type StatusLevel,
@@ -93,6 +94,7 @@ export default function BundleWatchEns() {
   const [cid, setCid] = useState<{ kind: string; cid: string } | null>(null);
   const [refAssets, setRefAssets] = useState<RefAsset[]>([]);
   const [refNote, setRefNote] = useState('');
+  const [refLiveAt, setRefLiveAt] = useState<number | null>(null);
   const [compare, setCompare] = useState<Compare | null>(null);
 
   const demo = () => {
@@ -154,6 +156,7 @@ export default function BundleWatchEns() {
             const entry: RefAsset = { path: 'index.html', sha256: await sha256Hex(text), size: new TextEncoder().encode(text).length, text };
             refs = [entry];
             setRefNote('Reference: IPFS index loaded directly from the browser.');
+            setRefLiveAt(Date.now());
           } else {
             setRefNote(`IPFS fetch HTTP ${res.status} — please paste the release archive or manifest manually.`);
           }
@@ -389,7 +392,11 @@ export default function BundleWatchEns() {
             </details>
           )}
 
-          {refNote && <p className="text-xs text-dim">{refNote}</p>}
+          {refNote && (
+            <p className="text-xs text-dim">
+              {refNote} {refLiveAt && <SourceBadge source="gateway" at={refLiveAt} />}
+            </p>
+          )}
 
           <ExportBar
             onJson={() =>

@@ -7,6 +7,7 @@ import {
   ExportBar,
   Kpi,
   KpiGrid,
+  SourceBadge,
   StatusTile,
   StepSection,
   type StatusLevel,
@@ -52,6 +53,7 @@ export default function IntentLens7683() {
   const [order, setOrder] = useState<DecodedOrder | null>(null);
   const [nowTs, setNowTs] = useState<number | null>(null);
   const [chainNote, setChainNote] = useState('');
+  const [liveSrc, setLiveSrc] = useState<{ source: 'user' | 'wallet' | 'public' | 'cache'; at: number } | null>(null);
   const [refundCalldata, setRefundCalldata] = useState('');
 
   const demo = () => {
@@ -83,6 +85,7 @@ export default function IntentLens7683() {
         if (!isTxHash(txhash.trim())) throw new Error('Provide a valid origin transaction hash (0x + 64 hex).');
         const tx = await getTx(chainId, txhash.trim());
         if (!tx.data) throw new Error('Transaction not found (choose a different origin network?).');
+        setLiveSrc({ source: tx.source, at: tx.at });
         o = await decodeOpenCalldata(String(tx.data.input));
         o.originSettler = o.originSettler ?? String((tx.data as Record<string, unknown>).to ?? '');
       }
@@ -98,6 +101,7 @@ export default function IntentLens7683() {
           if (blk.data) {
             setNowTs(Number(BigInt(String(blk.data.timestamp))));
             setChainNote(`Time base: latest block of destination chain ${destChainId}.`);
+            setLiveSrc((prev) => prev ?? { source: blk.source, at: blk.at });
           }
         } catch {
           setNowTs(Math.floor(Date.now() / 1000));
@@ -239,6 +243,11 @@ export default function IntentLens7683() {
             }
             detail={chainNote}
           />
+          {liveSrc && (
+            <p className="text-xs text-dim -mt-2 mb-2">
+              Live data source: <SourceBadge source={liveSrc.source} at={liveSrc.at} />
+            </p>
+          )}
           <KpiGrid>
             <Kpi label="Decoding" value={order.decodeConfidence} tone={order.decodeConfidence === 'raw' ? 'red' : order.decodeConfidence === 'partial' ? 'amber' : 'green'} />
             <Kpi label="Spread (implizit)" value={spread ? spread.spreadPct.toFixed(3) + ' %' : 'n/a'} tone={spread && spread.spreadPct > 3 ? 'amber' : 'default'} />

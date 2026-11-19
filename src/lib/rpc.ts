@@ -64,6 +64,8 @@ export type RpcSource = 'user' | 'wallet' | 'public' | 'cache';
 export interface RpcResult<T = unknown> {
   data: T;
   source: RpcSource;
+  /** epoch ms — when this answer was produced (cache hits keep the original fetch time). */
+  at: number;
   endpoint?: string; // internal; never show by name in the UI
 }
 
@@ -172,15 +174,15 @@ export async function rpcCall<T = unknown>(
   if (!opts.noCache) {
     const hit = await idbGet<{ t: number; v: T }>('rpc-cache', key);
     if (hit && Date.now() - hit.t < ttlFor(method, params) * 1000) {
-      return { data: hit.v, source: 'cache' };
+      return { data: hit.v, source: 'cache', at: hit.t };
     }
     const existing = inflight.get(key);
     if (existing) {
-      return (await existing) as { data: T; source: RpcSource };
+      return (await existing) as RpcResult<T>;
     }
   }
 
-  const run = (async (): Promise<{ data: T; source: RpcSource }> => {
+  const run = (async (): Promise<RpcResult<T>> => {
     const chain = chainById(chainId);
     const candidates: { url: string; source: RpcSource }[] = [];
     const userUrl = getUserRpc(chainId);
@@ -195,7 +197,7 @@ export async function rpcCall<T = unknown>(
         if (cid === chainId) {
           try {
             const v = (await p.request({ method, params })) as T;
-            return { data: v, source: 'wallet' };
+            return { data: v, source: 'wallet', at: Date.now() };
           } catch {
             /* wallet channel not usable — continue with HTTPS */
           }
@@ -211,7 +213,7 @@ export async function rpcCall<T = unknown>(
         if (!opts.noCache) {
           void idbSet('rpc-cache', key, { t: Date.now(), v });
         }
-        return { data: v, source: c.source };
+        return { data: v, source: c.source, at: Date.now() };
       } catch {
         attempt += 1;
         await sleep(Math.min(400 * 2 ** attempt, 4000));

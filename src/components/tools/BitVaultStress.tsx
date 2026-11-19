@@ -41,6 +41,7 @@ interface Analysis {
   utxos: (DustResult & { rate: number })[];
   rate: number;
   source?: 'public' | 'offline' | 'user' | 'wallet' | 'cache' | undefined;
+  at?: number | undefined;
   address?: string | undefined;
 }
 
@@ -123,6 +124,7 @@ Path weights: ${a.paths.map((p) => `\n  - ${esc(p.label)}: ${p.vbytes} vB (scrip
 export default function BitVaultStress() {
   const [input, setInput] = useState('');
   const [utxoText, setUtxoText] = useState('');
+  const [utxoFetchedAt, setUtxoFetchedAt] = useState<number | null>(null);
   const [fetchAddress, setFetchAddress] = useState('');
   const [rate, setRate] = useState(10);
 
@@ -157,6 +159,7 @@ export default function BitVaultStress() {
           const list = (await res.json()) as { txid: string; vout: number; value: number }[];
           const text = list.map((u) => `${u.txid};${u.vout};${u.value}`).join('\n');
           setUtxoText(`txid;vout;sats\n${text}`);
+          setUtxoFetchedAt(Date.now());
           setError('');
           setBusy(false);
           return;
@@ -253,7 +256,8 @@ export default function BitVaultStress() {
         warnings: uniq,
         utxos: results,
         rate,
-        source: utxoText.includes('demo') || utxos.length ? (utxoText.includes('demo') ? 'offline' : 'user') : 'offline',
+        source: utxoText.includes('demo') ? 'offline' : utxoFetchedAt ? 'public' : utxos.length ? 'user' : 'offline',
+        at: utxoFetchedAt ?? undefined,
         address: fetchAddress.trim() || undefined,
       });
     } catch (e) {
@@ -332,7 +336,7 @@ export default function BitVaultStress() {
         </div>
         <div>
           <label className="label" htmlFor="bv-utxo">UTXO list (CSV "txid;vout;sats" or JSON)</label>
-          <textarea id="bv-utxo" className="textarea mono" rows={5} value={utxoText} onChange={(e) => setUtxoText(e.target.value)} placeholder={'txid;vout;sats\n… '} />
+          <textarea id="bv-utxo" className="textarea mono" rows={5} value={utxoText} onChange={(e) => { setUtxoText(e.target.value); setUtxoFetchedAt(null); }} placeholder={'txid;vout;sats\n… '} />
         </div>
         {blocked && (
           <div className="status-tile status-red">
@@ -403,7 +407,7 @@ export default function BitVaultStress() {
           <div className="flex flex-wrap gap-2 items-center text-xs text-dim">
             <span className="badge badge-green">Compiler: {analysis.usedCompiler}</span>
             {analysis.issane != null && <span className={`badge ${analysis.issane ? 'badge-green' : 'badge-red'}`}>sane: {String(analysis.issane)}</span>}
-            <SourceBadge source={analysis.source} />
+            <SourceBadge source={analysis.source} at={analysis.at} />
           </div>
 
           <details className="acc">
