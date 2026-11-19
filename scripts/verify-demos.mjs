@@ -569,6 +569,8 @@ function existsDistWellKnown() {
   ok(sg.includes('cross') && sg.includes('matches chain') === false && sg.includes('CrossBadge') && /getCode\(refChain/.test(sg), 'LIVE: SlotGuard cross-checks pasted bytecode vs eth_getCode');
   const uo = readFileSync('src/components/tools/UseropAutopsy.tsx', 'utf8');
   ok(uo.includes('CrossBadge') && /getTxReceipt\(chainId, t\.hash\)/.test(uo), 'LIVE: UseropAutopsy cross-checks pasted receipts vs live chain');
+  const d8c = readFileSync('src/components/tools/Dac8SelfProof.tsx', 'utf8');
+  ok(d8c.includes('CrossBadge') && /facts\.source !== 'manual'/.test(d8c) && /fetchBtcTx\(id\)/.test(d8c), 'LIVE: DAC8 cross-checks manual/certificate facts vs live chain (anti-forgery)');
 }
 
 // ---------------------------------------------------------------- HYGIENE: docs drift lock-in (last check)

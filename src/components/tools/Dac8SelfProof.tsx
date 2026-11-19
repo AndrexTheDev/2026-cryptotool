@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   CopyButton,
+  CrossBadge,
   DemoButton,
   ErrorNote,
   ExportBar,
@@ -34,6 +35,8 @@ interface TxFacts {
   /** Live provenance (online fetches only): which channel answered, and when. */
   rpcSource?: 'user' | 'wallet' | 'public' | 'cache' | undefined;
   rpcAt?: number | undefined;
+  /** Pasted-vs-live cross-check (manual facts / certificate links): claims vs chain state. */
+  cross?: 'match' | 'mismatch' | 'unavailable' | undefined;
 }
 
 interface Cert {
@@ -197,6 +200,34 @@ export default function Dac8SelfProof() {
       }
     }
   }, []);
+
+  // Live-first doctrine (Wave 36/37): manually entered facts and certificate-link
+  // claims are automatically cross-checked against the live chain. A certificate
+  // that asserts a false block/time is flagged MISMATCH instead of looking plausible.
+  useEffect(() => {
+    if (!facts || facts.source !== 'manual' || facts.cross) return;
+    const id = facts.txid;
+    const valid = facts.asset === 'btc' ? isBitcoinTxid(id) : isTxHash(id);
+    if (!valid) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const live = facts.asset === 'btc' ? await fetchBtcTx(id) : await fetchEvmTx(chainId, id);
+        if (cancelled) return;
+        const checks: boolean[] = [];
+        if (facts.blockHeight != null && live.blockHeight != null) checks.push(facts.blockHeight === live.blockHeight);
+        if (facts.timestamp != null && live.timestamp != null) checks.push(Math.abs(facts.timestamp - live.timestamp) <= 7200);
+        if (facts.blockHash && live.blockHash) checks.push(facts.blockHash.toLowerCase() === live.blockHash.toLowerCase());
+        setFacts((prev) => (prev && prev.txid === id && !prev.cross ? { ...prev, cross: checks.length === 0 ? 'unavailable' : checks.every(Boolean) ? 'match' : 'mismatch' } : prev));
+      } catch {
+        if (!cancelled) setFacts((prev) => (prev && prev.txid === id && !prev.cross ? { ...prev, cross: 'unavailable' } : prev));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [facts, chainId]);
 
   const demo = () => {
     setAsset('btc');
@@ -519,6 +550,17 @@ export default function Dac8SelfProof() {
               {facts.source === 'online' && (
                 <p className="text-xs text-dim">
                   Live data source: <SourceBadge source={facts.rpcSource} at={facts.rpcAt} />
+                </p>
+              )}
+              {facts.source === 'manual' && facts.cross && (
+                <p className="text-xs text-dim">
+                  Manual/certificate claims vs chain: <CrossBadge verdict={facts.cross} />
+                </p>
+              )}
+              {facts.cross === 'mismatch' && (
+                <p className="badge badge-red whitespace-normal text-left">
+                  Cross-check failed: the claimed block/time does not match the live transaction — wrong network, typo, or a
+                  forged certificate. Fetch the transaction live for the authoritative facts.
                 </p>
               )}
             </>

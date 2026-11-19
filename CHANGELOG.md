@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-17 — Wave 37: DAC8 certificate anti-forgery cross-check
+
+The highest-value pasted-vs-live pair: **DAC8 SelfProof certificate links** (`#verify=…`) and manually entered facts. A forged certificate previously rendered plausibly; now the claimed block/time is automatically re-fetched live and compared.
+
+- **Dac8SelfProof:** whenever facts come from manual entry or a certificate link (`source: 'manual'`) and the txid is valid, the transaction is fetched live (BTC esplora / EVM RPC) and compared — block height strictly, block time with ±2 h tolerance, block hash strictly. Verdict badge via the shared `CrossBadge`; mismatch raises a red anti-forgery warning. No comparable fields or unreachable network → honest "cross-check unavailable".
+- **Lock-in:** LIVE module asserts the wiring. **141 → 142 checks** (README + CI label synced).
+
+With this wave every tool that accepts externally-claimed data (pasted bytecode, pasted receipts, manual facts, certificate links) cross-checks it against the live network of truth. The live-first doctrine is fully implemented.
+
 ## 2026-11-17 — Wave 36: Pasted-vs-live cross-checks (doctrine wave 3)
 
 Pasted data is no longer trusted on its own — where the same entity is queryable on-chain, the tool automatically fetches it and flags divergence.

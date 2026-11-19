@@ -40,5 +40,5 @@ jobs:
       - name: Dependency audit (full, all severities) — informational
         run: npm audit --audit-level=high || true
 
-      - name: Demo-Regression (141 Checks)
+      - name: Demo-Regression (142 Checks)
         run: node --experimental-strip-types scripts/verify-demos.mjs
