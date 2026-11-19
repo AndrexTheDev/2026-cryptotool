@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-11-17 — Wave 39: Full beta-test suite — module by module, user perspective
+
+New `scripts/beta-test.mjs` (**70 checks**, zero new runtime deps — esbuild pinned as explicit devDependency, version already locked by the existing override):
+
+- **A — lib functional + adversarial inputs:** format roundtrips (hex/utf8/wei incl. umlaut+emoji), CSV escaping (quotes/semicolons/newlines/CRLF), x402 parsers (broken JSON, BOM+CRLF requirements.txt, go.mod, boundary versions — fix version must NOT flag), HAR payment-header detection (case-insensitive), ERC-7715 radar, contenthash decoding (valid IPFS cidv1 vector, garbage, empty).
+- **B — SSR render smoke, all 10 tools:** each component is bundled (esbuild) and server-rendered via `renderToString` — exactly what the astro island build does; a crash here would break production. Asserts render size, the tool's primary input id, and the demo-button wiring.
+- **C — live paths:** real `fetchLatestNpm('fflate')` against the npm registry; RPC degradation (`getUserRpc`/`setUserRpc` SSR-safe without `window`; unknown chain → typed `RpcError`, no hang); cross-check wiring contracts (SlotGuard/UseropAutopsy/DAC8/X402).
+- Fix en route: `RpcError` refactored off TS parameter properties → `rpc.ts` is now strip-types testable like every other lib.
+- Wired in: `npm run test:beta`, part of `npm run verify`, CI step "Beta-Tests", README documented.
+
+Local: 70/70 beta, 142/142 demo, tsc 0 (both modes).
+
 ## 2026-11-17 — Wave 38: Copy audit for the live-first doctrine + external freshness
 
 - **External freshness:** Glamsterdam re-checked — Hoodi postponement reason now documented in PasskeyContinuity (ChainSecurity: EIP-8037 gas repricing can lock mainnet contracts into failure states, 13 documented real-world cases; still no new date, EIP-7773 leaves mainnet open). ROADMAP tracks it as open follow-up with trigger and now reflects the live-first state (Waves 34–38 resolved). typescript 7.0.2 = latest (7.1 not released), picomatch 4.0.7 (blocker unchanged), `npm audit` → 0 vulnerabilities.

@@ -32,7 +32,8 @@ npm run build      # production build into dist/
 npm run preview    # serve dist/ locally
 npm run audit      # policy audit over dist/ (after build)
 npm run test:demos # 142-check demo regression of all 10 modules
-npm run verify     # full pipeline: typecheck + build + audit-dist + audit:deps (npm audit, critical) + test:demos
+npm run test:beta  # 70-check beta suite: adversarial lib tests + SSR render smoke of all 10 tools + live npm/RPC paths
+npm run verify     # full pipeline: typecheck + build + audit-dist + audit:deps + test:demos + test:beta
 ```
 
 ## Architecture rules (safety invariants)
