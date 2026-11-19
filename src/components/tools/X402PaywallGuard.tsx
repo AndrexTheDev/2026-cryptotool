@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   CopyButton,
   DemoButton,
@@ -12,6 +12,7 @@ import {
   type StatusLevel,
 } from '../react/ui';
 import { downloadCSV, downloadJSON } from '../../lib/export';
+import { clearNpmLiveCache, fetchLatestNpm, type NpmLiveInfo } from '../../lib/npm-live';
 import {
   analyzePolicy7715,
   parseDependencies,
@@ -19,6 +20,7 @@ import {
   reconcileDeliveries,
   scanCodePatterns,
   scanDependencies,
+  semverBelow,
   type DeliveryFinding,
 } from '../../lib/x402';
 
@@ -101,11 +103,37 @@ export default function X402PaywallGuard() {
   const [report, setReport] = useState<{
     deps: ReturnType<typeof scanDependencies>;
     depsParsed: number;
+    depsList: ReturnType<typeof parseDependencies>;
     codeFindings: ReturnType<typeof scanCodePatterns>;
     policy: ReturnType<typeof analyzePolicy7715>;
     delivery: DeliveryFinding[];
     harEntries: number;
   } | null>(null);
+
+  // Live npm registry verification: runs automatically after every scan that
+  // detected npm dependencies. Keyed by package name; null = unreachable.
+  const [live, setLive] = useState<Record<string, NpmLiveInfo | null>>({});
+  const [livePending, setLivePending] = useState(false);
+  const [liveNonce, setLiveNonce] = useState(0);
+
+  useEffect(() => {
+    const names = [...new Set((report?.depsList ?? []).filter((d) => d.ecosystem === 'npm').map((d) => d.name))];
+    if (!names.length) {
+      setLive({});
+      setLivePending(false);
+      return;
+    }
+    let cancelled = false;
+    setLivePending(true);
+    void Promise.all(names.map(async (n) => [n, await fetchLatestNpm(n)] as const)).then((rows) => {
+      if (cancelled) return;
+      setLive(Object.fromEntries(rows));
+      setLivePending(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [report, liveNonce]);
 
   const demo = () => {
     setLockText(DEMO_LOCK);
@@ -137,7 +165,7 @@ export default function X402PaywallGuard() {
     const pol = policy.trim() ? analyzePolicy7715(policy) : analyzePolicy7715('{}');
     const entries = harText.trim() ? parseHar(harText) : [];
     const delivery = reconcileDeliveries(entries);
-    setReport({ deps: depFindings, depsParsed: deps.length, codeFindings, policy: pol, delivery, harEntries: entries.length });
+    setReport({ deps: depFindings, depsParsed: deps.length, depsList: deps, codeFindings, policy: pol, delivery, harEntries: entries.length });
     setRan(true);
   };
 
@@ -243,6 +271,66 @@ export default function X402PaywallGuard() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </details>
+          )}
+
+          {report.depsList.some((d) => d.ecosystem === 'npm') && (
+            <details className="acc" open>
+              <summary>
+                Live registry check ({report.depsList.filter((d) => d.ecosystem === 'npm').length} npm packages
+                {livePending ? ' — querying…' : ''})
+              </summary>
+              <div className="acc-body space-y-3">
+                <p className="text-xs text-dim">
+                  Each detected npm package is verified live against the npm registry: your browser connects directly to
+                  registry.npmjs.org (read-only, no API key, no operator proxy). Only the package names are requested —
+                  no other input leaves your device. Findings above stay valid even when the registry is unreachable.
+                </p>
+                <div className="overflow-x-auto">
+                  <table className="table-x">
+                    <thead>
+                      <tr>
+                        <th>Package</th>
+                        <th>Scanned</th>
+                        <th>Latest (live)</th>
+                        <th>Released</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[...new Map(report.depsList.filter((d) => d.ecosystem === 'npm').map((d) => [d.name, d])).values()].map((d) => {
+                        const info = live[d.name];
+                        const state = livePending && info === undefined ? 'pending' : info == null ? 'unreachable' : semverBelow(d.version, info.version) ? 'update' : 'current';
+                        return (
+                          <tr key={d.name}>
+                            <td className="mono text-xs">{d.name}</td>
+                            <td className="mono">{d.version}</td>
+                            <td className="mono">{info?.version ?? (state === 'pending' ? '…' : '—')}</td>
+                            <td className="text-xs">{info?.publishedAt ? info.publishedAt.slice(0, 10) : '—'}</td>
+                            <td>
+                              {state === 'pending' && <span className="badge">checking…</span>}
+                              {state === 'unreachable' && <span className="badge">registry unreachable</span>}
+                              {state === 'update' && <span className="badge badge-amber">update available</span>}
+                              {state === 'current' && <span className="badge badge-green">current</span>}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                <button
+                  type="button"
+                  className="btn-ghost text-xs"
+                  onClick={() => {
+                    clearNpmLiveCache();
+                    setLive({});
+                    setLiveNonce((n) => n + 1);
+                  }}
+                >
+                  Re-verify live
+                </button>
               </div>
             </details>
           )}

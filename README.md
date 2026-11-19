@@ -31,7 +31,7 @@ npm run dev        # dev server
 npm run build      # production build into dist/
 npm run preview    # serve dist/ locally
 npm run audit      # policy audit over dist/ (after build)
-npm run test:demos # 132-check demo regression of all 10 modules
+npm run test:demos # 135-check demo regression of all 10 modules
 npm run verify     # full pipeline: typecheck + build + audit-dist + audit:deps (npm audit, critical) + test:demos
 ```
 

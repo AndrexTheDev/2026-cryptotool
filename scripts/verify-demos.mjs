@@ -108,6 +108,7 @@ function extractConst(src, name, kind) {
   ok(semverBelow('0.4.9', '0.5.2') && !semverBelow('0.5.2', '0.5.2'), 'M07: semver 0.x edge');
 
   const src = readFileSync('src/components/tools/X402PaywallGuard.tsx', 'utf8');
+  ok(/npm-live/.test(src), 'M07: x402 guard wires the live npm registry check');
   const pm = extractConst(src, 'DEMO_LOCK', 'json');
   const deps = parseDependencies(JSON.stringify(pm), 'package-lock.json');
   ok(deps.length > 0, `M07: ${deps.length} dependencies from lockfile`);
@@ -131,6 +132,11 @@ function extractConst(src, name, kind) {
   ok(har[0].hadPaymentHeader === true && har[1].hadPaymentHeader === false, 'M07: payment header detection');
   const rec = reconcileDeliveries(har);
   ok(rec.length === 1 && /502/.test(rec[0].issue), `M07: reconcile finds paid-but-${rec.length === 1 ? 'failed' : '?'} (${rec.length} finding)`);
+
+  // live npm registry layer (pure functions only — no network in CI)
+  const { npmRegistryUrl, isNpmPackageName } = await import('../src/lib/npm-live.ts');
+  ok(npmRegistryUrl('@x402/core') === 'https://registry.npmjs.org/%40x402%2Fcore', 'M07: npm registry URL encodes scoped names');
+  ok(isNpmPackageName('@x402/core') && isNpmPackageName('x402') && !isNpmPackageName('../evil'), 'M07: npm package name validation');
 }
 
 // ---------------------------------------------------------------- x402 threshold lock-in (2026 advisory status)
