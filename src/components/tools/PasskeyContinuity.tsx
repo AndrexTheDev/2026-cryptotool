@@ -385,8 +385,10 @@ becoming visible — that is why the positive proof (32B=1) with a real vector i
                 (17.12.2025) and BPO-2 (07.01.2026) raised blob capacity stepwise to 14 target / 21
                 max blobs per block; the next major fork is <strong>Glamsterdam</strong> (ePBS via EIP-7732,
                 block-level access lists via EIP-7928) — active on Sepolia since 06.10.2026; the Hoodi testnet
-                fork (planned for 26.10.2026) was postponed on 22.10.2026 with no new date, so the floated
-                December mainnet candidates lapsed — no mainnet date is fixed (EIP-7773 leaves it open). The live test above
+                fork (planned for 26.10.2026) was postponed on 22.10.2026 after a ChainSecurity audit found that the
+                EIP-8037 gas repricing can lock mainnet contracts into failure states (13 documented real-world cases) —
+                no new date, so the floated December mainnet candidates lapsed; no mainnet date is fixed (EIP-7773
+                leaves it open). The live test above
                 nevertheless verifies every selected chain individually — chain lists change faster than
                 static documentation.
               </p>

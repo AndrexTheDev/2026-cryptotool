@@ -4,7 +4,7 @@
   <img src="public/logo.png" alt="StackAutopsy logo — three-layer stack with the dissected middle layer in gold" width="360" />
 </p>
 
-Ten specialized Web3, Bitcoin and compliance tools, executed **fully locally in the browser**: no accounts, no server upload, no tracking pixels. Static site generation with **Astro 7 + React islands + TypeScript + Tailwind 4**.
+Ten specialized Web3, Bitcoin and compliance tools, computed **locally in the browser** and verified **live against the networks of truth**: no accounts, no operator server, no tracking pixels. Static site generation with **Astro 7 + React islands + TypeScript + Tailwind 4**.
 
 The UI language is English. The legal pages (`/agb`, `/disclaimer`, `/datenschutz`) keep their German URL slugs by design; their content is provided in English as well.
 
@@ -41,7 +41,7 @@ npm run verify     # full pipeline: typecheck + build + audit-dist + audit:deps 
 - **Route-level code splitting**: heavy crypto modules (`viem`, `@noble/*`, `bitcoinjs-lib`, `bip322-js`) are loaded exclusively via dynamic `import()` from tool islands — see `manualChunks` in `astro.config.mjs`.
 - **Landing + legal = 0 KB JS**: `BaseLayout shell="static"` suppresses the `GlobalApp` hydration; only tool pages use `shell="interactive"`.
 - **No seed phrases/private keys**: BitVault-Stress actively blocks mnemonics; StealthAudit only accepts viewing keys and never exports key material.
-- **Offline-first**: every module has manual input or file fallbacks; RPC endpoints are user-replaceable (`RpcPanel`, persisted locally).
+- **Live-first**: chain data is fetched live by default — browser-direct to public read endpoints (user-replaceable via `RpcPanel`, persisted locally); every answer shows its source + time (`SourceBadge`), and pasted claims are automatically cross-checked against the chain (`CrossBadge`). **Offline fallbacks** (manual input, files, dumps) exist in every module; live checks then report "unavailable" instead of blocking.
 - **Determinism**: risk scores and thresholds are documented fixed in the module code.
 
 ## Phase-5 audit

@@ -9,7 +9,7 @@ export const GET: APIRoute = () => {
   lines.push(`# ${BRAND} — ${SUITE_NAME}`);
   lines.push('');
   lines.push(
-    '> Ten specialized Web3, Bitcoin and compliance tools for forensic security diagnostics, executed entirely locally in the browser: no accounts, no central data storage, no entry of private keys. All modules follow an identical 3-step principle (input, check, traffic-light report) with demo datasets, offline modes and portable exports (JSON, CSV, print/PDF, offline HTML).',
+    '> Ten specialized Web3, Bitcoin and compliance tools for forensic security diagnostics, computed locally in the browser and verified live against the public networks: no accounts, no central data storage, no entry of private keys. All modules follow an identical 3-step principle (input, check, traffic-light report) with demo datasets, offline modes, live cross-checks of pasted claims and portable exports (JSON, CSV, print/PDF, offline HTML).',
   );
   lines.push('');
   lines.push(`Operator: ${BRAND} · Contact: ${CONTACT_EMAIL}`);
@@ -29,7 +29,7 @@ export const GET: APIRoute = () => {
   lines.push('## Technical framework');
   lines.push('');
   lines.push('- Client-side processing without central data storage; local execution directly in the browser.');
-  lines.push('- Read calls go directly from the browser to blockchain endpoints chosen by the user; every module has an offline mode with manual or file-based input.');
+  lines.push('- Live verification: read calls go directly from the browser to public blockchain endpoints by default (user-configurable); pasted claims are cross-checked against the chain and flagged on mismatch; every module keeps an offline mode with manual or file-based input.');
   lines.push('- Voluntary on-chain support possible; no functional difference without support.');
   lines.push('- No investment, financial, legal or tax advice — all results are diagnostic indicators.');
   lines.push('');
