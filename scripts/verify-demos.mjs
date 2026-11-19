@@ -5,7 +5,7 @@
  * Run: node --experimental-strip-types scripts/verify-demos.mjs
  * Exit != 0 on any failure.
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 
 let failures = 0;
@@ -548,6 +548,20 @@ function existsDistWellKnown() {
   ok(d8.includes('31.01.2027') && d8.includes('31.07.2027') && d8.includes('30.09.2027')
      && d8.includes('EUR 50,000') && d8.includes('58 countries'),
      'M03: DAC8 deadlines 2027 (31.01./31.07./30.09.), fine range + CARF-58 documented');
+}
+
+// ---------------------------------------------------------------- LIVE-FIRST: every tool shows provenance (Wave 35)
+{
+  // Systematic live-status doctrine: every tool that can query live data must
+  // render the shared SourceBadge (source + answer time), and rpc.ts must
+  // timestamp every answer (RpcResult.at).
+  const tools = readdirSync('src/components/tools').filter((f) => f.endsWith('.tsx'));
+  const missing = tools.filter((f) => !readFileSync(`src/components/tools/${f}`, 'utf8').includes('SourceBadge'));
+  ok(tools.length === 10 && missing.length === 0, `LIVE: all 10 tools render SourceBadge (${tools.length - missing.length}/${tools.length})`);
+  const rpc = readFileSync('src/lib/rpc.ts', 'utf8');
+  ok(/at:\s*number/.test(rpc) && rpc.includes("source: 'cache', at:"), 'LIVE: rpc.ts timestamps every answer (RpcResult.at incl. cache hits)');
+  const ui = readFileSync('src/components/react/ui.tsx', 'utf8');
+  ok(ui.includes("'registry'") && ui.includes("'gateway'"), 'LIVE: SourceBadge covers registry + gateway sources');
 }
 
 // ---------------------------------------------------------------- HYGIENE: docs drift lock-in (last check)

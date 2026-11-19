@@ -6,6 +6,7 @@ import {
   ExportBar,
   Kpi,
   KpiGrid,
+  SourceBadge,
   StatusTile,
   StepSection,
   type StatusLevel,
@@ -64,6 +65,8 @@ interface TxAutopsy {
   gasPriceMarkupPct: number;
   tokenCharges: TokenCharge[];
   blockNumber: number;
+  source?: 'user' | 'wallet' | 'public' | 'cache' | undefined;
+  at?: number | undefined;
   error?: string;
 }
 
@@ -252,7 +255,7 @@ export default function UseropAutopsy() {
               out.push({ ...emptyTx(h), error: 'Receipt not found (different network? not yet confirmed?).' });
               continue;
             }
-            out.push(parseReceipt(h, rec.data));
+            out.push({ ...parseReceipt(h, rec.data), source: rec.source, at: rec.at });
           } catch (e) {
             out.push({ ...emptyTx(h), error: (e as Error).message });
           }
@@ -353,6 +356,7 @@ export default function UseropAutopsy() {
             <details key={r.hash} className="acc" open={results.length === 1}>
               <summary>
                 <span className="mono text-xs">{shortHex(r.hash, 14, 10)}</span>
+                <SourceBadge source={r.source} at={r.at} />
                 {r.error ? <span className="badge badge-red">Error</span> : <span className={r.marginPct > 15 ? 'badge badge-amber' : 'badge badge-green'}>{r.marginPct.toFixed(2)} %</span>}
               </summary>
               <div className="acc-body space-y-2">

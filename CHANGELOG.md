@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-17 — Wave 35: Uniform live provenance — every tool shows its data source
+
+**Live-first doctrine, wave 2:** every live answer across all 10 tools now carries uniform provenance, visible in the UI.
+
+- **`rpc.ts`: `RpcResult.at`** — every RPC answer is timestamped (epoch ms); cache hits honestly keep the original fetch time. All wrappers propagate it automatically.
+- **`SourceBadge` extended:** new sources `registry` (npm, live) and `gateway` (IPFS/ENS gateways) + optional `at` timestamp rendered as `· HH:MM:SS` (full ISO time in the tooltip).
+- **Rollout to all 10 tools:** UseropAutopsy (per-tx), IntentLens7683 (order + time base), PasskeyContinuity (per chain row), StvaUpgradeDiff (old/new impl comparison), StealthAudit5564 (last fetched log chunk), Dac8SelfProof (BTC esplora + EVM tx facts), X402PaywallGuard (registry check), BundleWatchEns (IPFS gateway fetch); BitVaultStress + SlotGuard7702 (already had badges) upgraded with `at` — and BitVault now distinguishes live-fetched (`public`) from pasted (`user`) UTXOs instead of mislabeling both.
+- **Lock-in:** demo regression gains a LIVE module — asserts all 10 tools render SourceBadge, rpc.ts timestamps every answer, SourceBadge covers registry+gateway. **135 → 138 checks** (README + CI label synced).
+
 ## 2026-11-17 — Wave 34: Live-first doctrine — X402 guard verifies against the npm registry
 
 **Doctrine change (owner directive):** StackAutopsy is an *online* security tool — checks are verified live against the network of truth, systematically. Status before this wave: 9/10 tools already live (7× EVM via the shared RPC manager, BitVaultStress + Dac8SelfProof via BTC APIs, BundleWatchEns via ENS/IPFS). The one remaining offline-only tool was X402PaywallGuard, which matched dependency versions against the embedded advisory DB only.

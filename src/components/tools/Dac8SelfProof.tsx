@@ -6,6 +6,7 @@ import {
   ExportBar,
   Kpi,
   KpiGrid,
+  SourceBadge,
   StatusTile,
   StepSection,
   type StatusLevel,
@@ -30,6 +31,9 @@ interface TxFacts {
   toLabel?: string;
   confirmed?: boolean | undefined;
   source: 'online' | 'manual' | 'offline-demo';
+  /** Live provenance (online fetches only): which channel answered, and when. */
+  rpcSource?: 'user' | 'wallet' | 'public' | 'cache' | undefined;
+  rpcAt?: number | undefined;
 }
 
 interface Cert {
@@ -102,6 +106,8 @@ async function fetchBtcTx(txid: string): Promise<TxFacts> {
         fromLabel: j.vin?.[0]?.prevout?.scriptpubkey_address ?? '',
         toLabel: vouts.map((o) => o.scriptpubkey_address).filter(Boolean).join(', '),
         source: 'online',
+        rpcSource: 'public',
+        rpcAt: Date.now(),
       };
     } catch (e) {
       lastErr = (e as Error).message;
@@ -137,6 +143,8 @@ async function fetchEvmTx(chainId: number, txid: string): Promise<TxFacts> {
     fromLabel: String(tx.data.from ?? ''),
     toLabel: String(tx.data.to ?? ''),
     source: 'online',
+    rpcSource: tx.source,
+    rpcAt: tx.at,
   };
 }
 
@@ -501,12 +509,19 @@ export default function Dac8SelfProof() {
           </button>
           {verifyResult && <StatusTile level={verifyResult.level} headline={verifyResult.headline} detail={verifyResult.detail} />}
           {facts && (
-            <KpiGrid>
-              <Kpi label="Asset" value={asset.toUpperCase()} />
-              <Kpi label="Block time (UTC)" value={facts.timestamp ? new Date(facts.timestamp * 1000).toLocaleString('en-GB') : 'manual/open'} />
-              <Kpi label="Amount" value={facts.amountLabel ?? '—'} />
-              <Kpi label="Confirmed" value={facts.confirmed == null ? 'n/a' : facts.confirmed ? 'yes' : 'no'} tone={facts.confirmed === false ? 'amber' : 'green'} />
-            </KpiGrid>
+            <>
+              <KpiGrid>
+                <Kpi label="Asset" value={asset.toUpperCase()} />
+                <Kpi label="Block time (UTC)" value={facts.timestamp ? new Date(facts.timestamp * 1000).toLocaleString('en-GB') : 'manual/open'} />
+                <Kpi label="Amount" value={facts.amountLabel ?? '—'} />
+                <Kpi label="Confirmed" value={facts.confirmed == null ? 'n/a' : facts.confirmed ? 'yes' : 'no'} tone={facts.confirmed === false ? 'amber' : 'green'} />
+              </KpiGrid>
+              {facts.source === 'online' && (
+                <p className="text-xs text-dim">
+                  Live data source: <SourceBadge source={facts.rpcSource} at={facts.rpcAt} />
+                </p>
+              )}
+            </>
           )}
           {overallLevel && cert && (
             <>

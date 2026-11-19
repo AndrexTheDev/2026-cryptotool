@@ -231,7 +231,14 @@ export function DemoButton({ onClick, label = 'Load demo scenario' }: { onClick:
   );
 }
 
-export function SourceBadge({ source }: { source?: 'user' | 'wallet' | 'public' | 'cache' | 'offline' | undefined }) {
+export function SourceBadge({
+  source,
+  at,
+}: {
+  source?: 'user' | 'wallet' | 'public' | 'cache' | 'offline' | 'registry' | 'gateway' | undefined;
+  /** epoch ms of the answer (RpcResult.at) — rendered as HH:MM:SS suffix. */
+  at?: number | undefined;
+}) {
   if (!source) return null;
   const map = {
     user: ['badge-green', 'Custom endpoint'],
@@ -239,7 +246,17 @@ export function SourceBadge({ source }: { source?: 'user' | 'wallet' | 'public' 
     public: ['badge-amber', 'Public endpoint'],
     cache: ['badge-green', 'Local cache'],
     offline: ['badge-amber', 'Offline mode'],
+    registry: ['badge-green', 'npm registry (live)'],
+    gateway: ['badge-amber', 'Public gateway'],
   } as const;
   const [cls, text] = map[source];
-  return <span className={`badge ${cls}`}>{text}</span>;
+  const t = at
+    ? ` · ${new Date(at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`
+    : '';
+  return (
+    <span className={`badge ${cls}`} title={at ? `Answered at ${new Date(at).toISOString()}` : undefined}>
+      {text}
+      {t}
+    </span>
+  );
 }

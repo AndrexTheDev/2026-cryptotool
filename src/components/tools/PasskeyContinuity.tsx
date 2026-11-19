@@ -6,6 +6,7 @@ import {
   ExportBar,
   Kpi,
   KpiGrid,
+  SourceBadge,
   StatusTile,
   StepSection,
   type StatusLevel,
@@ -39,6 +40,8 @@ interface ChainResult {
   malleabilityRaw?: string;
   signerCode?: 'contract' | 'empty' | 'unknown';
   accountCode?: 'contract' | 'empty' | 'unknown';
+  source?: 'user' | 'wallet' | 'public' | 'cache' | undefined;
+  at?: number | undefined;
   error?: string;
 }
 
@@ -138,6 +141,8 @@ export default function PasskeyContinuity() {
             const okRes = await ethCall(chainId, RIP7212_PRECOMPILE, vectorOk);
             row.precompileRaw = okRes.data;
             row.precompile = classifyCall(okRes.data);
+            row.source = okRes.source;
+            row.at = okRes.at;
 
             const hsRes = await ethCall(chainId, RIP7212_PRECOMPILE, vectorHighS);
             row.malleabilityRaw = hsRes.data;
@@ -314,7 +319,12 @@ export default function PasskeyContinuity() {
               <tbody>
                 {results.map((r) => (
                   <tr key={r.chainId}>
-                    <td>{chainById(r.chainId)?.name ?? `Chain ${r.chainId}`}</td>
+                    <td>
+                      {chainById(r.chainId)?.name ?? `Chain ${r.chainId}`}
+                      <div className="mt-1">
+                        <SourceBadge source={r.source} at={r.at} />
+                      </div>
+                    </td>
                     <td>
                       <span
                         className={`badge ${
