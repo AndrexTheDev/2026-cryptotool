@@ -33,7 +33,7 @@ npm run preview    # serve dist/ locally
 npm run audit      # policy audit over dist/ (after build)
 npm run test:demos # 142-check demo regression of all 10 modules
 npm run test:beta  # 70-check beta suite: adversarial lib tests + SSR render smoke of all 10 tools + live npm/RPC paths
-npm run test:interact # 40-check interaction suite: load demo → run → assert visible outcome, per tool (happy-dom)
+npm run test:interact # 54-check interaction suite (happy-dom): (1) demo → run → outcome per tool, (2) run without input → validation feedback, (3) cross-check verdicts end-to-end with mocked chain (match ✓ / MISMATCH)
 npm run verify     # full pipeline: typecheck + build + audit-dist + audit:deps + test:demos + test:beta + test:interact
 ```
 

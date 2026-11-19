@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-15 — Wave 41: Interaction suite — error paths + mocked cross-check verdicts
+
+`scripts/beta-interact.mjs` grows from 40 to **54 checks**, adding two phases:
+
+- **Phase 2 — error paths (10 checks):** every tool's primary action is clicked *without* any input. Each tool must surface visible validation feedback (provide/paste/enter/…), never a crash or a silent no-op.
+- **Phase 3 — cross-check verdicts end-to-end (4 checks):** with the chain mocked at the fetch layer, the Wave-36/37 anti-forgery feature is verified as a user sees it — SlotGuard: pasted bytecode == mocked `eth_getCode` → **"matches chain ✓"**; differing chain state → **"MISMATCH vs chain"** + stale/manipulated warning. DAC8: certificate facts == mocked esplora tx → **"matches chain ✓"**; forged block hash → **"MISMATCH vs chain"**.
+
+One test-side fix while developing: the mock initially fed SlotGuard only the `0xef0100` prefix (regex artifact on the concatenated constant), correctly producing MISMATCH — the suite now resolves the concatenated constant. Both badges render through the shared `CrossBadge` component, so the four checks cover every tool that inherits the cross-check UI.
+
 ## 2026-11-17 — Wave 40: Interaction tests — demo → run → outcome, per tool
 
 New `scripts/beta-interact.mjs` (**40 checks**, happy-dom): every tool is rendered in a real DOM, then driven like a user — click "Load demo scenario", click the primary action, await the outcome. External network is blocked except the npm registry, so this also proves graceful degradation (endpoint unreachable → clean error UI, never a crash).

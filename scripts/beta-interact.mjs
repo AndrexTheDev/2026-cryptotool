@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 // ============================================================================
-// beta-interact.mjs — true interaction tests, user perspective:
-// render each tool in a DOM, click "Load demo scenario", click the primary
-// run action, await the result, assert the outcome is visible.
+// beta-interact.mjs — true interaction tests, user perspective.
+//   Phase 1: render → load demo → run → outcome visible (per tool)
+//   Phase 2: run WITHOUT input → validation feedback visible, no crash
+//   Phase 3: cross-check verdicts end-to-end with a mocked chain —
+//            SlotGuard bytecode match/mismatch, DAC8 certificate match/mismatch
 // External network is blocked except the npm registry (allowed sandbox host);
 // unreachable endpoints must surface as graceful errors, never crashes.
 // ============================================================================
 
-import { mkdirSync, rmSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { Window } from 'happy-dom';
 
@@ -19,16 +21,35 @@ globalThis.localStorage = window.localStorage;
 try {
   Object.defineProperty(globalThis, 'navigator', { value: window.navigator, configurable: true });
 } catch {
-  /* node 22 navigator getter is fine for our purposes */
+  /* node 22 navigator getter is fine */
 }
 globalThis.HTMLElement = window.HTMLElement;
 globalThis.CustomEvent = window.CustomEvent;
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
-// fetch: npm registry real (allowed), everything else fails fast (degradation path)
+// ---- network: npm registry real; JSON-RPC + esplora via mutable mocks; rest blocked
+let evmCodeMock = null; // hex string returned for eth_getCode
+let btcTxMock = null; // object returned for GET .../tx/<txid>
 const realFetch = globalThis.fetch?.bind(globalThis);
 globalThis.fetch = async (url, init) => {
-  if (String(url).includes('registry.npmjs.org') && realFetch) return realFetch(url, init);
+  const u = String(url);
+  if (u.includes('registry.npmjs.org') && realFetch) return realFetch(url, init);
+  if (btcTxMock && /\/tx\/[0-9a-f]{64}$/.test(u)) {
+    return new window.Response(JSON.stringify(btcTxMock), { status: 200, headers: { 'content-type': 'application/json' } });
+  }
+  if (init?.method === 'POST' && typeof init.body === 'string') {
+    try {
+      const req = JSON.parse(init.body);
+      if (req.method === 'eth_getCode' && evmCodeMock != null) {
+        return new window.Response(JSON.stringify({ jsonrpc: '2.0', id: req.id ?? 1, result: evmCodeMock }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        });
+      }
+    } catch {
+      /* fall through */
+    }
+  }
   throw new Error('beta-interact: external fetch blocked (simulating offline/unreachable)');
 };
 
@@ -52,9 +73,59 @@ function t(name, cond, detail = '') {
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// [component, run-button regex, outcome regex, optional second step, wait ms]
+async function bundleTool(name) {
+  await esbuild.build({
+    entryPoints: [join('src/components/tools', `${name}.tsx`)],
+    bundle: true,
+    write: true,
+    outfile: join('.beta-cache', `${name}.mjs`),
+    format: 'esm',
+    jsx: 'automatic',
+    packages: 'external',
+    logLevel: 'silent',
+  });
+  return (await import(`../.beta-cache/${name}.mjs?${Date.now()}`)).default;
+}
+
+async function mount(Comp) {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  await act(async () => {
+    root.render(React.createElement(Comp));
+  });
+  return {
+    container,
+    async cleanup() {
+      await act(async () => root.unmount());
+      container.remove();
+    },
+  };
+}
+
+const clickRun = async (container, runRe) => {
+  const btn = [...container.querySelectorAll('button')].find(
+    (b) =>
+      /btn-primary/.test(b.className) &&
+      runRe.test(b.textContent ?? '') &&
+      !/demo|export|download|print|copy|csv|json|html/i.test(b.textContent ?? '') &&
+      !b.disabled,
+  );
+  if (btn) {
+    await act(async () => {
+      btn.click();
+    });
+  }
+  return !!btn;
+};
+
+mkdirSync('.beta-cache', { recursive: true });
+
+// ============================================================================
+// Phase 1: demo → run → outcome
+// ============================================================================
 const tools = [
-  ['SlotGuard7702', /analy|run|check|scan/i, /delegation|unreachable|error|throttled/i, null, 4000],
+  ['SlotGuard7702', /analy|run|check|scan/i, /delegation|unreachable|error|throttled|matches chain/i, null, 6000],
   ['UseropAutopsy', /analy|run|autopsy/i, /Receipt not found|unreachable|Error|margin/i, null, 4000],
   ['PasskeyContinuity', /test|check|run|probe/i, /error|revert|active|empty|unreachable|throttled/i, null, 20000],
   ['Dac8SelfProof', /generate challenge/i, /challenge|StackAutopsy\/DAC8|error|manual|block/i, /verify/i, 4000],
@@ -66,56 +137,24 @@ const tools = [
   ['StvaUpgradeDiff', /diff|compare|analy|run/i, /error|unreachable|pattern|impl|throttled/i, null, 4000],
 ];
 
-mkdirSync('.beta-cache', { recursive: true });
-
 for (const [name, runRe, outcomeRe, secondRe, waitMs] of tools) {
   try {
-    await esbuild.build({
-      entryPoints: [join('src/components/tools', `${name}.tsx`)],
-      bundle: true,
-      write: true,
-      outfile: join('.beta-cache', `${name}.mjs`),
-      format: 'esm',
-      jsx: 'automatic',
-      packages: 'external',
-      logLevel: 'silent',
-    });
-    const mod = await import(`../.beta-cache/${name}.mjs?${Date.now()}`);
-    const Comp = mod.default;
-
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    const root = createRoot(container);
-    await act(async () => {
-      root.render(React.createElement(Comp));
-    });
+    const Comp = await bundleTool(name);
+    const { container, cleanup } = await mount(Comp);
     const initialHtml = container.innerHTML;
 
-    // 1) click "Load demo scenario"
     const demoBtn = [...container.querySelectorAll('button')].find((b) => /load demo/i.test(b.textContent ?? ''));
-    t(`${name}: demo button clickable`, !!demoBtn);
+    t(`P1 ${name}: demo button clickable`, !!demoBtn);
     if (demoBtn) {
       await act(async () => {
         demoBtn.click();
       });
     }
 
-    // 2) click the primary run action (btn-primary, not demo/export/copy/print)
-    const runBtn = [...container.querySelectorAll('button')].find(
-      (b) =>
-        /btn-primary/.test(b.className) &&
-        runRe.test(b.textContent ?? '') &&
-        !/demo|export|download|print|copy|csv|json|html/i.test(b.textContent ?? ''),
-    );
-    t(`${name}: primary run action found`, !!runBtn);
-    if (runBtn) {
-      await act(async () => {
-        runBtn.click();
-        await sleep(waitMs); // let async analysis + endpoint backoff/degradation settle
-      });
-    }
+    const ran = await clickRun(container, runRe);
+    t(`P1 ${name}: primary run action found`, ran);
+    await act(async () => sleep(waitMs));
 
-    // optional second step (e.g. DAC8: "Generate challenge" → "Verify")
     if (secondRe) {
       const secondBtn = [...container.querySelectorAll('button')].find(
         (b) => /btn-primary/.test(b.className) && secondRe.test(b.textContent ?? '') && !b.disabled,
@@ -128,18 +167,95 @@ for (const [name, runRe, outcomeRe, secondRe, waitMs] of tools) {
       }
     }
 
-    // 3) outcome visible (result or graceful error) — DOM must have changed
     const html = container.innerHTML;
-    t(`${name}: run produced visible outcome`, html !== initialHtml && outcomeRe.test(html), outcomeRe.toString());
-    t(`${name}: no uncaught crash (container intact)`, container.isConnected && html.length > 800);
-
-    await act(async () => {
-      root.unmount();
-    });
-    container.remove();
+    t(`P1 ${name}: run produced visible outcome`, html !== initialHtml && outcomeRe.test(html), outcomeRe.toString());
+    t(`P1 ${name}: no uncaught crash (container intact)`, container.isConnected && html.length > 800);
+    await cleanup();
   } catch (e) {
-    t(`${name}: interaction flow`, false, String((e && e.message) || e));
+    t(`P1 ${name}: interaction flow`, false, String((e && e.message) || e));
   }
+}
+
+// ============================================================================
+// Phase 2: run WITHOUT input → visible validation feedback, no crash
+// ============================================================================
+const VALIDATION_RE = /provide|paste|enter|valid|select|required|please|no |invalid|error/i;
+for (const [name, runRe] of tools) {
+  try {
+    const Comp = await bundleTool(name);
+    const { container, cleanup } = await mount(Comp);
+    await clickRun(container, runRe);
+    await act(async () => sleep(1200));
+    const html = container.innerHTML;
+    t(`P2 ${name}: empty run → visible validation feedback`, VALIDATION_RE.test(html));
+    await cleanup();
+  } catch (e) {
+    t(`P2 ${name}: empty run`, false, String((e && e.message) || e));
+  }
+}
+
+// ============================================================================
+// Phase 3: cross-check verdicts with mocked chain (Wave 36/37 end-to-end)
+// ============================================================================
+{
+  // --- SlotGuard: pasted bytecode vs mocked eth_getCode ----------------------
+  const sgSrc = readFileSync('src/components/tools/SlotGuard7702.tsx', 'utf8');
+  const demoCode = sgSrc
+    .match(/DEMO_BYTECODE = ([^;]+);/)[1]
+    .split('+')
+    .map((s) => s.trim().replace(/^'|'$/g, ''))
+    .join('');
+
+  const SlotGuard = await bundleTool('SlotGuard7702');
+
+  evmCodeMock = demoCode; // chain says: exactly the pasted bytecode
+  let { container, cleanup } = await mount(SlotGuard);
+  await act(async () => {
+    [...container.querySelectorAll('button')].find((b) => /load demo/i.test(b.textContent ?? '')).click();
+  });
+  await clickRun(container, /analy|run|check|scan/i);
+  await act(async () => sleep(2500));
+  t('P3 SlotGuard: pasted == chain → "matches chain ✓"', container.innerHTML.includes('matches chain ✓'));
+  await cleanup();
+
+  evmCodeMock = '0xdeadbeef'; // chain disagrees
+  ({ container, cleanup } = await mount(SlotGuard));
+  await act(async () => {
+    [...container.querySelectorAll('button')].find((b) => /load demo/i.test(b.textContent ?? '')).click();
+  });
+  await clickRun(container, /analy|run|check|scan/i);
+  await act(async () => sleep(2500));
+  t('P3 SlotGuard: pasted != chain → "MISMATCH vs chain" + anti-forgery note', container.innerHTML.includes('MISMATCH vs chain') && /stale|manipulated/i.test(container.innerHTML));
+  await cleanup();
+  evmCodeMock = null;
+
+  // --- DAC8: certificate/manual facts vs mocked esplora ----------------------
+  const d8Src = readFileSync('src/components/tools/Dac8SelfProof.tsx', 'utf8');
+  const mBlock = d8Src.match(/manualBlock: '([^']+)'/)[1];
+  const mTime = d8Src.match(/manualTime: '([^']+)'/)[1];
+
+  const Dac8 = await bundleTool('Dac8SelfProof');
+
+  btcTxMock = { status: { block_hash: mBlock, block_height: 868000, block_time: Math.floor(Date.parse(mTime) / 1000), confirmed: true }, vout: [{ value: 50000 }], vin: [{ prevout: { value: 60000 } }] };
+  ({ container, cleanup } = await mount(Dac8));
+  await act(async () => {
+    [...container.querySelectorAll('button')].find((b) => /load demo/i.test(b.textContent ?? '')).click();
+  });
+  await clickRun(container, /generate challenge/i);
+  await act(async () => sleep(2500));
+  t('P3 DAC8: certificate facts == chain → "matches chain ✓"', container.innerHTML.includes('matches chain ✓'));
+  await cleanup();
+
+  btcTxMock = { status: { block_hash: '0'.repeat(64), block_height: 868000, block_time: Math.floor(Date.parse(mTime) / 1000), confirmed: true }, vout: [{ value: 50000 }], vin: [{ prevout: { value: 60000 } }] };
+  ({ container, cleanup } = await mount(Dac8));
+  await act(async () => {
+    [...container.querySelectorAll('button')].find((b) => /load demo/i.test(b.textContent ?? '')).click();
+  });
+  await clickRun(container, /generate challenge/i);
+  await act(async () => sleep(2500));
+  t('P3 DAC8: forged block hash → "MISMATCH vs chain" (anti-forgery fires)', container.innerHTML.includes('MISMATCH vs chain'));
+  await cleanup();
+  btcTxMock = null;
 }
 
 rmSync('.beta-cache', { recursive: true, force: true });
