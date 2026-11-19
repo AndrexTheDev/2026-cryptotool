@@ -9,7 +9,7 @@ const faq = [
   },
   {
     q: 'Where is my data processed?',
-    a: 'Exclusively in your browser: WebCrypto, workers and IndexedDB. There is no suite server that receives data. Optionally you can use public RPC endpoints of your choice for chain data — you configure that yourself, too.',
+    a: 'Exclusively in your browser: WebCrypto, workers and IndexedDB. There is no suite server that receives data. Live chain checks go directly from your browser to public read endpoints — you can configure your own — and pasted claims are automatically cross-checked against the chain.',
   },
   {
     q: 'Are the results legally binding?',
@@ -17,7 +17,7 @@ const faq = [
   },
   {
     q: 'Can I use the tools offline?',
-    a: 'Yes. Every tool has offline paths: manual inputs, dumps, files or signed artifacts. Once loaded, the page needs no server roundtrip for its core functions.',
+    a: 'Yes. Every tool has offline paths: manual inputs, dumps, files or signed artifacts. Once loaded, the page needs no server roundtrip for its core functions; live cross-checks then simply report “unavailable” instead of blocking you.',
   },
   {
     q: 'Why donations instead of a subscription?',
@@ -102,7 +102,7 @@ const steps = [
 
 <BaseLayout shell="static"
   title="Web3 Security Toolkit 2026 — 10 local audit tools"
-  description="Ten local Web3, Bitcoin and compliance tools: EIP-7702, DAC8, BIP-322, passkeys, x402, intents, privacy — in the browser, no signup."
+  description="Ten browser-local, live-verified Web3, Bitcoin and compliance tools: EIP-7702, DAC8, BIP-322, passkeys, x402, intents, privacy — in the browser, no signup."
   path="/"
   jsonLd={[faqLd, ...siteLd]}
 >
@@ -111,13 +111,13 @@ const steps = [
     <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(16,185,129,0.14),transparent)] pointer-events-none" />
     <div class="container-x relative py-16 sm:py-24 text-center">
       <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-prime-hi bg-prime-dim border border-mint/30 rounded-full px-4 py-1.5">
-        10 modules · 100 % local · no signup
+        10 modules · browser-local · live-verified · no signup
       </span>
       <h1 class="mt-6 text-4xl sm:text-6xl font-extrabold leading-[1.05] tracking-tight max-w-4xl mx-auto">
         Verify Web3 security, <span class="text-transparent bg-clip-text bg-gradient-to-r from-prime to-prime-hi">before you sign</span>.
       </h1>
       <p class="mt-5 text-base sm:text-lg text-dim max-w-2xl mx-auto">
-        EIP-7702 delegations, proxy upgrades, DAC8 findings, BIP-322 proofs, x402 middleware, intents, privacy and more — as locally running tools that send no data to servers.
+        EIP-7702 delegations, proxy upgrades, DAC8 findings, BIP-322 proofs, x402 middleware, intents, privacy and more — computed locally in your browser and cross-checked live against the chains. Nothing ever passes through an operator server.
       </p>
       <div class="mt-8 flex flex-wrap justify-center gap-3">
         <a href="#tools" class="btn btn-primary px-6 py-3 text-base">Explore tools</a>

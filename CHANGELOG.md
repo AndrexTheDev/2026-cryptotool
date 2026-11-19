@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-17 — Wave 38: Copy audit for the live-first doctrine
+
+After Waves 34–37 the product claim "local" needed precision work — the tools now verify live by default.
+
+- **Landing page:** hero pill `100 % local` → `browser-local · live-verified`; hero paragraph now states "computed locally in your browser and cross-checked live against the chains — nothing ever passes through an operator server"; FAQ "Where is my data processed?" now describes live-by-default read calls + automatic cross-checks (instead of "you configure that yourself"); FAQ "offline?" explains that cross-checks degrade to "unavailable" without network; meta description "local" → "browser-local, live-verified".
+- **llms.txt:** "executed entirely locally" → "computed locally … and verified live against the public networks"; endpoint description corrected from "chosen by the user" to "public by default, user-configurable".
+- **README:** feature line "Offline-first" → "**Live-first**" (default live, SourceBadge provenance, CrossBadge mismatch flags, offline fallbacks everywhere); intro updated accordingly.
+- Privacy page (`/datenschutz` §3) already disclosed direct endpoint connections precisely (IP visibility, own endpoints, offline modes) — unchanged, confirmed accurate.
+- Freshness re-audit (ROADMAP duty): `npm audit` → **0 vulnerabilities**; picomatch still 4.0.7 (external blocker unchanged).
+
 ## 2026-11-17 — Wave 37: DAC8 certificate anti-forgery cross-check
 
 The highest-value pasted-vs-live pair: **DAC8 SelfProof certificate links** (`#verify=…`) and manually entered facts. A forged certificate previously rendered plausibly; now the claimed block/time is automatically re-fetched live and compared.
