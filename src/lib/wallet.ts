@@ -35,11 +35,11 @@ export function discoverWallets(timeoutMs = 400): Promise<DiscoveredWallet[]> {
     window.dispatchEvent(new Event('eip6963:requestProvider'));
     setTimeout(() => {
       window.removeEventListener('eip6963:announceProvider', onAnnounce);
-      // Fallback: window.ethereum (vor-EIP-6963-Wallets)
+      // Fallback: window.ethereum (pre-EIP-6963 wallets)
       const w = window as unknown as { ethereum?: Eip1193Provider };
       if (found.size === 0 && w.ethereum) {
         found.set('legacy-injected', {
-          info: { uuid: 'legacy-injected', name: 'Injizierte Wallet', icon: '', rdns: '' },
+          info: { uuid: 'legacy-injected', name: 'Injected Wallet', icon: '', rdns: '' },
           provider: w.ethereum,
         });
       }

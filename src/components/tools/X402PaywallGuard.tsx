@@ -187,38 +187,38 @@ export default function X402PaywallGuard() {
 
   return (
     <div className="space-y-5">
-      <StepSection n={1} title="Collect artifacts" hint="Lockfile/manifest, SIWX/x402 code, ERC-7715 policy and optional HAR logs — everything stays local. Note: the draft (as of 09/2026) now calls the method wallet_requestExecutionPermissions; MetaMask integrations historically use wallet_grantPermissions.">
+      <StepSection n={1} title="Add your project files, code, or spending rules" hint="Paste any combination of lockfile, AI payment code, spending limits (ERC-7715), or request logs—everything stays in your browser. Tip: click “Load demo scenario” to see common mistakes caught right away. (Note: ERC-7715 now uses wallet_requestExecutionPermissions; older setups use wallet_grantPermissions.)">
         <div className="flex flex-wrap gap-2 items-center">
           <DemoButton onClick={demo} />
-          <span className="text-xs text-dim">Demo: vulnerable lockfile + vulnerable SIWX code + policy</span>
+          <span className="text-xs text-dim">Example: outdated x402 package + risky login code + loose spending rules</span>
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="label" htmlFor="x4-lock">package-lock.json / package.json / go.mod / requirements.txt</label>
+            <label className="label" htmlFor="x4-lock">Package list (package-lock.json, package.json, go.mod, requirements.txt)</label>
             <textarea id="x4-lock" className="textarea mono" rows={6} value={lockText} onChange={(e) => setLockText(e.target.value)} placeholder='{"packages":{…}}' />
-            <FileDrop label="…or drop a file" accept=".json,.mod,.txt,.lock" onFile={(c) => setLockText(c)} />
+            <FileDrop label="…or drop a file here" accept=".json,.mod,.txt,.lock" onFile={(c) => setLockText(c)} />
           </div>
           <div>
-            <label className="label" htmlFor="x4-code">SIWX/x402 code snippet</label>
-            <textarea id="x4-code" className="textarea mono" rows={6} value={code} onChange={(e) => setCode(e.target.value)} placeholder="// TypeScript/JS code of the payment or login middleware" />
+            <label className="label" htmlFor="x4-code">Login / payment code snippet (SIWX / x402)</label>
+            <textarea id="x4-code" className="textarea mono" rows={6} value={code} onChange={(e) => setCode(e.target.value)} placeholder="// Paste JS/TS payment or login code" />
           </div>
           <div>
-            <label className="label" htmlFor="x4-pol">ERC-7715 Policy-JSON (wallet_requestExecutionPermissions / wallet_grantPermissions)</label>
+            <label className="label" htmlFor="x4-pol">Agent spending rules (ERC-7715 JSON: wallet_requestExecutionPermissions / wallet_grantPermissions)</label>
             <textarea id="x4-pol" className="textarea mono" rows={5} value={policy} onChange={(e) => setPolicy(e.target.value)} placeholder='{"method":"wallet_grantPermissions", …}' />
           </div>
           <div>
-            <label className="label" htmlFor="x4-har">HTTP log / HAR (optional, delivery reconciliation)</label>
+            <label className="label" htmlFor="x4-har">HTTP traffic log / HAR file (optional: checks if paid calls actually delivered)</label>
             <textarea id="x4-har" className="textarea mono" rows={5} value={harText} onChange={(e) => setHarText(e.target.value)} placeholder='{"log":{"entries":[…]}}' />
-            <FileDrop label="Drop HAR file" accept=".har,.json" onFile={(c) => setHarText(c)} />
+            <FileDrop label="Drop a HAR log file" accept=".har,.json" onFile={(c) => setHarText(c)} />
           </div>
         </div>
       </StepSection>
 
-      <StepSection n={2} title="Run audit">
+      <StepSection n={2} title="Run safety scan">
         <p className="text-sm">
-          Compares package versions against the embedded vulnerability matrix (x402 lines), scans code patterns
-          (two-argument SIWX, transferChecked, approve discipline), rates the policy against 8 protection dimensions
-          and reconciles payment proofs against delivery status.
+          Checks package versions against known 2026 x402 security flaws and live npm releases, spots unsafe coding
+          patterns (missing replay checks, unlimited token approvals), scores spending limits across 8 safety rules, and
+          flags requests where payment succeeded but delivery failed.
         </p>
         <button className="btn btn-primary w-full sm:w-auto" onClick={run}>
           Analyze
@@ -227,22 +227,22 @@ export default function X402PaywallGuard() {
       </StepSection>
 
       {report && ran && (
-        <StepSection n={3} title="Criticality report">
+        <StepSection n={3} title="Security audit report">
           <StatusTile
             level={level!}
             headline={
               level === 'red'
-                ? 'Critical findings: do not deploy before patching'
+                ? 'Critical issues found: fix before going live'
                 : level === 'amber'
-                  ? 'Elevated risk: patches and policy hardening needed'
-                  : 'No known critical findings in the audited scope'
+                  ? 'Warnings found: update packages or tighten rules'
+                  : 'No known critical issues found'
             }
-            detail={`Audited: ${report.depsParsed} packages, ${report.codeFindings.length} code findings, policy ${policy.trim() ? `${report.policy.ok}/8 dimensions` : '—'}, ${report.delivery.length} delivery deficits.`}
+            detail={`Checked: ${report.depsParsed} packages, ${report.codeFindings.length} code issues, spending policy ${policy.trim() ? `${report.policy.ok}/8 safety checks` : 'not provided'}, ${report.delivery.length} failed paid deliveries.`}
           />
           <KpiGrid>
-            <Kpi label="Vulnerable dependencies" value={report.deps.length} tone={report.deps.length ? 'red' : 'green'} />
-            <Kpi label="Code pattern findings" value={report.codeFindings.length} tone={report.codeFindings.length ? 'amber' : 'green'} />
-            <Kpi label="Policy dimensions covered" value={policy.trim() ? `${report.policy.ok}/8` : 'n/a'} tone={policy.trim() ? (report.policy.ok >= 5 ? 'default' : 'amber') : 'default'} />
+            <Kpi label="Outdated / risky packages" value={report.deps.length} tone={report.deps.length ? 'red' : 'green'} />
+            <Kpi label="Code issues" value={report.codeFindings.length} tone={report.codeFindings.length ? 'amber' : 'green'} />
+            <Kpi label="Spending safety rules" value={policy.trim() ? `${report.policy.ok}/8` : 'n/a'} tone={policy.trim() ? (report.policy.ok >= 5 ? 'default' : 'amber') : 'default'} />
             <Kpi label="Paid, not delivered" value={report.delivery.length} tone={report.delivery.length ? 'red' : 'green'} />
           </KpiGrid>
 

@@ -15,7 +15,7 @@ export function StepSection({
   children: ReactNode;
 }) {
   return (
-    <section className="card p-5 sm:p-6" aria-label={`Schritt ${n}: ${title}`}>
+    <section className="card p-5 sm:p-6" aria-label={`Step ${n}: ${title}`}>
       <div className="flex items-center gap-3 mb-4">
         <span
           aria-hidden="true"
@@ -62,7 +62,7 @@ export function KpiGrid({ children }: { children: ReactNode }) {
   return <div className="grid grid-cols-2 md:grid-cols-4 gap-3">{children}</div>;
 }
 
-export function CopyButton({ text, label = 'Kopieren', compact }: { text: string; label?: string; compact?: boolean }) {
+export function CopyButton({ text, label = 'Copy', compact }: { text: string; label?: string; compact?: boolean }) {
   const [ok, setOk] = useState(false);
   return (
     <button
@@ -77,7 +77,7 @@ export function CopyButton({ text, label = 'Kopieren', compact }: { text: string
         }
       }}
     >
-      {ok ? '✓ Kopiert' : label}
+      {ok ? '✓ Copied' : label}
     </button>
   );
 }
@@ -109,7 +109,7 @@ export function ExportBar({
       )}
       {onPrint && (
         <button className="btn btn-ghost btn-sm" onClick={onPrint}>
-          ⬇ Druck / PDF
+          ⬇ Print / PDF (HTML)
         </button>
       )}
       {onHtml && (

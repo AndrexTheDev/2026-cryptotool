@@ -58,7 +58,7 @@ export const X402_ADVISORIES: Advisory[] = [
     match: (n) => /^@x402\/core$/.test(n),
     belowVersion: '2.27.0',
     severity: 'high',
-    summary: 'Separater Payment-Bypass im HTTP-Resource-Server von @x402/core. Fix: 2.27.0 (22.09.2026).',
+    summary: 'Separate payment bypass in the @x402/core HTTP resource server (lets callers skip payment checks). Fix: 2.27.0 (22.09.2026).',
   },
   {
     id: 'X402-CORE-2026-10',
@@ -85,7 +85,7 @@ export const X402_ADVISORIES: Advisory[] = [
     belowVersion: '2.28.1',
     severity: 'medium',
     summary:
-      'SIWX-Server-Extension Auth-Bypass: bezahlende Clients koennen unbezahlte Routen entsperren (PaymentPayload.resource URL). Betroffen 2.3.1–2.28.0; CVSS 6.5/6.9.',
+      'SIWX server auth bypass: paying clients can unlock unpaid routes via PaymentPayload.resource URL. Affected 2.3.1–2.28.0; CVSS 6.5/6.9.',
   },
   {
     id: 'PT-2026-118463-PY',
@@ -93,7 +93,7 @@ export const X402_ADVISORIES: Advisory[] = [
     match: (n) => /^x402/.test(n),
     belowVersion: '2.25.1',
     severity: 'medium',
-    summary: 'Python-x402-SIWX-Server: gleicher Auth-Bypass (PT-2026-118463), betroffen 2.11.0–2.25.0.',
+    summary: 'Python x402 SIWX server: same auth bypass (PT-2026-118463), affected 2.11.0–2.25.0.',
   },
   {
     id: 'PT-2026-118463-GO',
@@ -101,7 +101,7 @@ export const X402_ADVISORIES: Advisory[] = [
     match: (n) => /x402/i.test(n),
     belowVersion: '2.28.1',
     severity: 'medium',
-    summary: 'Go-Modul: SIWX-Server-Auth-Bypass (PT-2026-118463), betroffen 2.16.0–2.28.0.',
+    summary: 'Go module: SIWX server auth bypass (PT-2026-118463), affected 2.16.0–2.28.0.',
   },
   {
     id: 'X402-NPM-LEGACY',
@@ -286,7 +286,7 @@ export function scanCodePatterns(code: string): CodeFinding[] {
 }
 
 // ---------------------------------------------------------------------------
-// ERC-7715-Policy-Radar (8 Schutzdimensionen)
+// ERC-7715 policy radar (8 safety dimensions)
 // ---------------------------------------------------------------------------
 
 export interface PolicyDimension {
@@ -297,14 +297,14 @@ export interface PolicyDimension {
 }
 
 const DIMS: { id: string; label: string; keys: RegExp[] }[] = [
-  { id: 'perTx', label: 'Per-Transaction-Cap', keys: [/perTx|maxAmount|allowance|valueLimit|amountCap/i] },
-  { id: 'rolling', label: 'Rolling-Window-Cap', keys: [/rolling|periodLimit|budget.*(window|period)|windowCap/i] },
-  { id: 'recipient', label: 'Recipient-Allowlist', keys: [/recipient|allowlist|to:|targets/i] },
-  { id: 'token', label: 'Token-Restriktion', keys: [/token|asset|erc20|contractAddress/i] },
-  { id: 'time', label: 'Time window', keys: [/validFrom|validUntil|expiresAt|start.*end|notAfter/i] },
-  { id: 'fnlock', label: 'Function locks (selectors)', keys: [/selector|function.*(allow|deny)|abi|method/i] },
-  { id: 'rate', label: 'Rate-Limit', keys: [/rateLimit|maxCalls|callsPer|opsPer/i] },
-  { id: 'human', label: 'Human escalation threshold', keys: [/human|escalat|approval.*above|threshold.*confirm/i] },
+  { id: 'perTx', label: 'Per-Transaction Cap', keys: [/perTx|maxAmount|allowance|valueLimit|amountCap/i] },
+  { id: 'rolling', label: 'Rolling Window Cap', keys: [/rolling|periodLimit|budget.*(window|period)|windowCap/i] },
+  { id: 'recipient', label: 'Recipient Allowlist', keys: [/recipient|allowlist|to:|targets/i] },
+  { id: 'token', label: 'Token Restriction', keys: [/token|asset|erc20|contractAddress/i] },
+  { id: 'time', label: 'Time Window', keys: [/validFrom|validUntil|expiresAt|start.*end|notAfter/i] },
+  { id: 'fnlock', label: 'Allowed Functions (Selectors)', keys: [/selector|function.*(allow|deny)|abi|method/i] },
+  { id: 'rate', label: 'Rate Limit', keys: [/rateLimit|maxCalls|callsPer|opsPer/i] },
+  { id: 'human', label: 'Human Approval Threshold', keys: [/human|escalat|approval.*above|threshold.*confirm/i] },
 ];
 
 export function analyzePolicy7715(jsonText: string): { dims: PolicyDimension[]; ok: number; error?: string } {

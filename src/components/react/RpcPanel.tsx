@@ -63,8 +63,8 @@ export default function RpcPanel({ open, onClose }: { open: boolean; onClose: ()
           <div>
             <h2 className="text-lg">Network & data sources</h2>
             <p className="text-sm mt-1">
-              The suite runs entirely in your browser. Read calls go directly to the blockchain endpoints of your
-              choice — with no central data storage.
+              All checks run in your browser. When reading blockchain data, your browser connects directly to a public
+              blockchain reader (RPC node)—or a custom one you enter below.
             </p>
           </div>
           <button className="btn btn-ghost btn-sm" onClick={onClose} aria-label="Close">
@@ -75,7 +75,7 @@ export default function RpcPanel({ open, onClose }: { open: boolean; onClose: ()
         <div className="mt-4 space-y-3">
           <div>
             <label className="label" htmlFor="rpc-chain">
-              Network
+              Blockchain network
             </label>
             <select
               id="rpc-chain"
@@ -95,17 +95,17 @@ export default function RpcPanel({ open, onClose }: { open: boolean; onClose: ()
           </div>
           <div>
             <label className="label" htmlFor="rpc-url">
-              Custom RPC endpoint (optional)
+              Your own reader address / RPC URL (optional)
             </label>
             <input
               id="rpc-url"
               className="input mono"
-              placeholder={current ?? 'https://… (your own endpoint)'}
+              placeholder={current ?? 'https://… (leave empty to use public readers)'}
               value={value}
               onChange={(e) => setValue(e.target.value)}
             />
             <p className="text-xs text-dim mt-1">
-              Alternatively via URL for all tools: <code>?ds-rpc-{chainId}=https://…</code>
+              Tip: you can also set this via URL: <code>?ds-rpc-{chainId}=https://…</code>
             </p>
           </div>
           <div className="flex gap-2">
@@ -119,11 +119,11 @@ export default function RpcPanel({ open, onClose }: { open: boolean; onClose: ()
           {status && <p className="text-sm text-gold-hi">{status}</p>}
           <div className="border-t border-line pt-3">
             <button className="btn btn-ghost btn-sm w-full" onClick={() => void wipe()}>
-              Delete all local suite data
+              Delete all saved browser data
             </button>
             <p className="text-xs text-dim mt-2">
-              Deletes the cache (IndexedDB), scan progress and configured endpoints (localStorage) — immediately and
-              completely on this device.
+              Clears the local cache (IndexedDB), saved scan progress, and custom network addresses from this browser
+              right away.
             </p>
           </div>
         </div>

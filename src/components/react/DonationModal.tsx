@@ -210,9 +210,9 @@ export default function DonationModal({ open, onClose }: { open: boolean; onClos
         )}
 
         <p className="text-xs text-dim mt-4 leading-relaxed border-t border-line pt-3">
-          Legal clarification: donations are 100&nbsp;% voluntary, create no entitlement to support,
-          SLAs or consideration, and unlock no gated features. On-chain transactions are technically
-          final and cannot be charged back. Full details: see the terms (AGB) and disclaimer.
+          Legal note: donations are 100&nbsp;% voluntary, create no entitlement to support,
+          SLAs or paid features, and unlock nothing extra. Blockchain transfers are
+          final and cannot be reversed. Full details: see our Terms of Use and Disclaimer.
         </p>
       </div>
     </div>

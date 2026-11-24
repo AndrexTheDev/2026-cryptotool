@@ -304,15 +304,15 @@ export default function BitVaultStress() {
     <div className="space-y-5">
       <StepSection
         n={1}
-        title="Enter policy / descriptor & UTXOs"
-        hint="Strictly public data only: policy, descriptor with xpubs/fingerprints, UTXO list. Seed phrases and private keys are actively detected and blocked."
+        title="Enter your vault rule & coin pieces (UTXOs)"
+        hint="Paste only public vault rules (policy or descriptor) and coin amounts. Seed phrases and private keys are never needed and are automatically blocked."
       >
         <div className="flex flex-wrap gap-2 items-center">
           <DemoButton onClick={demo} />
-          <span className="text-xs text-dim">Demo: inheritance policy with timelock path</span>
+          <span className="text-xs text-dim">Example: an inheritance vault where heirs can claim coins after a waiting period</span>
         </div>
         <div>
-          <label className="label" htmlFor="bv-policy">Miniscript policy or output descriptor (wsh/tr)</label>
+          <label className="label" htmlFor="bv-policy">Vault rule (Miniscript policy or output descriptor)</label>
           <textarea
             id="bv-policy"
             className="textarea mono"
@@ -327,15 +327,15 @@ export default function BitVaultStress() {
         </div>
         <div className="grid sm:grid-cols-[1fr_auto] gap-3 items-end">
           <div>
-            <label className="label" htmlFor="bv-addr">Fetch UTXOs by address (optional)</label>
-            <input id="bv-addr" className="input mono" placeholder="bc1q…/bc1p…" value={fetchAddress} onChange={(e) => setFetchAddress(e.target.value)} />
+            <label className="label" htmlFor="bv-addr">Optional: load coin pieces (UTXOs) from a Bitcoin address</label>
+            <input id="bv-addr" className="input mono" placeholder="bc1q… or bc1p…" value={fetchAddress} onChange={(e) => setFetchAddress(e.target.value)} />
           </div>
           <button className="btn btn-ghost" onClick={() => void fetchUtxos()} disabled={busy}>
             Fetch
           </button>
         </div>
         <div>
-          <label className="label" htmlFor="bv-utxo">UTXO list (CSV "txid;vout;sats" or JSON)</label>
+          <label className="label" htmlFor="bv-utxo">Coin pieces / UTXOs (CSV "txid;vout;sats" or JSON)</label>
           <textarea id="bv-utxo" className="textarea mono" rows={5} value={utxoText} onChange={(e) => { setUtxoText(e.target.value); setUtxoFetchedAt(null); }} placeholder={'txid;vout;sats\n… '} />
         </div>
         {blocked && (
@@ -346,11 +346,11 @@ export default function BitVaultStress() {
         )}
       </StepSection>
 
-      <StepSection n={2} title="Start the stress test">
+      <StepSection n={2} title="Pick a network fee &amp; test your vault">
         <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-end">
           <div>
             <label className="label" htmlFor="bv-rate">
-              Fee rate: <span className="text-gold-hi mono">{rate} sat/vB</span>
+              Simulated Bitcoin fee rate: <span className="text-gold-hi mono">{rate} sat/vB</span>
             </label>
             <input
               id="bv-rate"
@@ -363,42 +363,42 @@ export default function BitVaultStress() {
               className="w-full accent-emerald-500"
             />
             <div className="flex justify-between text-[10px] text-dim mono">
-              <span>1</span>
-              <span>100</span>
-              <span>500</span>
+              <span>1 (calm)</span>
+              <span>100 (busy)</span>
+              <span>500 (spike)</span>
               <span>1000 sat/vB</span>
             </div>
           </div>
           <button className="btn btn-primary" onClick={() => void analyze()} disabled={busy}>
-            {busy ? 'Analyzing…' : 'Analyze'}
+            {busy ? 'Testing…' : 'Run stress test'}
           </button>
         </div>
         <p className="text-sm">
-          Computes exact vByte weights per spending path and checks each UTXO against the 1/3 dust cliff
-          (Bitcoin Core: economically critical at fee &gt; value/3) and the 100 % total-loss point.
+          Calculates how heavy each spending or inheritance path is (in vBytes) and checks whether each coin piece
+          crosses the “1/3 dust cliff” (fees eat more than a third of the coin) or becomes a 100% total loss.
         </p>
         {error && <ErrorNote message={error} />}
       </StepSection>
 
       {analysis && (
-        <StepSection n={3} title="Stress report">
+        <StepSection n={3} title="Vault stress report">
           <StatusTile
             level={overallLevel!}
             headline={
               overallLevel === 'red'
-                ? 'Critical: unspendable paths or consensus conflicts'
+                ? 'Warning: some coins cost more to spend than they hold'
                 : overallLevel === 'amber'
-                  ? 'Caution: dust cliff reached or check consensus assumptions'
-                  : 'Vault resilient regarding dust & paths'
+                  ? 'Heads up: some coins are near the fee danger zone'
+                  : 'Your vault holds up well at this fee rate'
             }
             detail={consolidationAdvice}
           />
           <KpiGrid>
-            <Kpi label="Lightest path" value={bestPath + ' vB'} tone="green" />
+            <Kpi label="Smallest path" value={bestPath + ' vB'} tone="green" />
             <Kpi label="Heaviest path" value={worstPath + ' vB'} tone={worstPath > 300 ? 'amber' : 'default'} />
-            <Kpi label="Dust limit @rate" value={satsFmt(Math.ceil(worstPath * analysis.rate) * 3)} tone="amber" />
+            <Kpi label="Safe minimum coin @rate" value={satsFmt(Math.ceil(worstPath * analysis.rate) * 3)} tone="amber" />
             <Kpi
-              label="UTXOs below 1/3 cliff"
+              label="Coins near dust cliff"
               value={`${analysis.utxos.filter((r) => r.crossedThird).length}/${analysis.utxos.length}`}
               tone={analysis.utxos.some((r) => r.crossedThird) ? 'red' : 'green'}
             />

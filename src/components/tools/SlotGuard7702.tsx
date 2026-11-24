@@ -122,7 +122,7 @@ ${pack.chainId === 0 ? 'Chain validity:      all chains (chainId 0) — WARNING:
 Authorization nonce:  ${pack.nonce}
 Authorization digest: ${esc(pack.digest)}
 Created:             ${new Date().toISOString()}
-Signiert:            ${pack.signed ? 'yes (r/s/yParity in the encrypted part)' : 'no — digest included for later signing'}</pre>
+Signed:              ${pack.signed ? 'yes (r/s/yParity in the encrypted part)' : 'no — digest included for later signing'}</pre>
 <h2>Encrypted core (age, passphrase)</h2>
 <p>This section is encrypted with your passphrase and contains the complete authorization${
     pack.signed ? ' incl. signature' : ''
@@ -314,29 +314,29 @@ export default function SlotGuard7702() {
       const anyError = newFindings.some((f) => f.status === 'error');
       const delegations = newFindings.filter((f) => f.status === 'delegation' || f.status === 'unknown-delegate');
       let level: StatusLevel = 'green';
-      let headline = 'No delegation detected';
-      let detail = 'On all checked networks the account has standard EOA bytecode without the 0xef0100 delegation marker.';
+      let headline = 'No hidden delegation found';
+      let detail = 'On all checked networks, this wallet looks like a normal Ethereum address with no hidden EIP-7702 program attached.';
       if (newFindings.length === 0 || anyError) {
         level = 'amber';
-        headline = 'Partially unknown';
-        detail = 'At least one network did not respond. Results are valid only for successfully queried networks; use offline mode if needed.';
+        headline = 'Partially checked';
+        detail = 'At least one network did not reply. Results apply only to networks that answered; you can also use offline mode.';
       }
       if (delegations.length > 0) {
         if (newFindings.some((f) => f.status === 'unknown-delegate')) {
           level = 'amber';
-          headline = 'Delegation to an unknown delegate';
+          headline = 'Connected to an unknown helper program (delegate)';
           detail =
-            'The delegate points to an address without deployed code or without a verifiable response. Check before any further signature. Context (2026): according to forensic analyses, the majority of malicious 7702 delegations trace back to a single recurring sweeper contract family — an unknown delegate is therefore a critical candidate for a dormant sweeper (can stay inactive for weeks and strike when funds arrive).';
+            'Your wallet points to a delegate address with no readable contract code or response. Double-check before signing anything else. Why this matters: many malicious 7702 delegations attach dormant "sweeper" scripts that wait quietly until new funds arrive and drain them.';
         } else if (col.length > 0) {
           level = 'red';
-          headline = 'Colliding storage slots / orphaned values';
+          headline = 'Data clash (storage collision) on active delegation';
           detail =
-            'Switching the delegate risks storage collisions: occupied slots overlap with the new layout or cannot be attributed. Prepare the panic-revoke package below.';
+            'Changing the attached delegation program could overwrite or mix up existing wallet data slots. Create an emergency undo package below before switching.';
         } else {
           level = 'amber';
-          headline = 'Active 7702 delegation found';
+          headline = 'Active EIP-7702 delegation found';
           detail =
-            'The account delegates execution to a contract address. Check the delegate and storage slots for integrity; keep a fresh panic-revoke package ready.';
+            'Your wallet currently forwards actions to a smart-contract helper (delegate). Review who controls that contract and keep a fresh emergency undo file ready.';
         }
       }
       setOverall({ level, headline, detail });
@@ -411,15 +411,15 @@ export default function SlotGuard7702() {
     <div className="space-y-5">
       <StepSection
         n={1}
-        title="Set account & networks"
-        hint="A public address is sufficient — a private key is never needed. Offline mode: paste bytecode and storage dump directly."
+        title="Enter your wallet address & networks"
+        hint="Only your public address (0x…) is needed—never your private key or seed phrase. Tip: click “Load demo scenario” to see a safe example first."
       >
         <div className="flex flex-wrap gap-2">
           <button className={`btn btn-sm ${mode === 'online' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setMode('online')}>
-            Online (multi-chain)
+            Online (live networks)
           </button>
           <button className={`btn btn-sm ${mode === 'offline' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setMode('offline')}>
-            Offline (manual raw data)
+            Offline (paste raw data)
           </button>
           <span className="ml-auto">
             <DemoButton onClick={demo} />
@@ -427,12 +427,12 @@ export default function SlotGuard7702() {
         </div>
         <div>
           <label className="label" htmlFor="sg-addr">
-            Public EOA address
+            Public wallet address (EOA)
           </label>
           <input
             id="sg-addr"
             className="input mono"
-            placeholder="0x…"
+            placeholder="0x… (your normal Ethereum address)"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             spellCheck={false}
@@ -440,26 +440,26 @@ export default function SlotGuard7702() {
         </div>
         {mode === 'online' ? (
           <div>
-            <span className="label">Networks</span>
+            <span className="label">Networks to check</span>
             <ChainMultiSelect selected={chains} onChange={setChains} />
           </div>
         ) : (
           <div className="grid gap-4">
             <div>
               <label className="label" htmlFor="sg-code">
-                Account bytecode (eth_getCode output)
+                Wallet code (eth_getCode output, optional)
               </label>
               <textarea
                 id="sg-code"
                 className="textarea mono"
-                placeholder="0xef0100… (23 bytes) or longer bytecode"
+                placeholder="0xef0100… (23 bytes) or longer code"
                 value={manualBytecode}
                 onChange={(e) => setManualBytecode(e.target.value)}
               />
             </div>
             <div>
               <label className="label" htmlFor="sg-dump">
-                Storage dump (one line per slot: "slot value" or JSON)
+                Saved wallet storage (one slot per line, e.g. 0x0: 0x0001)
               </label>
               <textarea
                 id="sg-dump"
@@ -471,52 +471,56 @@ export default function SlotGuard7702() {
             </div>
           </div>
         )}
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label className="label" htmlFor="sg-old">Current delegate (optional)</label>
-            <input id="sg-old" className="input mono" placeholder="0x…" value={oldDelegate} onChange={(e) => setOldDelegate(e.target.value)} />
+        <details className="acc">
+          <summary>Advanced: compare old vs. new delegate layouts (optional for developers)</summary>
+          <div className="acc-body space-y-4">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="label" htmlFor="sg-old">Current delegate address (optional)</label>
+                <input id="sg-old" className="input mono" placeholder="0x…" value={oldDelegate} onChange={(e) => setOldDelegate(e.target.value)} />
+              </div>
+              <div>
+                <label className="label" htmlFor="sg-new">Planned new delegate address (optional)</label>
+                <input id="sg-new" className="input mono" placeholder="0x…" value={newDelegate} onChange={(e) => setNewDelegate(e.target.value)} />
+              </div>
+              <div>
+                <label className="label" htmlFor="sg-lo">Current data slots (slot: name)</label>
+                <textarea id="sg-lo" className="textarea mono" rows={3} placeholder={'0x0: owner\n0x1: nonce'} value={layoutOld} onChange={(e) => setLayoutOld(e.target.value)} />
+              </div>
+              <div>
+                <label className="label" htmlFor="sg-ln">New data slots (slot: name)</label>
+                <textarea id="sg-ln" className="textarea mono" rows={3} placeholder={'0x0: owner\n0x1: guardian'} value={layoutNew} onChange={(e) => setLayoutNew(e.target.value)} />
+              </div>
+            </div>
+            {mode === 'online' && (
+              <div>
+                <label className="label" htmlFor="sg-ns">ERC-7201 storage namespace (optional)</label>
+                <input
+                  id="sg-ns"
+                  className="input mono"
+                  placeholder="e.g. openzeppelin.storage.Ownable"
+                  value={namespace}
+                  onChange={(e) => setNamespace(e.target.value)}
+                />
+              </div>
+            )}
           </div>
-          <div>
-            <label className="label" htmlFor="sg-new">Planned new delegate (optional)</label>
-            <input id="sg-new" className="input mono" placeholder="0x…" value={newDelegate} onChange={(e) => setNewDelegate(e.target.value)} />
-          </div>
-          <div>
-            <label className="label" htmlFor="sg-lo">Current layout (slot: role)</label>
-            <textarea id="sg-lo" className="textarea mono" rows={3} placeholder={'0x0: owner\n0x1: nonce'} value={layoutOld} onChange={(e) => setLayoutOld(e.target.value)} />
-          </div>
-          <div>
-            <label className="label" htmlFor="sg-ln">New layout (slot: role)</label>
-            <textarea id="sg-ln" className="textarea mono" rows={3} placeholder={'0x0: owner\n0x1: guardian'} value={layoutNew} onChange={(e) => setLayoutNew(e.target.value)} />
-          </div>
-        </div>
-        {mode === 'online' && (
-          <div>
-            <label className="label" htmlFor="sg-ns">ERC-7201-Namespace (optional)</label>
-            <input
-              id="sg-ns"
-              className="input mono"
-              placeholder="e.g. openzeppelin.storage.Ownable"
-              value={namespace}
-              onChange={(e) => setNamespace(e.target.value)}
-            />
-          </div>
-        )}
+        </details>
       </StepSection>
 
-      <StepSection n={2} title="Check delegation & storage">
+      <StepSection n={2} title="Run wallet check">
         <p className="text-sm">
-          Reads the 0xef0100 delegation marker, extracts the active delegate, checks <code>eth_getCode</code> of the
-          delegate and scans slots 0–15 plus EIP-1967/ERC-7201 namespaces for occupied values — followed by the
-          collision analysis of current vs. new layout.
+          Looks for the EIP-7702 delegation marker (<code>0xef0100</code>) that links a wallet to external code, verifies whether that
+          helper contract actually exists, and checks common storage slots for data clashes.
         </p>
         <button className="btn btn-primary w-full sm:w-auto" onClick={() => void analyze()} disabled={running}>
-          {running ? 'Analyzing…' : 'Check'}
+          {running ? 'Checking wallet…' : 'Check wallet'}
         </button>
         {error && <ErrorNote message={error} />}
       </StepSection>
 
       {overall && (
-        <StepSection n={3} title="Traffic-light result report">
+        <StepSection n={3} title="Safety report">
           <StatusTile level={overall.level} headline={overall.headline} detail={overall.detail} />
           <KpiGrid>
             <Kpi label="Networks checked" value={findings.filter((f) => f.status !== 'error').length + '/' + findings.length} />
@@ -526,11 +530,11 @@ export default function SlotGuard7702() {
               tone={findings.some((f) => f.status === 'delegation') ? 'amber' : 'green'}
             />
             <Kpi
-              label="Occupied slots (total)"
+              label="Used data slots"
               value={findings.reduce((a, f) => Math.max(a, f.nonZeroSlots.length), 0)}
               tone={collisions.length > 0 ? 'red' : 'default'}
             />
-            <Kpi label="Collisions / orphaned" value={collisions.length} tone={collisions.length ? 'red' : 'green'} />
+            <Kpi label="Data clashes" value={collisions.length} tone={collisions.length ? 'red' : 'green'} />
           </KpiGrid>
 
           {findings.map((f) => (
@@ -652,27 +656,27 @@ export default function SlotGuard7702() {
           <div className="status-tile status-amber">
             <span aria-hidden="true">⚠</span>
             <p className="text-sm">
-              <strong>Nonce warning:</strong> every regular transaction from this account increments the nonce and makes
-              pre-signed emergency packages (panic revoke) unredeemable. Regenerate the package after every account change
-              and store it offline.
+              <strong>Important about nonces (transaction counter):</strong> every normal transaction you send increases
+              your wallet's counter ("nonce") by 1, which makes older emergency undo files invalid. Create a fresh
+              emergency file whenever you use your wallet and store it offline.
             </p>
           </div>
 
           <details className="acc" open={panicOpen}>
-            <summary onClick={(e) => e.preventDefault()}>Break-glass: panic-revoke generator</summary>
+            <summary onClick={(e) => e.preventDefault()}>Emergency undo: create a Panic-Revoke file</summary>
             <div className="acc-body space-y-3">
               {!panicOpen && (
                 <button className="btn btn-outline-amber btn-sm" onClick={() => setPanicOpen(true)}>
-                  Configure emergency package
+                  Set up emergency undo file
                 </button>
               )}
               {panicOpen && (
                 <>
                   <div className="grid sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="label" htmlFor="pg-chain">Chain validity</label>
+                      <label className="label" htmlFor="pg-chain">Which network(s)?</label>
                       <select id="pg-chain" className="select" value={panicChain} onChange={(e) => setPanicChain(Number(e.target.value))}>
-                        <option value={0}>all chains (chainId 0)</option>
+                        <option value={0}>all networks (chainId 0)</option>
                         {[1, 8453, 42161, 10, 137, 56].map((id) => (
                           <option key={id} value={id}>
                             chainId {id} only
@@ -681,23 +685,22 @@ export default function SlotGuard7702() {
                       </select>
                     </div>
                     <div>
-                      <label className="label" htmlFor="pg-nonce">Nonce (empty = fetch current)</label>
+                      <label className="label" htmlFor="pg-nonce">Wallet counter / nonce (leave blank to fetch live)</label>
                       <input id="pg-nonce" className="input mono" placeholder="e.g. 12" value={panicNonce} onChange={(e) => setPanicNonce(e.target.value)} />
                     </div>
                     <div>
-                      <label className="label" htmlFor="pg-pass">Passphrase (min. 8 characters)</label>
+                      <label className="label" htmlFor="pg-pass">Password to lock the file (at least 8 characters)</label>
                       <input id="pg-pass" type="password" className="input" value={passphrase} onChange={(e) => setPassphrase(e.target.value)} />
                     </div>
                     <div>
-                      <label className="label" htmlFor="pg-hint">Password hint (optional, in the file's plain text)</label>
+                      <label className="label" htmlFor="pg-hint">Password hint (optional, visible in the file)</label>
                       <input id="pg-hint" className="input" placeholder="e.g. 'kitchen-drawer safe 2026'" value={passHint} onChange={(e) => setPassHint(e.target.value)} />
                     </div>
                   </div>
                   <p className="text-xs text-dim">
-                    This prepares an EIP-7702 authorization to {ZERO_ADDR} (full revocation). Signing works
-                    with any 7702-capable wallet flow (<code>wallet_signAuthorization</code>) or externally via the
-                    displayed digest; signature parts (r, s, v/yParity) can be added here and are
-                    stored encrypted.
+                    This prepares an EIP-7702 "undo" order pointing to {ZERO_ADDR} (removes any attached delegate). You
+                    can sign the displayed code digest in a 7702-compatible wallet and optionally store the signature
+                    parts (r, s, v/yParity) encrypted inside the file.
                   </p>
                   <div className="grid sm:grid-cols-3 gap-3">
                     <input className="input mono" placeholder="r (0x…64 Hex)" value={signR} onChange={(e) => setSignR(e.target.value)} />
