@@ -4,24 +4,24 @@ import ToolGrid from '../components/ToolGrid.astro';
 
 const faq = [
   {
-    q: 'What does the suite cost?',
-    a: 'The suite has no prices, subscriptions or accounts. Every analysis runs locally in your browser. If you want to support the work, you can voluntarily donate via SOL, BTC or an EVM address — with no influence on features.',
+    q: 'Do I have to pay or sign up?',
+    a: 'No. There are no prices, no subscriptions, and no accounts. Every check runs directly in your browser. If you find the tools helpful, you can optionally send a voluntary donation via SOL, BTC, or ETH—every feature works identically either way.',
   },
   {
-    q: 'Where is my data processed?',
-    a: 'Exclusively in your browser: WebCrypto, workers and IndexedDB. There is no suite server that receives data. Live chain checks go directly from your browser to public read endpoints — you can configure your own — and pasted claims are automatically cross-checked against the chain.',
+    q: 'Where does my data go?',
+    a: 'All calculations run locally in your own browser. There is no StackAutopsy server collecting your inputs or wallet addresses. When a tool checks live blockchain data, your browser talks directly to public blockchain reader nodes (and you can set your own node in the Network menu).',
   },
   {
-    q: 'Are the results legally binding?',
-    a: 'No. The suite provides technical preliminary indicators and finding artifacts. It does not replace legal, tax or compliance advice. DAC8-SelfProof is expressly a preparatory information sheet, not a filing.',
+    q: 'Does this replace a lawyer or tax advisor?',
+    a: 'No. The suite gives you clear technical facts and downloadable reports, not legal or tax advice. For example, DAC8-SelfProof builds a helpful proof document, which you can hand to your tax advisor or exchange.',
   },
   {
-    q: 'Can I use the tools offline?',
-    a: 'Yes. Every tool has offline paths: manual inputs, dumps, files or signed artifacts. Once loaded, the page needs no server roundtrip for its core functions; live cross-checks then simply report “unavailable” instead of blocking you.',
+    q: 'Can I use the tools offline without internet?',
+    a: 'Yes. Every tool has an offline mode where you can paste data or drop a file directly. Once the page is loaded, all core checks work without a server. Live blockchain comparisons will simply say “unavailable” instead of blocking you.',
   },
   {
-    q: 'Why donations instead of a subscription?',
-    a: 'Because security tools work best when they are accessible without coercion. Donations are voluntary, non-refundable and create no consideration.',
+    q: 'Do I ever need to enter a seed phrase or private key?',
+    a: 'Never! You only ever paste public addresses, transaction IDs, or read-only data. In fact, the tools actively block seed phrases if someone tries to paste one by mistake.',
   },
 ];
 
@@ -55,7 +55,7 @@ const siteLd = [
     applicationCategory: 'SecurityApplication',
     operatingSystem: 'Web Browser',
     url: SITE_URL,
-    description: 'Ten local Web3, Bitcoin and compliance tools — fully client-side, no signup.',
+    description: 'Ten simple browser-based crypto, Bitcoin and tax-proof security tools — no signup, no private keys.',
     author: { '@type': 'Person', name: 'AndrexTheDev', email: 'hippie.highho@gmail.com' },
     isAccessibleForFree: true,
     usageInfo: 'No accounts, no prices; voluntary on-chain support.',
@@ -63,46 +63,61 @@ const siteLd = [
 ];
 
 const comparisons = [
-  { before: 'Delegations control unknown, unlimited targets', after: '7702-SlotGuard lists delegate, scope and risk in minutes' },
-  { before: 'Proxy upgrades are signed blindly', after: 'STVA-UpgradeDiff shows storage collisions and initializer traps beforehand' },
-  { before: 'x402 middleware outdated, replay gate unnoticed', after: 'x402-PaywallGuard flags affected versions and SIWx misconfiguration' },
-  { before: 'Intent spreads unclear, deadlines missed', after: 'IntentLens-7683 computes fill windows and spread deterministically' },
-  { before: 'Live dApp silently differs from the release', after: 'BundleWatch-ENS reconciles script hashes with the ENS release' },
+  {
+    before: 'You do not know if hidden code is attached to your Ethereum wallet',
+    after: '7702-SlotGuard shows any attached code in seconds and builds an undo file',
+  },
+  {
+    before: 'A wallet update looks like unreadable hex numbers before you sign',
+    after: 'STVA-UpgradeDiff translates the update and shows what actually changes',
+  },
+  {
+    before: 'An AI payment app uses outdated libraries or leaves spending wide open',
+    after: 'x402-PaywallGuard flags known bugs and missing spending limits right away',
+  },
+  {
+    before: 'A cross-chain swap costs more than expected or gets stuck past its deadline',
+    after: 'IntentLens-7683 reveals the hidden fee spread and prepares refund data',
+  },
+  {
+    before: 'A DeFi website might be loading altered scripts to trick your wallet',
+    after: 'BundleWatch-ENS compares live website files against the official ENS release',
+  },
 ];
 
 const pillars = [
   {
-    title: '100 % local & client-side',
-    text: 'Computation with WebCrypto and workers in the browser. There is no data upload to an operator server — your browser is the runtime.',
+    title: 'Runs 100% in your browser',
+    text: 'All checks run locally on your own device. Nothing is sent to a StackAutopsy server.',
     icon: 'M12 3l8 4v5c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7l8-4z',
   },
   {
-    title: 'No signup, no tracking',
-    text: 'No accounts, no analytics, no cookies. The page lazy-loads tool code only on demand — the homepage contains not a single crypto import.',
+    title: 'No account, no tracking',
+    text: 'No login, no analytics, and no tracking cookies. Each tool only loads when you open it.',
     icon: 'M9 12l2 2 4-5M12 3a9 9 0 100 18 9 9 0 000-18z',
   },
   {
-    title: 'Deterministic math',
-    text: 'All risk scores and thresholds are documented fixed in the code, reproducible and exportable. No black-box scoring services.',
+    title: 'Clear, repeatable math',
+    text: 'Every green, yellow, or red warning follows fixed, documented rules—never secret black-box scores.',
     icon: 'M4 4h16v4H4zM4 10h10v4H4zM4 16h16v4H4z',
   },
   {
-    title: 'Open source & auditable',
-    text: 'Every page links to the module source code. Fresh builds are reproducible, the hash standards (EIP-191, BIP-322, EIP-1577) are public.',
+    title: 'Open source & verifiable',
+    text: 'Every tool is open for inspection and follows public Ethereum, Bitcoin, and ENS standards.',
     icon: 'M8 7l-5 5 5 5M16 7l5 5-5 5M13 4l-3 16',
   },
 ];
 
 const steps = [
-  { n: '01', title: 'Open a module', text: 'Pick a tile — the tool JavaScript loads only now, isolated from the rest of the page.' },
-  { n: '02', title: 'Choose an input', text: 'Address, JSON, calldata, log file or demo scenario. Offline mode available everywhere.' },
-  { n: '03', title: 'Start the check', text: 'One click starts the analysis; the result appears as a traffic light, KPIs, details and export.' },
+  { n: '01', title: 'Pick a tool', text: 'Choose what you want to check below—each tool includes a simple explanation and example.' },
+  { n: '02', title: 'Paste data or try the demo', text: 'Enter a public address, transaction ID, or file—or click “Load demo” to test it safely first.' },
+  { n: '03', title: 'Get a clear traffic light', text: 'Click the green check button to get a green, yellow, or red result plus an optional report export.' },
 ];
 ---
 
 <BaseLayout shell="static"
-  title="Web3 Security Toolkit 2026 — 10 local audit tools"
-  description="Ten browser-local, live-verified Web3, Bitcoin and compliance tools: EIP-7702, DAC8, BIP-322, passkeys, x402, intents, privacy — in the browser, no signup."
+  title="Web3 Security Toolkit 2026 — 10 easy browser tools"
+  description="Ten easy-to-understand Web3, Bitcoin and tax-proof check tools: check wallets, updates, swaps, fees, passkeys and websites safely in your browser — no signup."
   path="/"
   jsonLd={[faqLd, ...siteLd]}
 >
@@ -111,16 +126,16 @@ const steps = [
     <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(16,185,129,0.14),transparent)] pointer-events-none" />
     <div class="container-x relative py-16 sm:py-24 text-center">
       <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-prime-hi bg-prime-dim border border-mint/30 rounded-full px-4 py-1.5">
-        10 modules · browser-local · live-verified · no signup
+        10 simple tools · runs in your browser · live-verified · no signup
       </span>
       <h1 class="mt-6 text-4xl sm:text-6xl font-extrabold leading-[1.05] tracking-tight max-w-4xl mx-auto">
-        Verify Web3 security, <span class="text-transparent bg-clip-text bg-gradient-to-r from-prime to-prime-hi">before you sign</span>.
+        Check crypto safety in plain English, <span class="text-transparent bg-clip-text bg-gradient-to-r from-prime to-prime-hi">before you sign</span>.
       </h1>
       <p class="mt-5 text-base sm:text-lg text-dim max-w-2xl mx-auto">
-        EIP-7702 delegations, proxy upgrades, DAC8 findings, BIP-322 proofs, x402 middleware, intents, privacy and more — computed locally in your browser and cross-checked live against the chains. Nothing ever passes through an operator server.
+        Spot hidden wallet takeovers, decode confusing updates, prove wallet ownership for taxes, test Bitcoin inheritance fees, and verify DeFi websites—all locally in your browser with built-in demo examples. Never enter a private key or seed phrase.
       </p>
       <div class="mt-8 flex flex-wrap justify-center gap-3">
-        <a href="#tools" class="btn btn-primary px-6 py-3 text-base">Explore tools</a>
+        <a href="#tools" class="btn btn-primary px-6 py-3 text-base">Browse all 10 tools</a>
         <a href="#support" class="btn btn-ghost px-6 py-3 text-base">♥ Support the project</a>
       </div>
       <div class="mt-10 inline-flex items-center gap-3 text-sm text-dim bg-surface border border-line rounded-full px-5 py-2.5">
@@ -134,16 +149,16 @@ const steps = [
   <section class="border-y border-line bg-surface/50">
     <div class="container-x py-14">
       <div class="max-w-2xl">
-        <h2 class="text-2xl sm:text-3xl font-bold">The 2026 threat landscape</h2>
+        <h2 class="text-2xl sm:text-3xl font-bold">Why check before you click “Confirm”?</h2>
         <p class="text-dim mt-3 text-sm sm:text-base">
-          Three developments make ad-hoc checks inadequate: <strong class="text-ink">EIP-7702 delegations</strong> give smart contracts key power over EOAs, <strong class="text-ink">x402 payment middleware</strong> spreads faster than audits, and <strong class="text-ink">DAC8/CARF reporting duties</strong> demand documented self-disclosures. This suite checks technically, deterministically and locally — without any account being created anywhere.
+          In 2026, three everyday risks catch both beginners and pros off guard: <strong class="text-ink">hidden wallet permissions (EIP-7702)</strong> can silently drain funds later, <strong class="text-ink">AI payment apps (x402)</strong> can ship with unfixed bugs, and <strong class="text-ink">new tax rules (DAC8)</strong> ask for proof that your self-custody wallet is really yours. Each tool here turns complicated blockchain data into a clear green, yellow, or red check.
         </p>
       </div>
       <div class="grid sm:grid-cols-3 gap-4 mt-8">
         {[
-          { k: '7702', t: 'Delegation hijacks', d: 'Unchecked delegate addresses can take over entire wallets. SlotGuard shows every delegate and its scope.' },
-          { k: 'x402', t: 'Paywall middleware traps', d: 'Outdated x402 versions without replay protection or signature binding are an entry point. PaywallGuard detects them.' },
-          { k: 'ENS', t: 'Bundle substitution', d: 'If the ENS record switches, the dApp suddenly loads foreign scripts. BundleWatch compares hashes with the reference release.' },
+          { k: '7702', t: 'Hidden wallet hijackers', d: 'One bad signature can attach a hidden drain script to your wallet. SlotGuard checks your address and helps you undo it.' },
+          { k: 'x402', t: 'Leaky AI payment apps', d: 'Apps where AI agents pay automatically can leak funds if outdated. PaywallGuard spots known bugs and missing spending caps.' },
+          { k: 'ENS', t: 'Tampered app websites', d: 'Hackers sometimes swap scripts on a DeFi website or ENS name. BundleWatch checks whether the live site matches the official release.' },
         ].map((c) => (
           <div class="card p-5">
             <span class="mono text-xs text-prime-hi font-bold">{c.k}</span>
@@ -159,8 +174,8 @@ const steps = [
   <section id="tools" class="container-x py-16">
     <div class="flex items-end justify-between mb-2">
       <div>
-        <h2 class="text-2xl sm:text-3xl font-bold">Ten tools, one click away</h2>
-        <p class="text-dim text-sm mt-1">Filter: pick a category — tool code loads only after opening.</p>
+        <h2 class="text-2xl sm:text-3xl font-bold">All 10 tools—explained simply with examples</h2>
+        <p class="text-dim text-sm mt-1">Filter by topic below. Every tool includes a one-click demo so you can try it safely right away.</p>
       </div>
       <a href="/llms.txt" class="hidden md:inline btn btn-ghost btn-sm mono text-xs">llms.txt</a>
     </div>
@@ -170,15 +185,15 @@ const steps = [
   <!-- Before/After -->
   <section class="border-y border-line bg-surface/50">
     <div class="container-x py-14">
-      <h2 class="text-2xl sm:text-3xl font-bold">Before / After</h2>
+      <h2 class="text-2xl sm:text-3xl font-bold">What changes when you check first</h2>
       <div class="mt-6 overflow-x-auto">
         <table class="table-x">
-          <thead><tr><th class="w-1/2">Without checking</th><th>With the Web3 Security Toolkit</th></tr></thead>
+          <thead><tr><th class="w-1/2">Without checking</th><th>With StackAutopsy</th></tr></thead>
           <tbody>
             {comparisons.map((c) => (
               <tr>
                 <td class="text-sm text-dim">{c.before}</td>
-                <td class="text-sm"><span class="badge badge-green mr-2">after</span>{c.after}</td>
+                <td class="text-sm"><span class="badge badge-green mr-2">with check</span>{c.after}</td>
               </tr>
             ))}
           </tbody>
@@ -189,7 +204,7 @@ const steps = [
 
   <!-- Flow -->
   <section class="container-x py-14">
-    <h2 class="text-2xl sm:text-3xl font-bold">Three steps to a finding</h2>
+    <h2 class="text-2xl sm:text-3xl font-bold">How it works in 3 simple steps</h2>
     <div class="grid sm:grid-cols-3 gap-4 mt-6">
       {steps.map((s) => (
         <div class="card p-5">
@@ -204,7 +219,7 @@ const steps = [
   <!-- Trust pillars -->
   <section class="border-y border-line bg-surface/50">
     <div class="container-x py-14">
-      <h2 class="text-2xl sm:text-3xl font-bold">Trust through architecture</h2>
+      <h2 class="text-2xl sm:text-3xl font-bold">Built for privacy &amp; clarity</h2>
       <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
         {pillars.map((p) => (
           <div class="card p-5">
@@ -219,7 +234,7 @@ const steps = [
 
   <!-- FAQ -->
   <section class="container-x py-14 max-w-3xl">
-    <h2 class="text-2xl sm:text-3xl font-bold">Frequently asked questions</h2>
+    <h2 class="text-2xl sm:text-3xl font-bold">Common questions (FAQ)</h2>
     <div class="mt-6 space-y-3">
       {faq.map((f) => (
         <details class="acc">
@@ -233,9 +248,9 @@ const steps = [
   <!-- Support / donations -->
   <section id="support" class="border-t border-line bg-surface/50">
     <div class="container-x py-16 text-center">
-      <h2 class="text-2xl sm:text-3xl font-bold">Support independent Web3 security</h2>
+      <h2 class="text-2xl sm:text-3xl font-bold">Support independent security tools</h2>
       <p class="text-dim max-w-xl mx-auto mt-3 text-sm sm:text-base">
-        Donations are <strong class="text-ink">voluntary</strong> and transparent at all times: three addresses, QR codes generated locally, no consideration.
+        Donations are <strong class="text-ink">100% voluntary</strong>: three public addresses, QR codes generated on your device, no paywalls.
       </p>
       <div class="flex flex-wrap justify-center gap-3 mt-7">
         <a href="/donate" class="btn btn-primary px-6 py-3">View donation addresses</a>

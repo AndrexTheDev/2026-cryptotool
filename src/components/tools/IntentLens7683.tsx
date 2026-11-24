@@ -158,11 +158,11 @@ export default function IntentLens7683() {
 
   return (
     <div className="space-y-5">
-      <StepSection n={1} title="Enter order data" hint="Signed GaslessCrossChainOrder (EIP-712 JSON), raw calldata of open()/openFor() or origin transaction hash + chains.">
+      <StepSection n={1} title="Paste your cross-chain swap order" hint="Paste a signed swap order (EIP-712 JSON), raw swap calldata, or the origin transaction hash. Tip: click “Load demo scenario” to see an Ethereum-to-Base swap example.">
         <div className="flex flex-wrap gap-2">
           {(
             [
-              ['json', 'EIP-712 JSON'],
+              ['json', 'Order JSON (EIP-712)'],
               ['calldata', 'Raw calldata'],
               ['txhash', 'TX hash (online)'],
             ] as const
@@ -177,7 +177,7 @@ export default function IntentLens7683() {
         </div>
         {mode === 'json' && (
           <div>
-            <label className="label" htmlFor="il-json">Signed GaslessCrossChainOrder (EIP-712 JSON)</label>
+            <label className="label" htmlFor="il-json">Cross-chain order (EIP-712 JSON)</label>
             <textarea id="il-json" className="textarea mono" rows={7} value={json} onChange={(e) => setJson(e.target.value)} placeholder='{"message":{"originSettler":"0x…","user":"0x…","nonce":"42","originChainId":"1", …}}' />
           </div>
         )}
@@ -190,56 +190,57 @@ export default function IntentLens7683() {
         {mode === 'txhash' && (
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label className="label" htmlFor="il-tx">Origin transaction hash</label>
+              <label className="label" htmlFor="il-tx">Transaction hash on the starting chain</label>
               <input id="il-tx" className="input mono" placeholder="0x…" value={txhash} onChange={(e) => setTxhash(e.target.value)} />
             </div>
             <div>
-              <label className="label" htmlFor="il-oc">Origin chain</label>
+              <label className="label" htmlFor="il-oc">Starting network</label>
               <ChainSingleSelect value={chainId} onChange={setChainId} />
             </div>
           </div>
         )}
         <div className="grid sm:grid-cols-3 gap-4">
           <div>
-            <label className="label" htmlFor="il-dc">Destination chain</label>
+            <label className="label" htmlFor="il-dc">Destination network</label>
             <ChainSingleSelect value={destChainId} onChange={setDestChainId} />
           </div>
           <div>
-            <label className="label" htmlFor="il-ra">refundAddress (optional)</label>
+            <label className="label" htmlFor="il-ra">Refund address (optional)</label>
             <input id="il-ra" className="input mono" placeholder="0x…" value={refundAddr} onChange={(e) => setRefundAddr(e.target.value)} />
           </div>
           <div>
-            <label className="label" htmlFor="il-rc">recipient (optional)</label>
+            <label className="label" htmlFor="il-rc">Recipient address (optional)</label>
             <input id="il-rc" className="input mono" placeholder="0x…" value={recipientAddr} onChange={(e) => setRecipientAddr(e.target.value)} />
           </div>
         </div>
         <div>
-          <label className="label" htmlFor="il-mt">Manual time base (offline, ISO, optional)</label>
+          <label className="label" htmlFor="il-mt">Manual check time (offline ISO timestamp, optional)</label>
           <input id="il-mt" className="input mono" placeholder="2026-11-15T12:00:00Z" value={manualNow} onChange={(e) => setManualNow(e.target.value)} />
         </div>
       </StepSection>
 
-      <StepSection n={2} title="Decode intent">
+      <StepSection n={2} title="Decode swap &amp; check deadline">
         <p className="text-sm">
-          Decodes originSettler, deadlines, amounts and common orderData schemas vendor-independently, computes
-          the maximum implicit solver spread and checks the deadline status on the destination chain.
+          Translates the ERC-7683 swap fields into plain numbers, calculates the hidden fee gap ("solver spread")
+          between what you send and the minimum you receive, and checks on the destination network whether the swap
+          deadline has passed.
         </p>
         <button className="btn btn-primary w-full sm:w-auto" onClick={() => void run()} disabled={busy}>
-          {busy ? 'Decoding…' : 'Decode'}
+          {busy ? 'Decoding…' : 'Decode swap'}
         </button>
         {error && <ErrorNote message={error} />}
       </StepSection>
 
       {order && (
-        <StepSection n={3} title="Order anatomy">
+        <StepSection n={3} title="Swap breakdown &amp; refund status">
           <StatusTile
             level={level!}
             headline={
               deadline?.passed
-                ? 'Deadline expired — check fill, prepare refund'
+                ? 'Deadline passed — check if filled, or use the refund data below'
                 : spread && spread.spreadPct > 3
-                  ? 'High implicit solver spread'
-                  : 'Order decoded — spread & assumptions below'
+                  ? 'High hidden fee spread (over 3%)'
+                  : 'Order decoded — fee spread and deadline look clear'
             }
             detail={chainNote}
           />
@@ -249,10 +250,10 @@ export default function IntentLens7683() {
             </p>
           )}
           <KpiGrid>
-            <Kpi label="Decoding" value={order.decodeConfidence} tone={order.decodeConfidence === 'raw' ? 'red' : order.decodeConfidence === 'partial' ? 'amber' : 'green'} />
-            <Kpi label="Spread (implizit)" value={spread ? spread.spreadPct.toFixed(3) + ' %' : 'n/a'} tone={spread && spread.spreadPct > 3 ? 'amber' : 'default'} />
-            <Kpi label="fillDeadline" value={order.fillDeadline ? fmtDate(order.fillDeadline) : '—'} />
-            <Kpi label="Deadline status (dest. chain)" value={deadline ? (deadline.passed ? 'expired' : 'open') : 'unknown'} tone={deadline?.passed ? 'amber' : 'green'} />
+            <Kpi label="Decoded" value={order.decodeConfidence} tone={order.decodeConfidence === 'raw' ? 'red' : order.decodeConfidence === 'partial' ? 'amber' : 'green'} />
+            <Kpi label="Solver fee spread" value={spread ? spread.spreadPct.toFixed(3) + ' %' : 'n/a'} tone={spread && spread.spreadPct > 3 ? 'amber' : 'default'} />
+            <Kpi label="Fill deadline" value={order.fillDeadline ? fmtDate(order.fillDeadline) : '—'} />
+            <Kpi label="Deadline status" value={deadline ? (deadline.passed ? 'expired' : 'still open') : 'unknown'} tone={deadline?.passed ? 'amber' : 'green'} />
           </KpiGrid>
 
           <details className="acc" open>

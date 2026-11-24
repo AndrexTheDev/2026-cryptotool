@@ -32,7 +32,7 @@ export function toCSV(rows: Record<string, unknown>[], sep = ';'): string {
 }
 
 export function downloadCSV(rows: Record<string, unknown>[], filename: string) {
-  // UTF-8-BOM + Semikolon: deutschland-tauglicher CSV-Import in Tabellenprogrammen
+  // UTF-8 BOM + semicolon for reliable CSV import in spreadsheet apps
   downloadBlob('﻿' + toCSV(rows), filename, 'text/csv;charset=utf-8');
 }
 
@@ -45,8 +45,8 @@ export interface PrintableReport {
 }
 
 /**
- * Erzeugt eine eigenstaendige, offline oeffnbare HTML-Druckansicht
- * (self-contained, no external assets) and opens it in a new tab.
+ * Generates a self-contained, offline-viewable HTML print report
+ * (no external assets) and opens it in a new tab.
  */
 export function openPrintableReport(rep: PrintableReport) {
   const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -54,7 +54,7 @@ export function openPrintableReport(rep: PrintableReport) {
     ? { green: '#047857', amber: '#b45309', red: '#b91c1c', neutral: '#334155' }[rep.status.level]
     : '#334155';
   const html = `<!doctype html>
-<html lang="de"><head><meta charset="utf-8">
+<html lang="en"><head><meta charset="utf-8">
 <title>${esc(rep.title)}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
@@ -73,7 +73,7 @@ ${rep.subtitle ? `<p class="sub">${esc(rep.subtitle)}</p>` : ''}
 ${rep.status ? `<div class="status"><strong>${esc(rep.status.headline)}</strong>${rep.status.detail ? esc(rep.status.detail) : ''}</div>` : ''}
 ${rep.sections.map((s) => `<h2>${esc(s.heading)}</h2><div>${s.body}</div>`).join('\n')}
 <p class="meta">${esc(rep.footerNote ?? 'Generated locally in the browser by StackAutopsy (Web3 Security & Forensics Suite). No server storage, no transfer of private keys.')}</p>
-<script>window.addEventListener('load',()=>{/* Druckdialog optional via Button */});<\/script>
+<script>window.addEventListener('load',()=>{/* Print dialog optional via button */});<\/script>
 </body></html>`;
   const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
   window.open(url, '_blank', 'noopener');

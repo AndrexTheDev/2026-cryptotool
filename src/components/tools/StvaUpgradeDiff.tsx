@@ -59,11 +59,11 @@ const DEMO_CALLDATA =
   '0x4f1ef286000000000000000000000000edd160febbd92e350d4d398fb636302fccd67c7e00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000';
 const DEMO_SAFE = JSON.stringify(
   {
-    safe: '0x8Ba1f109551bD432803012645Ac136ddd64DBA72',
+    safe: '0x8ba1f109551bD432803012645Ac136ddd64DBA72',
     chainId: 1,
     safeTxHash: '0x',
     tx: {
-      to: '0xD2046C5451980C011A2278DB7cD2A4763d0E4C8d',
+      to: '0xd2046C5451980c011A2278DB7CD2A4763D0E4c8d',
       value: '0',
       data: DEMO_CALLDATA,
       operation: 0,
@@ -123,7 +123,7 @@ export default function StvaUpgradeDiff() {
 
   const demo = () => {
     setChainId(1);
-    setProxy('0xD2046C5451980C011A2278DB7cD2A4763d0E4C8d');
+    setProxy('0xd2046C5451980c011A2278DB7CD2A4763D0E4c8d');
     setNewImpl('0xEdd160fEBBD92E350D4D398fb636302fccd67C7e');
     setCalldata(DEMO_CALLDATA);
     setSafeJson(DEMO_SAFE);
@@ -385,57 +385,57 @@ export default function StvaUpgradeDiff() {
     <div className="space-y-5">
       <StepSection
         n={1}
-        title="Enter upgrade data"
-        hint="Proxy, new implementation and the calldata to be signed — or a Safe transaction export (JSON). Optional: EIP-712 typed data for complete fingerprints."
+        title="Paste the update data"
+        hint="Paste the raw transaction data (calldata) you are asked to sign—or a Safe wallet JSON export. Tip: click “Load demo scenario” to see a real Safe update."
       >
         <div className="flex flex-wrap gap-2 items-center">
           <DemoButton onClick={demo} />
-          <span className="text-xs text-dim">Demo: upgradeToAndCall payload with Safe export</span>
+          <span className="text-xs text-dim">Example: a Safe wallet upgrade transaction (upgradeToAndCall)</span>
         </div>
         <div className="grid sm:grid-cols-3 gap-4">
           <div>
-            <label className="label" htmlFor="sd-net">Network</label>
+            <label className="label" htmlFor="sd-net">Blockchain network</label>
             <ChainSingleSelect value={chainId} onChange={setChainId} />
           </div>
           <div>
-            <label className="label" htmlFor="sd-proxy">Proxy address (optional)</label>
+            <label className="label" htmlFor="sd-proxy">Proxy / Safe address (optional)</label>
             <input id="sd-proxy" className="input mono" placeholder="0x…" value={proxy} onChange={(e) => setProxy(e.target.value)} />
           </div>
           <div>
-            <label className="label" htmlFor="sd-new">New implementation (optional, if not from calldata)</label>
+            <label className="label" htmlFor="sd-new">New code address (optional, if not inside calldata)</label>
             <input id="sd-new" className="input mono" placeholder="0x…" value={newImpl} onChange={(e) => setNewImpl(e.target.value)} />
           </div>
         </div>
         <div>
-          <label className="label" htmlFor="sd-cd">Raw calldata</label>
+          <label className="label" htmlFor="sd-cd">Transaction data (raw hex calldata)</label>
           <textarea id="sd-cd" className="textarea mono" placeholder="0x4f1ef286…" value={calldata} onChange={(e) => setCalldata(e.target.value)} />
         </div>
         <details className="acc">
-          <summary>Safe export / EIP-712 / layouts (optional)</summary>
+          <summary>Advanced: Safe JSON export / EIP-712 data / storage layouts (optional)</summary>
           <div className="acc-body space-y-4">
             <div>
               <label className="label" htmlFor="sd-safe">Safe transaction export (JSON)</label>
               <textarea id="sd-safe" className="textarea mono" rows={4} placeholder='{"safe":"0x…","chainId":1,"tx":{…}}' value={safeJson} onChange={(e) => setSafeJson(e.target.value)} />
             </div>
             <div>
-              <label className="label" htmlFor="sd-td">EIP-712 typed data (JSON, optional)</label>
+              <label className="label" htmlFor="sd-td">EIP-712 typed signature data (JSON, optional)</label>
               <textarea id="sd-td" className="textarea mono" rows={3} placeholder='{"domain":{…},"types":{…},"primaryType":"…","message":{…}}' value={typedJson} onChange={(e) => setTypedJson(e.target.value)} />
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="label" htmlFor="sd-lo">Storage layout old</label>
+                <label className="label" htmlFor="sd-lo">Old storage slots</label>
                 <textarea id="sd-lo" className="textarea mono" rows={3} placeholder={'0x0: admin\n0x1: paused'} value={layoutOld} onChange={(e) => setLayoutOld(e.target.value)} />
               </div>
               <div>
-                <label className="label" htmlFor="sd-ln">Storage layout new</label>
+                <label className="label" htmlFor="sd-ln">New storage slots</label>
                 <textarea id="sd-ln" className="textarea mono" rows={3} placeholder={'0x0: admin\n0x1: paused\n0x2: treasury'} value={layoutNew} onChange={(e) => setLayoutNew(e.target.value)} />
               </div>
             </div>
             <div>
-              <label className="label" htmlFor="sd-ver">Verification status (confirmed by the user)</label>
+              <label className="label" htmlFor="sd-ver">Is the source code verified on a block explorer?</label>
               <select id="sd-ver" className="select" value={verifiedHint} onChange={(e) => setVerifiedHint(e.target.value as typeof verifiedHint)}>
-                <option value="unknown">unknown</option>
-                <option value="both">old &amp; new verified</option>
+                <option value="unknown">unknown / not checked</option>
+                <option value="both">both old &amp; new verified</option>
                 <option value="new-only">only new verified</option>
                 <option value="old-only">only old verified</option>
                 <option value="none">neither verified</option>
@@ -445,31 +445,31 @@ export default function StvaUpgradeDiff() {
         </details>
       </StepSection>
 
-      <StepSection n={2} title="Start three-level verification">
+      <StepSection n={2} title="Decode & compare update">
         <p className="text-sm">
-          Decodes the calldata, computes cryptographic fingerprints (calldata digest, EIP-712 hashes, Safe
-          safeTxHash), compares the old and new implementation via bytecode hash and pattern scan — and forces the
-          result into the three STVA categories instead of a blanket statement.
+          Translates the raw hex bytes into readable function names, checks whether the target is an official Safe
+          version, compares the old vs. new implementation for risky code patterns, and splits the result into three
+          clear parts: what you sign, what actually runs, and what unverified assumptions remain.
         </p>
         <button className="btn btn-primary w-full sm:w-auto" onClick={() => void run()} disabled={busy}>
-          {busy ? 'Analyzing…' : 'Analyze'}
+          {busy ? 'Analyzing…' : 'Analyze update'}
         </button>
         {error && <ErrorNote message={error} />}
       </StepSection>
 
       {report && (
-        <StepSection n={3} title="STVA review report">
-          <StatusTile level={report.level} headline={report.headline} detail={report.snapshot ? `Snapshot: block ${report.snapshot.blockNumber} on ${chainById(report.chainId)?.name}.` : 'No chain snapshot — assumptions not bound in time.'} />
+        <StepSection n={3} title="Plain-language review report">
+          <StatusTile level={report.level} headline={report.headline} detail={report.snapshot ? `Checked at block ${report.snapshot.blockNumber} on ${chainById(report.chainId)?.name}.` : 'No live block snapshot — assumptions are not pinned to a specific time.'} />
           <KpiGrid>
-            <Kpi label="Decoded" value={report.decoded?.functionName ?? 'no'} tone={report.decoded?.functionName ? 'green' : 'red'} />
-            <Kpi label="Descriptor" value={report.decoded?.descriptor ? 'found' : 'missing'} tone={report.decoded?.descriptor ? 'green' : 'amber'} />
-            <Kpi label="Patterns old" value={report.oldImpl?.patterns?.length ?? 0} />
-            <Kpi label="Patterns new" value={report.newImpl?.patterns?.length ?? 0} tone={(report.newImpl?.patterns?.length ?? 0) > (report.oldImpl?.patterns?.length ?? 0) ? 'red' : 'default'} />
+            <Kpi label="Readable?" value={report.decoded?.functionName ?? 'no'} tone={report.decoded?.functionName ? 'green' : 'red'} />
+            <Kpi label="Clear-signing info" value={report.decoded?.descriptor ? 'found' : 'missing'} tone={report.decoded?.descriptor ? 'green' : 'amber'} />
+            <Kpi label="Risky opcodes (old)" value={report.oldImpl?.patterns?.length ?? 0} />
+            <Kpi label="Risky opcodes (new)" value={report.newImpl?.patterns?.length ?? 0} tone={(report.newImpl?.patterns?.length ?? 0) > (report.oldImpl?.patterns?.length ?? 0) ? 'red' : 'default'} />
           </KpiGrid>
 
           <div className="grid gap-3">
             <details className="acc" open>
-              <summary><span className="text-prime-hi">1 — Verified signature intent (signing time)</span></summary>
+              <summary><span className="text-prime-hi">1 — What your signature approves (Signing time)</span></summary>
               <div className="acc-body">
                 <ul className="list-disc ml-5 space-y-1">
                   {report.signingTime.map((s, i) => (
@@ -479,7 +479,7 @@ export default function StvaUpgradeDiff() {
               </div>
             </details>
             <details className="acc" open>
-              <summary><span className="text-prime-hi">2 — Enforced execution effect (execution time)</span></summary>
+              <summary><span className="text-prime-hi">2 — What actually executes on-chain (Execution time)</span></summary>
               <div className="acc-body">
                 <ul className="list-disc ml-5 space-y-1">
                   {report.executionTime.map((s, i) => (
@@ -489,7 +489,7 @@ export default function StvaUpgradeDiff() {
               </div>
             </details>
             <details className="acc" open>
-              <summary><span className="text-gold-hi">3 — Unchecked execution assumptions (simulation time)</span></summary>
+              <summary><span className="text-gold-hi">3 — What stays unverified / assumed (Check manually)</span></summary>
               <div className="acc-body">
                 <ul className="list-disc ml-5 space-y-1">
                   {report.assumptions.map((s, i) => (

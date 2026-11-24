@@ -429,13 +429,13 @@ export default function Dac8SelfProof() {
     <div className="space-y-5">
       <StepSection
         n={1}
-        title="Set transaction & target address"
-        hint="The suite builds a deterministic ownership challenge from TXID, block hash and timestamp. No complete history leaves your browser."
+        title="Enter the transfer & your wallet address"
+        hint="Pick Bitcoin or Ethereum, paste the transfer ID and your own receiving wallet address. Tip: click “Load demo scenario” to walk through an example."
       >
         <div className="flex flex-wrap gap-2 items-center">
           <div className="flex gap-2">
             <button className={`btn btn-sm ${asset === 'evm' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setAsset('evm')}>
-              EVM (ETH & Co.)
+              Ethereum &amp; EVM
             </button>
             <button className={`btn btn-sm ${asset === 'btc' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setAsset('btc')}>
               Bitcoin
@@ -447,7 +447,7 @@ export default function Dac8SelfProof() {
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="label" htmlFor="d8-tx">{asset === 'btc' ? 'Bitcoin TXID' : 'EVM transaction hash'}</label>
+            <label className="label" htmlFor="d8-tx">{asset === 'btc' ? 'Bitcoin transaction ID (TXID)' : 'Ethereum transaction hash'}</label>
             <input id="d8-tx" className="input mono" placeholder={asset === 'btc' ? '64 hex characters' : '0x…'} value={txid} onChange={(e) => setTxid(e.target.value)} />
           </div>
           {asset === 'evm' && (
@@ -464,11 +464,11 @@ export default function Dac8SelfProof() {
           )}
         </div>
         <div>
-          <label className="label" htmlFor="d8-target">Target address of the self-transfer (claimed self-custody address)</label>
+          <label className="label" htmlFor="d8-target">Your receiving wallet address (the wallet you want to prove is yours)</label>
           <input id="d8-target" className="input mono" placeholder={asset === 'btc' ? 'bc1…' : '0x…'} value={target} onChange={(e) => setTarget(e.target.value)} />
         </div>
         <details className="acc">
-          <summary>Offline fields (block time, block hash, amount, exchange row, cost basis)</summary>
+          <summary>Optional: manual transfer details, cost basis &amp; exchange CSV row</summary>
           <div className="acc-body grid sm:grid-cols-2 gap-4">
             <div>
               <label className="label" htmlFor="d8-mb">Block hash (manual)</label>
@@ -483,25 +483,22 @@ export default function Dac8SelfProof() {
               <input id="d8-ma" className="input" value={manualAmount} onChange={(e) => setManualAmount(e.target.value)} placeholder="0.384 BTC" />
             </div>
             <div>
-              <label className="label" htmlFor="d8-note">Cost basis / note (optional)</label>
-              <input id="d8-note" className="input" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. cost basis 2023" />
+              <label className="label" htmlFor="d8-note">Purchase price / note for tax records (optional)</label>
+              <input id="d8-note" className="input" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. bought in 2023 for EUR 24,800/BTC" />
             </div>
             <div className="sm:col-span-2">
-              <label className="label" htmlFor="d8-csv">Exchange CSV row (optional, one line)</label>
+              <label className="label" htmlFor="d8-csv">Matching row from your exchange CSV (optional)</label>
               <input id="d8-csv" className="input mono" value={csvRow} onChange={(e) => setCsvRow(e.target.value)} placeholder="Date;Type;Amount;Asset;Comment" />
             </div>
           </div>
         </details>
       </StepSection>
 
-      <StepSection n={2} title="Generate & sign the challenge">
+      <StepSection n={2} title="Create &amp; sign your ownership statement">
         <p className="text-sm">
-          The challenge is built deterministically from TXID, block hash, timestamp and purpose string. Signing paths:
-          EVM wallet (EIP-191) directly here, or create the signature in your (hardware) wallet and paste it below
-          (Bitcoin: BIP-322; EVM: EIP-191/EIP-712/ERC-1271). BIP-322 has been at status "Complete" (v1.0.0) since 04/2026: modern signers
-          prefix signatures with smp/ful/pof — all variants are recognized; proof of funds (pof = finalized PSBT with
-          embedded challenge) is format-checked, the UTXO spend status additionally requires a node/explorer. Older signatures without
-          a prefix continue to count as simple.
+          Click below to create a short “I own this wallet” text tied to that transfer. Then sign that text in your
+          wallet app (or hardware wallet) and paste the signature in Step 3. Supports Ethereum wallets (EIP-191 /
+          ERC-1271) and Bitcoin message signatures (BIP-322 simple/full/pof, including modern <code>smp</code>/<code>ful</code>/<code>pof</code> prefixes and older prefix-free signatures).
         </p>
         <button className="btn btn-primary w-full sm:w-auto" onClick={() => void prepare()} disabled={busy}>
           {busy ? 'Loading data…' : 'Generate challenge'}
@@ -530,13 +527,13 @@ export default function Dac8SelfProof() {
       </StepSection>
 
       {challenge && (
-        <StepSection n={3} title="Verify locally & export the dossier">
+        <StepSection n={3} title="Verify signature &amp; save your proof report">
           <div>
-            <label className="label" htmlFor="d8-sig">Signature (BIP-322 base64, EIP-191/712 hex, ERC-1271 bytes)</label>
-            <textarea id="d8-sig" className="textarea mono" value={sigInput} onChange={(e) => setSigInput(e.target.value)} placeholder="Paste signature here …" />
+            <label className="label" htmlFor="d8-sig">Paste signature from your wallet (BIP-322 base64, EIP-191/712 hex, or ERC-1271 bytes)</label>
+            <textarea id="d8-sig" className="textarea mono" value={sigInput} onChange={(e) => setSigInput(e.target.value)} placeholder="Paste the signature here…" />
           </div>
           <button className="btn btn-primary" onClick={() => void verify()} disabled={busy}>
-            {busy ? 'Verifying…' : 'Verify'}
+            {busy ? 'Verifying…' : 'Verify signature'}
           </button>
           {verifyResult && <StatusTile level={verifyResult.level} headline={verifyResult.headline} detail={verifyResult.detail} />}
           {facts && (
@@ -583,18 +580,13 @@ export default function Dac8SelfProof() {
               <div className="status-tile status-amber">
                 <span aria-hidden="true">⚠</span>
                 <p className="text-sm">
-                  <strong>Legal note:</strong> The signature documents cryptographic control over
-                  the target address at the block time. It does not replace national tax advice or an official
-                  case-by-case review (e.g. DAC8/TFR attribution, cost-basis determination). Time context (as of 11/2026):
-                  DAC8 has applied since 01.01.2026 — transposed in Germany by the Crypto-Asset Tax Transparency Act
-                  (KStTG; Bundestag 06.11.2025, Bundesrat consent 19.12.2025). The first reporting year
-                  (calendar year 2026) is already running: RCASPs are continuously collecting data; first transmissions to the
-                  national authorities (DE: BZSt) become due in 2027 — EU/CARF baseline 31.01.2027, KStTG deadline
-                  31.07.2027 —, the first automatic EU exchange follows by 30.09.2027. Pre-existing accounts must be
-                  verified by self-certification by 01.01.2027; KStTG violations carry fines of up to EUR 50,000
-                  per case. Practical pitfall: exchanges report disposal proceeds — for accrued coins with
-                  cost basis 0, the burden of proof lies with the user. CARF launches internationally in 2027 across 58 countries
-                  — keep your findings complete.
+                  <strong>Helpful tax &amp; legal context (as of 11/2026):</strong> This signature proves that you
+                  controlled the wallet at the time of the transfer, which helps answer exchange and tax-office
+                  questions—it does not replace personal tax advice. Under EU DAC8 rules (in Germany: KStTG,
+                  passed 19.12.2025), 2026 is the first reporting year: exchanges and platforms report customer sales to
+                  tax authorities in 2027 (EU/CARF baseline 31.01.2027, German KStTG deadline 31.07.2027, automatic EU
+                  exchange by 30.09.2027; penalties up to EUR 50,000 for violations; international CARF covers 58 countries). Keeping
+                  self-transfer proofs helps show you moved coins to your own wallet rather than selling them.
                 </p>
               </div>
               <ExportBar

@@ -160,15 +160,15 @@ export default function StealthAudit5564() {
     const vk = viewingKey.trim();
     const sp = spendingPub.trim();
     if (!/^0x[0-9a-fA-F]{64}$/.test(vk)) {
-      setError('Viewing key: expected 0x + 64 hex characters (32 bytes).');
+      setError('Please enter a valid read-only viewing key (0x + 64 hex characters). Never enter your spending key.');
       return null;
     }
     if (BigInt(vk) >= 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n || BigInt(vk) === 0n) {
-      setError('Viewing key outside the secp256k1 group order.');
+      setError('Invalid viewing key: value is outside the secp256k1 curve range.');
       return null;
     }
     if (!/^0x(04[0-9a-fA-F]{128}|0[23][0-9a-fA-F]{64})$/.test(sp)) {
-      setError('Spending public key: expected uncompressed (04 + 128 hex) or compressed (02/03 + 64 hex).');
+      setError('Please enter a valid public spending key (starts with 0x04, 0x02, or 0x03).');
       return null;
     }
     return { vk, sp };
@@ -307,19 +307,19 @@ export default function StealthAudit5564() {
       <div className="status-tile status-amber">
         <span aria-hidden="true">⚠</span>
         <p className="text-sm">
-          <strong>Never enter the (private) spending key!</strong> This tool requires only the
-          <em> private viewing key</em> + the <em>public spending key</em>. Both stay local;
-          exports never contain the viewing key.
+          <strong>Safety first: NEVER enter your private spending key!</strong> This scanner only needs your{' '}
+          <em>read-only viewing key</em> (to spot incoming payments) and your <em>public spending key</em>. Both stay
+          in your browser, and exported reports never include any keys.
         </p>
       </div>
 
-      <StepSection n={1} title="Keys, time window & source" hint="Viewing key (0x + 64 hex), public spending key, block-exact or date window. Logs online from the announcer or as a local JSON export.">
+      <StepSection n={1} title="Enter your viewing key &amp; block range" hint="Choose a specific block range so the scan stays fast. You can scan live blockchain announcements or paste an offline JSON log export. Tip: click “Load demo scenario” to see how it works.">
         <div className="flex flex-wrap gap-2">
           <button className={`btn btn-sm ${mode === 'online' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setMode('online')}>
-            Online (announcer logs)
+            Online (live blockchain logs)
           </button>
           <button className={`btn btn-sm ${mode === 'offline' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setMode('offline')}>
-            Offline (JSON export)
+            Offline (paste JSON logs)
           </button>
           <span className="ml-auto">
             <DemoButton onClick={() => void demo()} />
@@ -327,23 +327,23 @@ export default function StealthAudit5564() {
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="label" htmlFor="st-vk">Private viewing key</label>
-            <input id="st-vk" type="password" className="input mono" autoComplete="off" placeholder="0x…64 hex (stays local)" value={viewingKey} onChange={(e) => setViewingKey(e.target.value)} />
+            <label className="label" htmlFor="st-vk">Read-only viewing key (stays in browser)</label>
+            <input id="st-vk" type="password" className="input mono" autoComplete="off" placeholder="0x… (64 hex characters)" value={viewingKey} onChange={(e) => setViewingKey(e.target.value)} />
             <button type="button" className="text-xs text-prime-hi mt-1 underline underline-offset-2" onClick={(e) => {const inp=e.currentTarget.previousElementSibling as HTMLInputElement; inp.type = inp.type==='password'?'text':'password';}}>
-              Toggle visibility
+              Show / hide key
             </button>
           </div>
           <div>
-            <label className="label" htmlFor="st-sp">Public spending key</label>
-            <input id="st-sp" className="input mono" placeholder="0x04… (uncompressed) or 0x02/03… (compressed)" value={spendingPub} onChange={(e) => setSpendingPub(e.target.value)} />
+            <label className="label" htmlFor="st-sp">Public spending key (not secret)</label>
+            <input id="st-sp" className="input mono" placeholder="0x02… / 0x03… / 0x04…" value={spendingPub} onChange={(e) => setSpendingPub(e.target.value)} />
           </div>
           <div>
-            <label className="label" htmlFor="st-from">Start block</label>
+            <label className="label" htmlFor="st-from">Start block number</label>
             <input id="st-from" className="input mono" placeholder="e.g. 21000000" value={fromBlock} onChange={(e) => setFromBlock(e.target.value)} />
           </div>
           <div>
-            <label className="label" htmlFor="st-to">End block</label>
-            <input id="st-to" className="input mono" placeholder="empty = latest" value={toBlock} onChange={(e) => setToBlock(e.target.value)} />
+            <label className="label" htmlFor="st-to">End block number</label>
+            <input id="st-to" className="input mono" placeholder="leave empty for latest block" value={toBlock} onChange={(e) => setToBlock(e.target.value)} />
           </div>
           {mode === 'online' && (
             <div>
@@ -352,22 +352,22 @@ export default function StealthAudit5564() {
             </div>
           )}
           <div>
-            <label className="label" htmlFor="st-min">Minimum amount (optional, wei filter if the log export contains values)</label>
+            <label className="label" htmlFor="st-min">Minimum amount filter (optional, in wei)</label>
             <input id="st-min" className="input mono" placeholder="0" value={minWei} onChange={(e) => setMinWei(e.target.value)} />
           </div>
         </div>
         {mode === 'offline' && (
           <div>
-            <label className="label" htmlFor="st-logs">Announcement logs (JSON array)</label>
+            <label className="label" htmlFor="st-logs">Stealth announcement logs (JSON array)</label>
             <textarea id="st-logs" className="textarea mono" rows={6} value={logsJson} onChange={(e) => setLogsJson(e.target.value)} placeholder='[{"schemeId":1,"stealthAddress":"0x…","ephemeralPubKey":"0x02…","metadata":"0x…", …}]' />
           </div>
         )}
       </StepSection>
 
-      <StepSection n={2} title="Start WebWorker scan">
+      <StepSection n={2} title="Scan for incoming payments">
         <p className="text-sm">
-          Scheme 1: shared secret c = ephemeralPub × viewingKey, view tag = keccak256(c)[0]; full check:
-          stealthAddr(SpendingPub + keccak256(c)·G). Progress is held pausably in IndexedDB — without the key.
+          Runs quietly in a background browser worker (EIP-5564 scheme 1): quickly skips non-matching announcements using
+          the view tag, then confirms exact stealth addresses that belong to you. You can pause and resume at any time.
         </p>
         <div className="flex gap-2 flex-wrap">
           <button className="btn btn-primary" onClick={() => void runScan(false)} disabled={busy}>
@@ -390,11 +390,11 @@ export default function StealthAudit5564() {
       </StepSection>
 
       {scan && (
-        <StepSection n={3} title="Scan result">
+        <StepSection n={3} title="Payments found">
           <StatusTile
             level={level!}
-            headline={scan.hits.length === 0 ? 'No stealth inbound payments in the window' : `${scan.hits.length} stealth inbound payment(s) found`}
-            detail={`Checked: ${num(scan.checked)} announcements · view-tag prefilter hit ${num(scan.tagFiltered)} · duration ${(scan.durationMs / 1000).toFixed(1)} s · source: ${ { online: 'announcer logs', offline: 'local JSON export', demo: 'demo (synthetic)' }[scan.source] }. The export never contains the viewing key.`}
+            headline={scan.hits.length === 0 ? 'No stealth payments found in this block range' : `${scan.hits.length} incoming stealth payment(s) found`}
+            detail={`Checked ${num(scan.checked)} announcements (${num(scan.tagFiltered)} skipped early by view-tag filter) in ${(scan.durationMs / 1000).toFixed(1)} s · Source: ${ { online: 'live blockchain logs', offline: 'pasted JSON file', demo: 'built-in demo' }[scan.source] }. Exported files never include your viewing key.`}
           />
           <KpiGrid>
             <Kpi label="Hits" value={num(scan.hits.length)} tone={scan.hits.length ? 'amber' : 'green'} />

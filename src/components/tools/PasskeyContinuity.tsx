@@ -57,28 +57,28 @@ function classifyCall(raw: string): ChainResult['precompile'] {
 const CHECKLIST = [
   {
     id: 'rp-self',
-    q: 'Do you control the rpId domain yourself (no dependency on third-party domains)?',
-    hint: 'passkey signatures are bound to the rpId domain — its outage locks the account.',
+    q: 'Do you control the website domain tied to your passkey (or can you recover without it)?',
+    hint: 'Passkeys are tied to a website domain (rpId). If that company shuts down its domain, you could get locked out unless you have a backup.',
   },
   {
     id: 'rp-backup',
-    q: 'Does a documented fallback-capable second signer exist for domain loss?',
-    hint: 'e.g. a second signer type, guardian or time-delayed recovery mode.',
+    q: 'Do you have a second backup login or recovery guardian set up?',
+    hint: 'For example, a hardware wallet signer, a trusted guardian, or a time-delayed recovery path.',
   },
   {
     id: 'synced',
-    q: 'Is the passkey cloud-synced AND additionally a device-bound backup passkey registered?',
-    hint: 'Pure sync passkeys die with the sync service account; purely device-bound ones die with the device.',
+    q: 'Do you have BOTH a cloud-synced passkey (iCloud/Google) AND a separate device passkey?',
+    hint: 'If you lose your cloud account, the separate device passkey saves you—and vice versa if you lose your phone.',
   },
   {
     id: 'chains',
-    q: 'Are all chains used by the account tested (precompile or fallback contract present)?',
-    hint: 'Automatically taken over from the matrix once the check has run.',
+    q: 'Did you test every blockchain where you hold funds?',
+    hint: 'Check the table below after running the test to make sure every network you use shows green.',
   },
   {
     id: 'portability',
-    q: 'Does the passkey manager support an export (FIDO CXF or a vendor-specific path) — i.e. does the passkey survive a provider switch?',
-    hint: 'CXF 1.0 (Credential Exchange Format) has been a FIDO Proposed Standard since 08/2025 (errata 03/2026); the transport protocol CXP is still only a Working Draft (10/2024) — without a manager export, a provider switch threatens forced re-registration via the recovery path.',
+    q: 'Can your passkey manager export your passkey (FIDO CXF or vendor export) if you switch apps?',
+    hint: 'CXF 1.0 (Credential Exchange Format) has been a FIDO Proposed Standard since 08/2025 (errata 03/2026), while CXP transport is still a Working Draft (10/2024)—without export support, switching password managers means re-registering via recovery.',
   },
 ];
 
@@ -207,15 +207,15 @@ export default function PasskeyContinuity() {
     <div className="space-y-5">
       <StepSection
         n={1}
-        title="Define account & target chains"
-        hint="The precompile test uses a fixed embedded, valid P-256 vector (160 bytes). Optional: signer/verifier address for chain fallback checks."
+        title="Pick your networks &amp; fill out the backup checklist"
+        hint="We send a safe 160-byte P-256 test signature to each network to see if passkeys (FaceID / TouchID) work there. Wallet addresses are optional."
       >
         <div className="flex flex-wrap gap-2">
           <button className={`btn btn-sm ${!offlineMode ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setOfflineMode(false)}>
-            Online
+            Online (live networks)
           </button>
           <button className={`btn btn-sm ${offlineMode ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setOfflineMode(true)}>
-            Offline (paste results)
+            Offline (paste raw results)
           </button>
           <span className="ml-auto">
             <DemoButton onClick={demo} />
@@ -223,22 +223,22 @@ export default function PasskeyContinuity() {
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="label" htmlFor="pc-acc">Smart account address (optional)</label>
+            <label className="label" htmlFor="pc-acc">Your smart-wallet address (optional)</label>
             <input id="pc-acc" className="input mono" placeholder="0x…" value={account} onChange={(e) => setAccount(e.target.value)} />
           </div>
           <div>
-            <label className="label" htmlFor="pc-signer">WebAuthn signer / P-256 verifier address (optional)</label>
+            <label className="label" htmlFor="pc-signer">Backup passkey verifier contract (optional)</label>
             <input id="pc-signer" className="input mono" placeholder="0x…" value={signer} onChange={(e) => setSigner(e.target.value)} />
           </div>
         </div>
         {!offlineMode ? (
           <div>
-            <span className="label">Target networks</span>
+            <span className="label">Networks where you want to use your passkey wallet</span>
             <ChainMultiSelect selected={chains} onChange={setChains} />
           </div>
         ) : (
           <div>
-            <label className="label" htmlFor="pc-off">Offline results (per line: chainId, eth_call return to 0x…0100)</label>
+            <label className="label" htmlFor="pc-off">Offline results (one per line: chainId, hex output from 0x…0100)</label>
             <textarea
               id="pc-off"
               className="textarea mono"
@@ -267,35 +267,35 @@ export default function PasskeyContinuity() {
         </div>
       </StepSection>
 
-      <StepSection n={2} title="Start multi-chain check">
+      <StepSection n={2} title="Test passkey support across chains">
         <p className="text-sm">
-          For each chain: <code>eth_call</code> to <code>{RIP7212_PRECOMPILE}</code> (RIP-7212/EIP-7951 address) with the valid vector
-          (expects 32-byte <code>1</code>), then with the high-S counterpart (malleability behavior), then
-          fallback code presence (0x ≠ 0x via <code>eth_getCode</code>).
+          Tests each chosen blockchain at the standard passkey verifier address (<code>{RIP7212_PRECOMPILE}</code>) using
+          a valid test signature, checks whether strict anti-tampering (high-S rejection) is enabled, and checks if your
+          backup verifier contract exists there.
         </p>
         <button className="btn btn-primary w-full sm:w-auto" onClick={() => void run()} disabled={busy}>
-          {busy ? 'Checking chains…' : 'Check'}
+          {busy ? 'Testing chains…' : 'Check chains'}
         </button>
         {error && <ErrorNote message={error} />}
       </StepSection>
 
       {ran && scorecard && (
-        <StepSection n={3} title="Compatibility matrix & recovery readiness">
+        <StepSection n={3} title="Passkey compatibility &amp; backup score">
           <StatusTile
             level={level!}
             headline={
               level === 'green'
-                ? 'Passkey account viable multi-chain'
+                ? 'Your passkey wallet works safely across these networks'
                 : level === 'amber'
-                  ? 'Partially secured — document the gaps'
-                  : 'Silent failure risk detected'
+                  ? 'Mostly ready — check the remaining backup gaps'
+                  : 'Warning: passkey logins could silently fail on some chains'
             }
             detail={
               scorecard.kills.length > 0
-                ? `On ${scorecard.kills.map((k) => chainById(k.chainId)?.short ?? k.chainId).join(', ')} neither a native precompile nor a fallback contract — signatures silently fail there (0x0100 ambiguity).`
+                ? `On ${scorecard.kills.map((k) => chainById(k.chainId)?.short ?? k.chainId).join(', ')}, there is neither built-in passkey support nor a backup verifier contract—transactions could fail silently there.`
                 : scorecard.native === 0
-                  ? 'No native P-256 precompile detected on any checked chain — fallback contracts become mandatory.'
-                  : `Natively verifiable on ${scorecard.native} chain(s), checklist ${scorecard.clDone}/${CHECKLIST.length} done.`
+                  ? 'None of the checked chains returned built-in passkey support—you will need a backup verifier contract.'
+                  : `Built-in passkey support active on ${scorecard.native} chain(s); backup checklist ${scorecard.clDone}/${CHECKLIST.length} completed.`
             }
           />
           <KpiGrid>

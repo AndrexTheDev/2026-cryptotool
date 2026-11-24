@@ -56,7 +56,7 @@ export async function p2trAddress(xOnlyPub: Uint8Array): Promise<string> {
 }
 
 /**
- * Signiert eine Nachricht per BIP-322 simple (P2TR key-path, SIGHASH_DEFAULT).
+ * Signs a message via BIP-322 simple (P2TR key-path, SIGHASH_DEFAULT).
  * ONLY for demo/test purposes with known test keys.
  */
 export async function signBip322P2tr(privKey: Uint8Array, message: string): Promise<{ address: string; signatureBase64: string }> {

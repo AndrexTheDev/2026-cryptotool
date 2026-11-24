@@ -21,6 +21,7 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
       (t) =>
         t.name.toLowerCase().includes(q) ||
         t.tagline.toLowerCase().includes(q) ||
+        t.plainSummary.toLowerCase().includes(q) ||
         CATEGORY_LABEL[t.category].toLowerCase().includes(q),
     );
   }, [query]);
@@ -72,7 +73,7 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
           <input
             ref={inputRef}
             className="w-full bg-transparent outline-none text-ink placeholder:text-dim"
-            placeholder="Search tools … (10 modules)"
+            placeholder="Search tools by name or topic (e.g. tax, fees, passkey)…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             aria-label="Search tools"

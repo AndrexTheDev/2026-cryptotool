@@ -306,13 +306,13 @@ export default function UseropAutopsy() {
 
   return (
     <div className="space-y-5">
-      <StepSection n={1} title="Enter bundle transaction(s)" hint="Up to 25 transaction hashes (one per line) or explorer CSV. Map UserOperation hashes via their containing bundle TX; alternatively paste receipt JSON offline.">
+      <StepSection n={1} title="Paste smart-wallet transaction ID(s)" hint="Paste up to 25 transaction hashes (or a block-explorer CSV) to see what the network actually charged vs. what the bundler or paymaster billed you. Tip: click “Load demo scenario” to see an example.">
         <div className="flex flex-wrap gap-2">
           <button className={`btn btn-sm ${mode === 'online' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setMode('online')}>
-            Online
+            Online (fetch by TX hash)
           </button>
           <button className={`btn btn-sm ${mode === 'offline' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setMode('offline')}>
-            Offline (receipt JSON)
+            Offline (paste receipt JSON)
           </button>
           <span className="ml-auto">
             <DemoButton onClick={demo} />
@@ -321,57 +321,57 @@ export default function UseropAutopsy() {
         {mode === 'online' ? (
           <div className="grid sm:grid-cols-[1fr_16rem] gap-4">
             <div>
-              <label className="label" htmlFor="uo-in">Transaction hashes / explorer CSV</label>
-              <textarea id="uo-in" className="textarea mono" rows={6} value={txInput} onChange={(e) => setTxInput(e.target.value)} />
+              <label className="label" htmlFor="uo-in">Transaction hash(es) or CSV export</label>
+              <textarea id="uo-in" className="textarea mono" rows={6} value={txInput} onChange={(e) => setTxInput(e.target.value)} placeholder="0x…" />
             </div>
             <div>
               <label className="label" htmlFor="uo-net">Network</label>
               <ChainSingleSelect value={chainId} onChange={setChainId} />
-              <label className="label mt-4" htmlFor="uo-price">Reference rate (optional, EUR per ETH/token)</label>
+              <label className="label mt-4" htmlFor="uo-price">Optional: ETH price in EUR (to see euro cost)</label>
               <input id="uo-price" className="input" inputMode="decimal" placeholder="e.g. 2450.00" value={refPrice} onChange={(e) => setRefPrice(e.target.value)} />
             </div>
           </div>
         ) : (
           <div>
-            <label className="label" htmlFor="uo-json">Transaction receipt (JSON, object or array)</label>
+            <label className="label" htmlFor="uo-json">Transaction receipt JSON (object or array)</label>
             <textarea id="uo-json" className="textarea mono" rows={8} value={receiptJson} onChange={(e) => setReceiptJson(e.target.value)} placeholder='{"gasUsed":"0x…","effectiveGasPrice":"0x…","logs":[…]}' />
           </div>
         )}
       </StepSection>
 
-      <StepSection n={2} title="Perform the autopsy">
+      <StepSection n={2} title="Inspect fee breakdown">
         <p className="text-sm">
-          Splits the bundler margin into gas-unit markup (%) and gas-price markup (%), net in wei and %, and
-          detects ERC-20 paymaster bookings (transfer logs) including the effective spread against the reference rate.
+          Compares the real blockchain gas fee against what your smart wallet paid (EntryPoint logs) and splits any
+          extra markup into gas-unit markup (%) and gas-price markup (%), plus ERC-20 token fees charged by paymasters.
         </p>
         <button className="btn btn-primary w-full sm:w-auto" onClick={() => void run()} disabled={busy}>
-          {busy ? 'Analyzing…' : 'Analyze'}
+          {busy ? 'Analyzing…' : 'Analyze fees'}
         </button>
         {error && <ErrorNote message={error} />}
       </StepSection>
 
       {results.length > 0 && (
-        <StepSection n={3} title="Fee forensics">
+        <StepSection n={3} title="Fee breakdown report">
           <StatusTile
             level={level!}
             headline={
               stats.ok === 0
-                ? 'No UserOperationEvents found in the receipts'
+                ? 'No smart-wallet (UserOperation) events found in these receipts'
                 : stats.avgPct > 15
-                  ? 'Above-average bundler markups'
-                  : 'Bundler margins within the usual corridor'
+                  ? 'High bundler markups detected (over 15%)'
+                  : 'Bundler fee margins look normal'
             }
             detail={
               stats.ok === 0
-                ? 'Check whether the hashes contain EntryPoint bundles (v0.6–v0.9, identical event format) and the correct network is selected.'
-                : `Average net markup ${stats.avgPct.toFixed(2)} % across ${stats.ok} transaction(s).`
+                ? 'Make sure you selected the right network and that the transaction used an ERC-4337 EntryPoint (v0.6–v0.9).'
+                : `Average extra margin: ${stats.avgPct.toFixed(2)} % across ${stats.ok} transaction(s).`
             }
           />
           <KpiGrid>
-            <Kpi label="Analyzed (with UserOps)" value={`${stats.ok}/${stats.total}`} />
-            <Kpi label="Avg net markup" value={stats.avgPct.toFixed(2) + ' %'} tone={stats.avgPct > 15 ? 'amber' : 'green'} />
-            <Kpi label="Σ margin" value={fmtEth(stats.sumMargin) + ' ' + (chainById(chainId)?.nativeSymbol ?? 'ETH')} tone={stats.sumMargin > 0n ? 'amber' : 'default'} />
-            <Kpi label="Paymaster tokens" value={stats.tokens.size} tone={stats.tokens.size ? 'amber' : 'default'} />
+            <Kpi label="Checked (smart-wallet TXs)" value={`${stats.ok}/${stats.total}`} />
+            <Kpi label="Avg extra markup" value={stats.avgPct.toFixed(2) + ' %'} tone={stats.avgPct > 15 ? 'amber' : 'green'} />
+            <Kpi label="Total bundler margin" value={fmtEth(stats.sumMargin) + ' ' + (chainById(chainId)?.nativeSymbol ?? 'ETH')} tone={stats.sumMargin > 0n ? 'amber' : 'default'} />
+            <Kpi label="Token paymasters used" value={stats.tokens.size} tone={stats.tokens.size ? 'amber' : 'default'} />
           </KpiGrid>
 
           {results.map((r) => (

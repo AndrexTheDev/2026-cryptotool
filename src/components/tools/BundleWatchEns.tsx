@@ -235,7 +235,7 @@ export default function BundleWatchEns() {
 
   return (
     <div className="space-y-5">
-      <StepSection n={1} title="ENS name & live data" hint="ENS name resolution (contenthash, EIP-1577) online — or paste the contenthash manually in offline mode. Live data via bookmarklet, HAR or a manual list.">
+      <StepSection n={1} title="Enter the app's ENS name &amp; live script list" hint="Checks an app's official ENS website record (contenthash) against the scripts running on the live webpage. Use the “Copy bookmarklet” helper on the live website to grab its script hashes, or click “Load demo scenario” to see how a tampered script is caught.">
         <div className="flex flex-wrap gap-2 items-center">
           <DemoButton onClick={demo} />
           <button
@@ -248,69 +248,70 @@ export default function BundleWatchEns() {
               }
             }}
           >
-            📋 Copy bookmarklet
+            📋 Copy webpage check script
           </button>
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="label" htmlFor="bw-ens">ENS name</label>
+            <label className="label" htmlFor="bw-ens">ENS domain name (e.g. app.uniswap.eth)</label>
             <input id="bw-ens" className="input mono" placeholder="app.example.eth" value={ensName} onChange={(e) => setEnsName(e.target.value)} />
           </div>
           <div>
-            <label className="label" htmlFor="bw-ch">contenthash (offline, optional override)</label>
+            <label className="label" htmlFor="bw-ch">Optional: paste ENS contenthash manually (offline)</label>
             <input id="bw-ch" className="input mono" placeholder="0xe30101…" value={manualCh} onChange={(e) => setManualCh(e.target.value)} />
           </div>
         </div>
         <div>
-          <label className="label" htmlFor="bw-live">Live bundle data (bookmarklet JSON / HAR / list)</label>
+          <label className="label" htmlFor="bw-live">Live webpage files (bookmarklet JSON, HAR, or asset list)</label>
           <textarea id="bw-live" className="textarea mono" rows={6} value={liveData} onChange={(e) => setLiveData(e.target.value)} placeholder='{"origin":"https://app…","assets":[{"url":"…","hash":"sha256…"}]}' />
-          <FileDrop label="Drop bookmarklet JSON or HAR" accept=".json,.har" onFile={(c) => setLiveData(c)} />
+          <FileDrop label="Drop bookmarklet JSON or HAR file" accept=".json,.har" onFile={(c) => setLiveData(c)} />
         </div>
         <div>
-          <label className="label" htmlFor="bw-ref">Reference manifest (JSON, files: path/sha256) or release archive notes</label>
+          <label className="label" htmlFor="bw-ref">Official release file list (manifest JSON with SHA-256 hashes)</label>
           <textarea id="bw-ref" className="textarea mono" rows={5} value={refManifest} onChange={(e) => setRefManifest(e.target.value)} placeholder='{"files":[{"path":"assets/index-ab12cd.js","sha256":"…","size":12345}]}' />
         </div>
         <div>
-          <label className="label" htmlFor="bw-gh">Repository (owner/repo, optional — note: local download expected)</label>
+          <label className="label" htmlFor="bw-gh">Optional: GitHub repository (owner/repo — download release files locally)</label>
           <input id="bw-gh" className="input mono" placeholder="org/project" value={ghRepo} onChange={(e) => setGhRepo(e.target.value)} />
         </div>
       </StepSection>
 
-      <StepSection n={2} title="Start integrity check">
+      <StepSection n={2} title="Compare live site vs. official release">
         <p className="text-sm">
-          Reads the ENS owner + contenthash (EIP-1577), decodes the IPFS/IPNS reference, computes SHA-256 comparisons
-          and highlights new domains or contract addresses in the live bundle.
+          Looks up who controls the ENS domain and its official IPFS/IPNS pointer, compares each live script's SHA-256
+          fingerprint against the official release, and alerts you if unknown scripts, extra domains, or weak ENS
+          ownership appear.
         </p>
         <button className="btn btn-primary w-full sm:w-auto" onClick={() => void run()} disabled={busy}>
-          {busy ? 'Checking…' : 'Check'}
+          {busy ? 'Checking…' : 'Check website'}
         </button>
         {error && <ErrorNote message={error} />}
       </StepSection>
 
       {compare && (
-        <StepSection n={3} title="External integrity report">
+        <StepSection n={3} title="Website safety report">
           <StatusTile
             level={level!}
             headline={
               level === 'red'
-                ? 'Live bundle deviates from the reference'
+                ? 'Warning: live website scripts do NOT match the official release'
                 : level === 'amber'
-                  ? 'Hashes consistent — but ENS governance is critical'
-                  : 'Live bundle matches the reference'
+                  ? 'Files match — but ENS ownership has a single-key risk'
+                  : 'Website scripts match the official release'
             }
             detail={
               mismatchCount > 0
-                ? `${mismatchCount} file(s) with a diverging hash. ${compare.newInLive.length} file(s) without a reference counterpart.`
+                ? `${mismatchCount} file(s) changed compared to the reference, and ${compare.newInLive.length} unexpected file(s) were loaded.`
                 : gov?.kind === 'eoa'
-                  ? 'All hashes match; however, a single EOA controls the ENS name (takeover risk).'
-                  : 'Hash and domain comparison without findings.'
+                  ? 'All file hashes match, but a single wallet (EOA) owns the ENS name—if hacked, the site could be swapped.'
+                  : 'All file hashes and domains match the official release.'
             }
           />
           <KpiGrid>
-            <Kpi label="Reconciled files" value={compare.matched.filter((m) => m.ref).length} />
-            <Kpi label="Hash deviations" value={mismatchCount} tone={mismatchCount ? 'red' : 'green'} />
-            <Kpi label="New files live" value={compare.newInLive.length} tone={compare.newInLive.length ? 'amber' : 'green'} />
-            <Kpi label="New domains live" value={compare.newDomains.length} tone={compare.newDomains.length ? 'red' : 'green'} />
+            <Kpi label="Matched files" value={compare.matched.filter((m) => m.ref).length} />
+            <Kpi label="Changed files" value={mismatchCount} tone={mismatchCount ? 'red' : 'green'} />
+            <Kpi label="Extra live files" value={compare.newInLive.length} tone={compare.newInLive.length ? 'amber' : 'green'} />
+            <Kpi label="New unknown domains" value={compare.newDomains.length} tone={compare.newDomains.length ? 'red' : 'green'} />
           </KpiGrid>
 
           {gov && (
@@ -411,7 +412,7 @@ export default function BundleWatchEns() {
                 subtitle: `${ensName || manualCh.slice(0, 18) + '…'} · ${new Date().toLocaleString('en-GB')}`,
                 status: { level: level!, headline: level === 'red' ? 'Deviations found' : level === 'amber' ? 'Governance risk' : 'Integrity confirmed', detail: gov?.detail },
                 sections: [
-                  { heading: 'Governance', body: `<pre>Owner: ${gov?.owner ?? '-'}\nTyp: ${gov?.kind ?? '-'}\ncontenthash: ${cid ? cid.kind + ' ' + cid.cid : '-'}</pre>` },
+                  { heading: 'Governance', body: `<pre>Owner: ${gov?.owner ?? '-'}\nType: ${gov?.kind ?? '-'}\ncontenthash: ${cid ? cid.kind + ' ' + cid.cid : '-'}</pre>` },
                   {
                     heading: 'Hash comparison',
                     body: '<table border="1" cellspacing="0" cellpadding="6">' + compare.matched.map((m) => `<tr><td>${m.url}</td><td>${m.ref || '—'}</td><td>${m.ref ? (m.ok ? 'identical' : 'DEVIATION') : 'new live'}</td></tr>`).join('') + '</table>',

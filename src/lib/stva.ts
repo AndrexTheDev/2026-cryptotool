@@ -1,7 +1,6 @@
-// STVA-Hilfslogik: Calldata-Dekodierung, Safe-Signing-Hash, Fingerprints.
-import type { Address } from 'viem';
+// STVA helper logic: calldata decoding, Safe signing hash, fingerprints.
 
-/** Eingebettete ABI-Schnittstellen gaengiger Upgrade-/Multisig-Selektoren. */
+/** Embedded ABI interfaces for common upgrade and multisig selectors. */
 export const UPGRADE_ABIS = [
   {
     type: 'function',
@@ -73,9 +72,10 @@ export interface SafeTx {
 
 export async function computeSafeTxHash(safeAddress: string, chainId: number, tx: SafeTx): Promise<string> {
   const v = await import('viem');
+  const normAddr = (a: string) => v.getAddress(a.toLowerCase());
   const domain = {
     chainId: BigInt(chainId),
-    verifyingContract: safeAddress as Address,
+    verifyingContract: normAddr(safeAddress),
   } as const;
   const types = {
     SafeTx: [
@@ -96,15 +96,15 @@ export async function computeSafeTxHash(safeAddress: string, chainId: number, tx
     types,
     primaryType: 'SafeTx',
     message: {
-      to: tx.to as Address,
+      to: normAddr(tx.to),
       value: BigInt(tx.value),
       data: tx.data as `0x${string}`,
       operation: tx.operation,
       safeTxGas: BigInt(tx.safeTxGas),
       baseGas: BigInt(tx.baseGas),
       gasPrice: BigInt(tx.gasPrice),
-      gasToken: tx.gasToken as Address,
-      refundReceiver: tx.refundReceiver as Address,
+      gasToken: normAddr(tx.gasToken),
+      refundReceiver: normAddr(tx.refundReceiver),
       nonce: BigInt(tx.nonce),
     },
   });
@@ -141,7 +141,7 @@ export function parseSafeExport(text: string): { safeTx: SafeTx; safeAddress: st
 }
 
 // ---------------------------------------------------------------------------
-// Eingebettete, minimal ERC-7730-inspirierte Clear-Signing-Deskriptoren
+// Embedded, minimal ERC-7730-inspired clear-signing descriptors
 // (registry excerpt, bundled locally — no network fetch). Format modeled on
 // ERC-7730: selector -> human-readable field description.
 // ---------------------------------------------------------------------------
@@ -156,16 +156,16 @@ export interface ClearSignDescriptor {
 export const LOCAL_ERC7730_REGISTRY: ClearSignDescriptor[] = [
   {
     selector: '0x3659cfe6',
-    label: 'Transparent-Proxy: Implementierung wechseln (upgradeTo)',
-    fields: [{ path: 'newImplementation', label: 'Neue Implementierung' }],
+    label: 'Transparent Proxy: replace implementation (upgradeTo)',
+    fields: [{ path: 'newImplementation', label: 'New implementation' }],
     riskNote: 'Replaces the entire execution logic of the proxy.',
   },
   {
     selector: '0x4f1ef286',
-    label: 'UUPS-Proxy: Implementierung wechseln + Initialisierungsaufruf (upgradeToAndCall)',
+    label: 'UUPS Proxy: replace implementation + initialization call (upgradeToAndCall)',
     fields: [
-      { path: 'newImplementation', label: 'Neue Implementierung' },
-      { path: 'data', label: 'Initialisierungs-Calldata' },
+      { path: 'newImplementation', label: 'New implementation' },
+      { path: 'data', label: 'Initialization calldata' },
     ],
     riskNote: 'Replaces the logic AND immediately executes code in the proxy context.',
   },
@@ -217,7 +217,7 @@ export async function decodeUpgradeCalldata(calldata: string): Promise<DecodedCa
   }
 }
 
-/** ERC-8213-inspirierter kurzer Calldata-Fingerprint (deterministisch). */
+/** ERC-8213-inspired short calldata fingerprint (deterministic). */
 export async function calldataFingerprint(calldata: string): Promise<string> {
   const v = await import('viem');
   const digest = v.keccak256(calldata as `0x${string}`);
@@ -251,11 +251,10 @@ export async function eip712HashJson(typedDataJson: string): Promise<{ domainSep
 }
 
 // ---------------------------------------------------------------------------
-// Kanonische Safe-Singleton-Registry (Quelle: safe-global/safe-deployments,
-// Stand 2026-11; v1.5.0 seit 03.07.2025 onchain, seit 09/2026 offiziell als
-// Upgrade-Empfehlung in Safe{Wallet}).
-// addresses are stored lowercase-normalized (checksum verification via
-// im Upstream-Repo).
+// Canonical Safe singleton registry (source: safe-global/safe-deployments,
+// as of 2026-11; v1.5.0 on-chain since 03.07.2025, officially recommended
+// for upgrades in Safe{Wallet} since 09/2026).
+// Addresses are stored lowercase-normalized (checksum verification in upstream repo).
 export interface SafeSingleton {
   version: string;
   variant: 'Safe' | 'SafeL2' | 'SafeMigration';

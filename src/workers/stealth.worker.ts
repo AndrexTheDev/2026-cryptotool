@@ -159,7 +159,7 @@ if (gself) (gself as Worker).onmessage = (e: MessageEvent) => {
   if (msg.type === 'demo') {
     // demo keys: publicly known test values (viewing 0x02, spending 0x03)
     const viewingPrivHex = '0x' + '0'.repeat(63) + '2';
-    const spendingPub = secp256k1.Point.BASE.multiply(2n).toBytes(false); // spending unkomprimiert abgeleitet aus 0x03? -> wir nutzen priv 0x03:
+    const spendingPub = secp256k1.Point.BASE.multiply(2n).toBytes(false); // spending uncompressed derived from 0x03 -> using priv 0x03:
     void spendingPub;
     const spendingPubHex = hexStr(secp256k1.Point.BASE.multiply(3n).toBytes(false));
     const announcements = genDemo(viewingPrivHex, spendingPubHex);

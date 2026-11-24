@@ -8,20 +8,20 @@ Ten specialized Web3, Bitcoin and compliance tools, computed **locally in the br
 
 The UI language is English. The legal pages (`/agb`, `/disclaimer`, `/datenschutz`) keep their German URL slugs by design; their content is provided in English as well.
 
-## Tools
+## Tools (plain-language overview + examples)
 
-| # | Route | Purpose |
-|---|-------|---------|
-| 01 | `/tools/7702-slotguard` | EIP-7702 delegations, storage collisions, panic-revoke package |
-| 02 | `/tools/stva-upgradediff` | Three-layer verification of Safe/proxy upgrades |
-| 03 | `/tools/dac8-selfproof` | BIP-322 / EIP-191/712 / ERC-1271 self-transfer proofs |
-| 04 | `/tools/bitvault-stress` | Miniscript vaults, vByte, dust cliff, fee heatmap |
-| 05 | `/tools/passkey-continuity` | WebAuthn/P-256 multi-chain, RIP-7212 detection |
-| 06 | `/tools/userop-autopsy` | Bundler margin & paymaster spread from EntryPoint logs |
-| 07 | `/tools/x402-paywallguard` | x402 middleware vulnerabilities, SIWX scanner, ERC-7715 radar |
-| 08 | `/tools/intentlens-7683` | Decode ERC-7683 intents, spread, refund calldata |
-| 09 | `/tools/stealthaudit-5564` | EIP-5564 viewing-key scan in a WebWorker (no key export) |
-| 10 | `/tools/bundlewatch-ens` | dApp frontend integrity against ENS contenthash & releases |
+| # | Route | Plain-language explanation | Example |
+|---|-------|----------------------------|---------|
+| 01 | `/tools/7702-slotguard` | Checks whether your normal Ethereum wallet has hidden program code ("a delegate") attached via EIP-7702, warns on data clashes, and builds an encrypted emergency undo file. | You signed a sketchy airdrop claim and want to check if a hidden sweeper script is attached to your address—and create an undo file. |
+| 02 | `/tools/stva-upgradediff` | Translates raw hex update data ("calldata") into plain steps: what you are signing, what executes, and what risks stay hidden. | Your team Safe wallet asks you to approve an upgrade shown only as `0x4f1ef286…`; paste it to see the exact new contract and whether it is an official Safe release. |
+| 03 | `/tools/dac8-selfproof` | Creates a short "I own this wallet" statement tied to one Bitcoin or Ethereum transfer, verifies the signature locally, and exports a clean proof report. | You moved 0.38 BTC from an exchange to your hardware wallet and need EU DAC8 / Travel Rule ownership proof without uploading your full history. |
+| 04 | `/tools/bitvault-stress` | Simulates high Bitcoin fees on your vault or inheritance plan to flag small coin pieces ("UTXOs") near the dust cliff and creates an offline heir practice guide. | You hold small deposits (3,400 or 21,000 sats) in an inheritance vault and test at which fee rate fees would eat them—plus export a drill for heirs. |
+| 05 | `/tools/passkey-continuity` | Tests whether each selected blockchain verifies passkeys (FaceID / TouchID) natively or via a backup contract, plus a 5-point recovery checklist. | You unlock your smart wallet with FaceID on Base and check whether another network supports passkeys before sending funds there. |
+| 06 | `/tools/userop-autopsy` | Breaks down smart-wallet (ERC-4337) receipts to compare real network gas costs against what the bundler or paymaster actually billed you. | Your smart wallet charged $3 in gas/USDC when the network was quiet; paste the TX hash to see the exact extra markup percentage. |
+| 07 | `/tools/x402-paywallguard` | Scans AI agent payment packages (x402), login/payment code, spending limits (ERC-7715), and HTTP logs for known bugs and failed paid calls. | You run an AI agent that pays for API calls with USDC and check its lockfile, middleware code, and spending limits before deploying. |
+| 08 | `/tools/intentlens-7683` | Reads cross-chain intent swaps (ERC-7683) in plain language, calculates the hidden solver fee spread, checks deadlines, and prepares refund data. | You bridged 1,000 USDC from Ethereum to Base and either received less than expected or the swap timed out past its deadline. |
+| 09 | `/tools/stealthaudit-5564` | Uses only your read-only viewing key to scan a block range for private EIP-5564 stealth payments and exports a key-free report for taxes or heirs. | Someone paid you via a privacy stealth address and your tax advisor needs a list of incoming payments without exposing your spending key. |
+| 10 | `/tools/bundlewatch-ens` | Compares the scripts running on a Web3 app website against its official ENS record and release file hashes, and flags weak single-key ENS ownership. | Before signing a big swap on a DeFi website, verify that its live scripts match the official ENS release and no extra domains were injected. |
 
 ## Development
 

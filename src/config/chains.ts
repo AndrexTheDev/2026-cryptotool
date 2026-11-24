@@ -7,9 +7,9 @@ export interface ChainDef {
   name: string;
   short: string;
   nativeSymbol: string;
-  blockTimeHint: number; // Sekunden, heuristisch fuer Block<->Zeit Umrechnung
+  blockTimeHint: number; // seconds, heuristic for block <-> time conversion
   fallbackRpc: string[];
-  explorerTx?: string; // {hash}-Platzhalter
+  explorerTx?: string; // {hash} placeholder
   explorerAddress?: string;
 }
 

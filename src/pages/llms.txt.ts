@@ -17,14 +17,14 @@ export const GET: APIRoute = () => {
   lines.push('## Tools');
   lines.push('');
   for (const t of TOOLS) {
-    lines.push(`- [${t.name}](${SITE_URL}/tools/${t.slug}) (${CATEGORY_LABEL[t.category]}): ${t.tagline} — ${t.solution}`);
+    lines.push(`- [${t.name}](${SITE_URL}/tools/${t.slug}) (${CATEGORY_LABEL[t.category]}): ${t.tagline} — ${t.plainSummary} Example: ${t.example}`);
   }
   lines.push('');
   lines.push('## Legal & transparency');
   lines.push('');
-  lines.push(`- [Terms of use (AGB)](${SITE_URL}/agb)`);
-  lines.push(`- [Disclaimer / liability](${SITE_URL}/disclaimer)`);
-  lines.push(`- [Privacy transparency](${SITE_URL}/datenschutz)`);
+  lines.push(`- [Terms of Use](${SITE_URL}/agb)`);
+  lines.push(`- [Disclaimer & Liability](${SITE_URL}/disclaimer)`);
+  lines.push(`- [Privacy Notice](${SITE_URL}/datenschutz)`);
   lines.push('');
   lines.push('## Technical framework');
   lines.push('');

@@ -1,4 +1,4 @@
-// Spenden-URI-Builder (BIP-21, Solana Pay, EIP-681) - rein clientseitig.
+// Donation URI builder (BIP-21, Solana Pay, EIP-681) — strictly client-side.
 import { DONATION } from '../config/site';
 
 export type DonationChain = 'sol' | 'btc' | 'eth';

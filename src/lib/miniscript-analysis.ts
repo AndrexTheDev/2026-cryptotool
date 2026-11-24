@@ -38,7 +38,7 @@ export function parsePolicy(src: string): PolicyNode {
   const peek = () => toks[pos];
   const next = () => toks[pos++];
   const expect = (t: string) => {
-    if (next() !== t) throw new Error(`Parser: '${t}' erwartet bei Position ${pos}`);
+    if (next() !== t) throw new Error(`Parser: expected '${t}' at position ${pos}`);
   };
 
   function parse(): PolicyNode {
